@@ -1,1 +1,1 @@
-# STEM-Unicorn-backend
+# Algomatic Project
