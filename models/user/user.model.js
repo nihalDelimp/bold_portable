@@ -18,21 +18,6 @@ module.exports = (sequelize, Sequelize) => {
         mobile: {
             type: Sequelize.STRING,
             allowNull: false
-        },
-        angle_api_keys: {
-            type: Sequelize.STRING,
-            unique: true,
-        },
-        angel_password: {
-            type: Sequelize.STRING,
-        },
-        angel_totp_token: {
-            type: Sequelize.STRING,
-            unique: true,
-        },
-        angel_client_id: {
-            type: Sequelize.STRING,
-            unique: true,
         }
     },
         { timestamps: true }
