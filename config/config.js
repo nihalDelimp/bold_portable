@@ -3,7 +3,7 @@ module.exports = {
   development: {
     username: 'root',
     password: 'root',
-    database: 'Algomatic',
+    database: 'bold_portable',
     host: '127.0.0.1',
     dialect: 'mysql',
     operatorsAliases: '0',

@@ -13,7 +13,7 @@ const User = db.user;
 exports.registerUsers = async (req, res, next) => {
     try {
         const user = await getUser({ email: req.body.email });
-        const { name, email, password, mobile, angle_api_keys, angel_password, angel_totp_token, angel_client_id } = req.body;
+        const { name, email, password, mobile} = req.body;
         console.log(mobile)
         if (user) {
             return apiResponse.ErrorResponse(res, User_exists);
@@ -24,11 +24,7 @@ exports.registerUsers = async (req, res, next) => {
                     name,
                     email,
                     password: hash,
-                    mobile,
-                    angle_api_keys,
-                    angel_password,
-                    angel_totp_token,
-                    angel_client_id
+                    mobile
                 }
             ).then(async user => {
                 let userData = { user };
