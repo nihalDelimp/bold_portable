@@ -35,7 +35,9 @@ const getUser = async obj => {
 
 //get all users
 const getAllUsers = async () => {
-    return await User.findAll();
+    return await User.findAll({
+        where: { user_type: "USER" },
+      });
 };
 
 
