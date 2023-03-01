@@ -64,3 +64,4 @@ typings/
 package-lock.json
 *.log
 *.gz
+public
