@@ -18,6 +18,11 @@ module.exports = (sequelize, Sequelize) => {
         mobile: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        user_type: {
+            type: Sequelize.ENUM,
+            values: ['USER', 'ADMIN', 'RANDOM'],
+            defaultValue: 'USER',
         }
     },
         { timestamps: true }
