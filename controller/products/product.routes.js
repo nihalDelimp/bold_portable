@@ -52,8 +52,16 @@ const upload = multer({
 // login for existing users
 router.post('/add-products', checkAuth, hasRole('ADMIN'), upload.single('product_image'), productController.addNewProducts);
 
-//register a new user
+//Update the Specific product details
+router.put('/update-products/:id', checkAuth, hasRole('ADMIN'), upload.single('product_image'), productController.updateProducts);
+
+//Delete the Specific product details
+router.delete('/delete-products/:id', checkAuth, hasRole('ADMIN'), productController.deleteProducts);
+
+//Get the List of the product
 router.get('/get-products', productController.getAllProducts);
 
+//Get the Specific product details
+router.get('/get-specific-products/:id', productController.getSpecificProducts);
 
 module.exports = router;
