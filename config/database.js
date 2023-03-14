@@ -1,21 +1,16 @@
-const Sequelize = require('sequelize');
+const mongoose = require("mongoose");
+const winston = require('winston')
 
-// configure this with your own parameters
-const database = new Sequelize({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_TYPE,
-    database: process.env.MYSQL_DB,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    // dialectOptions: {
-    //     ssl:'Amazon RDS'
-    // },
-    define: {
-        timestamps: false
-    },
-    pool: { maxConnections: 5, maxIdleTime: 30 },
-    language: 'en'
-});
+const database = mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    if (process.env.NODE_ENV !== "test") {
+        winston.info(`Child process: ${process.pid} is connected to DB`);
+    } else {
+        winston.info(`Server process: ${process.pid} is connected to DB`);
+    }
+})
+    .catch(err => {
+        winston.error("App starting error:" + err.message);
+        process.exit(1);
+    });
 
 module.exports = database;
