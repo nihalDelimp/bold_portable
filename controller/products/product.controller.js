@@ -1,28 +1,31 @@
 const logger = require("../../helpers/logger");
-const db = require('../../models/index');
 const apiResponse = require("../../helpers/apiResponse");
+const Product = require('../../models/product/product.schema');
 const path = require('path');
 
-const Product = db.product;
-
-//create new users
+//create new Products
 exports.addNewProducts = async (req, res, next) => {
     try {
         let { title, description, product_price } = req.body;
         console.log(req.file.path)
-        await Product.create({
+
+
+        const product = new Product({
             title,
             description,
             product_image: req.file.path,
             product_image_type: req.file.mimetype,
             product_price
-        }).then(data => {
+        });
+        const savedProduct = await product.save();
+        if (savedProduct) {
             logger.log("info", { fileName: path.basename(__filename), mesage: 'File uploaded Successfully' });
-            return apiResponse.successResponseWithData(res, "Data_created", data)
-        }).catch(err => {
+            return apiResponse.successResponseWithData(res, "Product Added Succesfully", savedProduct)
+
+        } else {
             logger.log("warn", { fileName: path.basename(__filename), err });
             return apiResponse.ErrorResponse(res, err.message)
-        })
+        }
     }
     catch (err) {
         logger.error(err);
@@ -34,30 +37,14 @@ exports.addNewProducts = async (req, res, next) => {
 //Update products
 exports.updateProducts = async (req, res, next) => {
     try {
-        let { id } = req.params
-        console.log(id)
+        let { id } = req.params;
         let { title, description, product_price } = req.body;
-        console.log(req.file.path);
-        if (id) {
-            await Product.update(
-                {
-                    title,
-                    description,
-                    product_price,
-                    product_image: req.file.path,
-                    product_image_type: req.file.mimetype,
-                }, { where: { id } },
-            )
-                .then(num => {
-                    if (num <= 1) {
-                        return apiResponse.successResponse(res, "Data updated Successfully")
-                    } else {
-                        return apiResponse.ErrorResponse(res, "Data not updated")
-                    }
-                }
-                ).catch(err => {
-                    return apiResponse.ErrorResponse(err, "Some Unexpected error occured")
-                });
+        const product = await Product.findByIdAndUpdate(id, { title, description, product_price }, { new: true });
+        if (!product) {
+            return apiResponse.ErrorResponse(res, "Data not updated")
+        }
+        else {
+            return apiResponse.successResponseWithData(res, "Data updated Successfully", product)
         }
     }
     catch (err) {
@@ -70,42 +57,22 @@ exports.updateProducts = async (req, res, next) => {
 exports.deleteProducts = async (req, res, next) => {
     try {
         const { id } = req.params;
-        if (id) {
-            await Product.destroy({
-                where: { id }
-            }).then(num => {
-                if (num == 1) {
-                    res.send({
-                        status: 1,
-                        message: "Data_Deleted"
-                    });
-                } else {
-                    res.send({
-                        status: 0,
-                        message: "Data_not_deleted"
-                    });
-                }
-            })
-                .catch(err => {
-                    res.status(500).send({
-                        status: 0,
-                        message: "Data_not_deleted_error"
-                    });
-                });
-        }
-        else {
-            console.log("He")
-            // return apiResponse.ErrorResponse(res, error.message)
+        const product = await Product.findByIdAndDelete(id);
+
+        if (!product) {
+            return apiResponse.ErrorResponse(res, 'Product not found')
+        } else {
+            return apiResponse.successResponse(res, "Product Deleted Succesfully")
         }
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message)
     }
 };
 
-//Login for users
+//get all products
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const product_list = await Product.findAll();
+        const product_list = await Product.find();
         return apiResponse.successResponseWithData(res, "Product_list", product_list, product_list.length);
 
     } catch (error) {
@@ -118,15 +85,14 @@ exports.getAllProducts = async (req, res, next) => {
 exports.getSpecificProducts = async (req, res, next) => {
     try {
         let { id } = req.params;
-        let specific_product_list = await Product.findOne({ where: { id } });
-        if (specific_product_list === null) {
-            return apiResponse.ErrorResponse(res, "Sorry no data present")
+        const product = await Product.findById(id);
 
-        } else {
-
-            return apiResponse.successResponseWithData(res, "Product_list", specific_product_list);
+        if (!product) {
+            return apiResponse.ErrorResponse(res, "Sorry no product present")
         }
-
+        else {
+            return apiResponse.successResponseWithData(res, "Product_list", product);
+        }
     } catch (error) {
         logger.error(error);
         return apiResponse.ErrorResponse(res, error.message)

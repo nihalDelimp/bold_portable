@@ -4,9 +4,6 @@ const { validate } = require("../../validators/validate")
 const checkAuth = require('../../middleware/checkAuth');
 const { hasRole } = require('../../middleware/checkRole');
 const multer = require("multer");
-const path = require('path');
-const fs = require('fs');
-const apiResponse = require("../../helpers/apiResponse");
 
 // const fileFilter = (req, file, cb) => {
 //     if (file.mimetype.split("/")[0] === "image") {
@@ -32,7 +29,7 @@ const multerStorage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = file.mimetype.split("/")[1];
-        cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`);
+        cb(null, `products/admin-${file.fieldname}-${Date.now()}.${ext}`);
     },
 });
 
