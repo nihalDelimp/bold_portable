@@ -4,34 +4,77 @@ const Product = require('../../models/product/product.schema');
 const path = require('path');
 
 //create new Products
+// exports.addNewProducts = async (req, res, next) => {
+//     try {
+//         let { title, description, product_price } = req.body;
+//         console.log(req.file.path)
+
+
+//         const product = new Product({
+//             title,
+//             description,
+//             product_image: req.file.path,
+//             product_image_type: req.file.mimetype,
+//             product_price
+//         });
+//         const savedProduct = await product.save();
+//         if (savedProduct) {
+//             logger.log("info", { fileName: path.basename(__filename), mesage: 'File uploaded Successfully' });
+//             return apiResponse.successResponseWithData(res, "Product Added Succesfully", savedProduct)
+
+//         } else {
+//             logger.log("warn", { fileName: path.basename(__filename), err });
+//             return apiResponse.ErrorResponse(res, err.message)
+//         }
+//     }
+//     catch (err) {
+//         logger.error(err);
+//         return apiResponse.ErrorResponse(res, err.message);
+//     }
+// };
+
+
 exports.addNewProducts = async (req, res, next) => {
     try {
         let { title, description, product_price } = req.body;
-        console.log(req.file.path)
-
-
+        let images = [];
+        console.log(req.files)
+        // check if a single file or an array of files is uploaded
+        if (req.files) {
+            // multiple files uploaded
+            images = req.files.map(file => ({
+                image_path: file.path,
+                image_type: file.mimetype
+            }));
+        } else {
+            // single file uploaded
+            images.push({
+                image_path: req.file.path,
+                image_type: req.file.mimetype
+            });
+        }
+        console.log(images, "Images")
         const product = new Product({
             title,
             description,
-            product_image: req.file.path,
-            product_image_type: req.file.mimetype,
+            product_images: images,
             product_price
         });
+
         const savedProduct = await product.save();
         if (savedProduct) {
-            logger.log("info", { fileName: path.basename(__filename), mesage: 'File uploaded Successfully' });
-            return apiResponse.successResponseWithData(res, "Product Added Succesfully", savedProduct)
-
+            logger.log("info", { fileName: path.basename(__filename), message: 'Product added successfully' });
+            return apiResponse.successResponseWithData(res, "Product added successfully", savedProduct);
         } else {
             logger.log("warn", { fileName: path.basename(__filename), err });
-            return apiResponse.ErrorResponse(res, err.message)
+            return apiResponse.ErrorResponse(res, err.message);
         }
-    }
-    catch (err) {
+    } catch (err) {
         logger.error(err);
         return apiResponse.ErrorResponse(res, err.message);
     }
 };
+
 
 
 //Update products
@@ -39,11 +82,20 @@ exports.updateProducts = async (req, res, next) => {
     try {
         let { id } = req.params;
         let { title, description, product_price } = req.body;
-        const product = await Product.findByIdAndUpdate(id, { title, description, product_price }, { new: true });
+
+        let updateFields = { title, description, product_price };
+        if (req.files && req.files.length > 0) {
+            let productImages = req.files.map(file => ({ image_path: file.path, image_type: file.mimetype }));
+            updateFields.product_images = productImages;
+        }
+
+        const product = await Product.findByIdAndUpdate(id, updateFields, { new: true });
         if (!product) {
+            logger.log("info", { fileName: path.basename(__filename), message: 'Data not Update' });
             return apiResponse.ErrorResponse(res, "Data not updated")
         }
         else {
+            logger.log("info", { fileName: path.basename(__filename), message: 'Data updated Successfully' });
             return apiResponse.successResponseWithData(res, "Data updated Successfully", product)
         }
     }
@@ -52,6 +104,7 @@ exports.updateProducts = async (req, res, next) => {
         return apiResponse.ErrorResponse(res, err.message);
     }
 };
+
 
 //Delete products
 exports.deleteProducts = async (req, res, next) => {

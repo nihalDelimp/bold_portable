@@ -2,6 +2,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/user/user.schema');
 const apiResponse = require("../../helpers/apiResponse");
+const logger = require("../../helpers/logger");
+const fs = require('fs');
+const path = require('path');
+
 exports.registerUsers = async (req, res) => {
     try {
         const { name, email, password, mobile, user_type } = req.body;
@@ -128,5 +132,42 @@ exports.updateProfile = async (req, res) => {
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message)
 
+    }
+}
+
+exports.updateProfileImage = async (req, res) => {
+    try {
+        const { _id } = req.userData.user;
+        if (req.file === undefined) {
+            return apiResponse.ErrorResponse(res, "No file Found");
+        }
+
+        const user = await User.findById(_id);
+        if (!user) {
+            return apiResponse.notFoundResponse(res, "User not found");
+        }
+
+        // delete old profile picture file if it exists
+        if (user.profile_picture) {
+            fs.unlink(user.profile_picture, (err) => {
+                if (err) {
+                    logger.log("error", { fileName: path.basename(__filename), message: err.message });
+                }
+            });
+        }
+
+        // update user's profile picture
+        user.profile_picture = req.file.path;
+        const updateUser = await user.save();
+        if (updateUser) {
+            logger.log("info", { fileName: path.basename(__filename), message: 'File uploaded Successfully' });
+            return apiResponse.successResponseWithData(res, "User image uploaded successfully", updateUser);
+        } else {
+            logger.log("warn", { fileName: path.basename(__filename), message: 'Failed to update user profile picture' });
+            return apiResponse.ErrorResponse(res, "Failed to update user profile picture");
+        }
+    } catch (error) {
+        logger.log("error", { fileName: path.basename(__filename), message: error.message });
+        return apiResponse.ErrorResponse(res, error.message);
     }
 }

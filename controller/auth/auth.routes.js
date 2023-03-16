@@ -3,6 +3,9 @@ const authController = require('./auth.controller');
 const { userValidationRules, loginValidationRules, passwordValidationRules, nameValidationRules } = require('./auth.schema')
 const { validate } = require("../../validators/validate")
 const checkAuth = require('../../middleware/checkAuth');
+const upload = require('../../helpers/multer');
+const apiResponse = require("../../helpers/apiResponse");
+const multer = require("multer");
 
 // login for existing users
 router.post('/login', loginValidationRules(), validate, authController.loginUser);
@@ -18,5 +21,25 @@ router.get('/get-all-users', authController.getListAllUsers)
 
 //update User profile
 router.post('/update-user-profile', checkAuth, authController.updateProfile)
+
+//Update User Profile Image
+router.put('/update-profile-image', checkAuth, upload.single("profile_picture"), authController.updateProfileImage)
+
+router.use((error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        if (error.code === "LIMIT_FILE_SIZE") {
+            return apiResponse.validationError(res, " File is too large");
+        }
+
+        if (error.code === "LIMIT_FILE_COUNT") {
+            return apiResponse.validationError(res, "File limit reached");
+        }
+
+        if (error.code === "LIMIT_UNEXPECTED_FILE") {
+            return apiResponse.validationError(res, "File type not supported!");
+        }
+    }
+});
+
 
 module.exports = router;

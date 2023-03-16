@@ -4,25 +4,6 @@ const { validate } = require("../../validators/validate")
 const checkAuth = require('../../middleware/checkAuth');
 const { hasRole } = require('../../middleware/checkRole');
 const multer = require("multer");
-
-// const fileFilter = (req, file, cb) => {
-//     if (file.mimetype.split("/")[0] === "image") {
-//         cb(null, true);
-//     }
-//     else {
-//         cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE"), false);
-//     }
-// };
-// var storage = multer.memoryStorage();
-
-// var upload = multer({
-//     storage: storage, limits: {
-//         fileSize: 700000000
-//     },
-//     fileFilter
-// });
-
-// const upload = multer({ dest: "public/files" });
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "public");
@@ -47,10 +28,10 @@ const upload = multer({
 });
 
 // login for existing users
-router.post('/add-products', checkAuth, hasRole('ADMIN'), upload.single('product_image'), productController.addNewProducts);
+router.post('/add-products', checkAuth, hasRole('ADMIN'), upload.array('product_image', 10), productController.addNewProducts);
 
 //Update the Specific product details
-router.put('/update-products/:id', checkAuth, hasRole('ADMIN'), upload.single('product_image'), productController.updateProducts);
+router.put('/update-products/:id', checkAuth, hasRole('ADMIN'), upload.array('product_image', 10), productController.updateProducts);
 
 //Delete the Specific product details
 router.delete('/delete-products/:id', checkAuth, hasRole('ADMIN'), productController.deleteProducts);
