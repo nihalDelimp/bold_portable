@@ -82,8 +82,8 @@ exports.loginUser = async (req, res) => {
 
 exports.specificUserDetails = async (req, res) => {
     try {
-        const { id } = req.body;
-        User.findOne({ _id: id }).then(data => {
+        const _id = req.params.id;
+        User.findOne({ _id }).then(data => {
             return apiResponse.successResponseWithData(res, "data", data)
         })
             .catch(err => {
@@ -91,7 +91,6 @@ exports.specificUserDetails = async (req, res) => {
             })
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message)
-
     }
 }
 

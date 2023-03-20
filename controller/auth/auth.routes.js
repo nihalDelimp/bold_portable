@@ -14,7 +14,7 @@ router.post('/login', loginValidationRules(), validate, authController.loginUser
 router.post('/register', userValidationRules(), validate, authController.registerUsers);
 
 ///Get specific User Details
-router.get('/get-specific-user', authController.specificUserDetails);
+router.get('/get-specific-user/:id', checkAuth, authController.specificUserDetails);
 
 //get the list of all user
 router.get('/get-all-users', authController.getListAllUsers)

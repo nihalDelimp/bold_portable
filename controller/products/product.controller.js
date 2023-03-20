@@ -3,36 +3,6 @@ const apiResponse = require("../../helpers/apiResponse");
 const Product = require('../../models/product/product.schema');
 const path = require('path');
 
-//create new Products
-// exports.addNewProducts = async (req, res, next) => {
-//     try {
-//         let { title, description, product_price } = req.body;
-//         console.log(req.file.path)
-
-
-//         const product = new Product({
-//             title,
-//             description,
-//             product_image: req.file.path,
-//             product_image_type: req.file.mimetype,
-//             product_price
-//         });
-//         const savedProduct = await product.save();
-//         if (savedProduct) {
-//             logger.log("info", { fileName: path.basename(__filename), mesage: 'File uploaded Successfully' });
-//             return apiResponse.successResponseWithData(res, "Product Added Succesfully", savedProduct)
-
-//         } else {
-//             logger.log("warn", { fileName: path.basename(__filename), err });
-//             return apiResponse.ErrorResponse(res, err.message)
-//         }
-//     }
-//     catch (err) {
-//         logger.error(err);
-//         return apiResponse.ErrorResponse(res, err.message);
-//     }
-// };
-
 
 exports.addNewProducts = async (req, res, next) => {
     try {
