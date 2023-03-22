@@ -65,9 +65,9 @@ exports.loginUser = async (req, res) => {
                         expiresIn: "1d",
                     };
                     userData.token = jwt.sign(jwtPayload, secret, jwtData);
-                    let { _id, name, email, user_type } = userData.user;
+                    let { _id, name, email, user_type, mobile } = userData.user;
                     let { token } = userData;
-                    return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type }, token })
+                    return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type, mobile }, token })
                 }
                 else {
                     return apiResponse.ErrorResponse(res, "Not a valid password")
