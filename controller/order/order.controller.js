@@ -1,31 +1,41 @@
 const Order = require('../../models/order/order.schema');
+const Product = require('../../models/product/product.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 
 exports.createOrder = async (req, res) => {
     try {
         const { userId, products } = req.body;
-        console.log(userId, products, "helooo")
+
+        const orderedProducts = [];
+        for (const { productId, product_quantity, product_price } of products) {
+            const productDetails = await Product.findById(productId);
+            if (!productDetails) {
+                throw new Error(`Product with id ${productId} not found`);
+            }
+            orderedProducts.push({
+                product: productDetails._id,
+                product_quantity,
+                product_price
+            });
+        }
+
         // Calculate the total price of the order
-        const totalPrice = products.reduce((total, product) => {
+        const totalPrice = orderedProducts.reduce((total, product) => {
             return total + product.product_quantity * product.product_price;
         }, 0);
 
-        // Create a new order document
+        // Create a new order document with user id and ordered products
         const newOrder = new Order({
             user: userId,
-            products: products.map(product => ({
-                product: product.productId,
-                product_quantity: product.product_quantity,
-                product_price: product.product_quantity * product.product_price
-            })),
+            products: orderedProducts,
             total_price: totalPrice
         });
 
-        // Save the new order document
+        // Save the new order document and populate the product field
         const savedOrder = await newOrder.save();
-
-        return apiResponse.successResponseWithData(res, 'Order created successfully', savedOrder);
+        const populatedOrder = await Order.findById(savedOrder._id).populate('products.product');
+        return apiResponse.successResponseWithData(res, 'Order created successfully', populatedOrder);
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
@@ -35,16 +45,17 @@ exports.createOrder = async (req, res) => {
 exports.getOrderDetails = async (req, res) => {
     try {
         const userId = req.params.id;
-        // Find all orders for the specified user
-        const orders = await Order.find({ user: userId });
+        const orders = await Order.find({ user: userId }).populate({
+            path: 'products.product',
+            model: 'Product'
+        });
 
         return apiResponse.successResponseWithData(res, 'Order fetched successfully', orders);
-
     } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message)
-
+        return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 exports.cancelOrder = async (req, res) => {
     try {
