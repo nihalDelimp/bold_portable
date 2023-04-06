@@ -102,14 +102,14 @@ exports.getAllProducts = async (req, res, next) => {
         const products = await Product.find()
             .skip(skipIndex)
             .limit(limit);
-        console.log(req.query.pageSize, "Nihal");
+
         const count = await Product.countDocuments();
 
         const response = {
-            data: products,
+            products,
             currentPage: page,
             totalPages: Math.ceil(count / limit),
-            count: count
+            count
         };
 
         return apiResponse.successResponseWithData(res, "Product list retrieved successfully", response);
