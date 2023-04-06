@@ -95,14 +95,30 @@ exports.deleteProducts = async (req, res, next) => {
 //get all products
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const product_list = await Product.find();
-        return apiResponse.successResponseWithData(res, "Product_list", product_list, product_list.length);
+        const page = parseInt(req.query.pageNumber) || 1;
+        const limit = parseInt(req.query.pageSize) || 10;
+        const skipIndex = (page - 1) * limit;
 
+        const products = await Product.find()
+            .skip(skipIndex)
+            .limit(limit);
+        console.log(req.query.pageSize, "Nihal");
+        const count = await Product.countDocuments();
+
+        const response = {
+            data: products,
+            currentPage: page,
+            totalPages: Math.ceil(count / limit),
+            count: count
+        };
+
+        return apiResponse.successResponseWithData(res, "Product list retrieved successfully", response);
     } catch (error) {
         logger.error(error);
-        return apiResponse.ErrorResponse(res, error.message)
+        return apiResponse.ErrorResponse(res, error.message);
     }
-}
+};
+
 
 //Get the specific Product
 exports.getSpecificProducts = async (req, res, next) => {

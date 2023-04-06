@@ -97,17 +97,24 @@ exports.specificUserDetails = async (req, res) => {
 
 exports.getListAllUsers = async (req, res) => {
     try {
-        await User.find({ user_type: { $ne: 'ADMIN' } }).sort({ createdAt: 1 }).limit(10).then(data => {
-            return apiResponse.successResponseWithData(res, "Data retrieved successfully", data)
-        })
-            .catch(err => {
-                return apiResponse.ErrorResponse(res, "Some Error Occurs")
-            })
-    } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
+        const totalUsers = await User.countDocuments({ user_type: { $ne: 'ADMIN' } });
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        const users = await User.find({ user_type: { $ne: 'ADMIN' } })
+            .sort({ createdAt: 1 })
+            .skip(skip)
+            .limit(limit);
+
+        return apiResponse.successResponseWithData(res, "Data retrieved successfully", { users, totalPages, currentPage: page });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
     }
-}
+};
+
 
 
 exports.updateProfile = async (req, res) => {

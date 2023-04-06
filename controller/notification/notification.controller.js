@@ -6,9 +6,18 @@ const Notification = require('../../models/notification/notification.schema');
 exports.getUnseenNotifications = async (req, res) => {
     try {
 
+        // Get the page number and page size from the query parameters
+        const pageNumber = parseInt(req.query.pageNumber) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        console.log(pageNumber, pageSize)
+
+        // Calculate the number of documents to skip based on the page number and page size
+        const documentsToSkip = (pageNumber - 1) * pageSize;
         const unseenNotifications = await Notification.find({ status_seen: false })
             .populate('order')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(documentsToSkip)
+            .limit(pageSize);
 
         return apiResponse.successResponseWithData(res, 'Unseen notifications retrieved successfully', unseenNotifications, unseenNotifications.length);
     } catch (error) {
