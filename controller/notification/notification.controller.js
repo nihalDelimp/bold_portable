@@ -14,7 +14,15 @@ exports.getUnseenNotifications = async (req, res) => {
         // Calculate the number of documents to skip based on the page number and page size
         const documentsToSkip = (pageNumber - 1) * pageSize;
         const unseenNotifications = await Notification.find({ status_seen: false })
-            .populate('order')
+            .populate({
+                path: 'order',
+                model: 'Order'
+            })
+            .populate({
+                path: 'user',
+                model: 'User',
+                select: '-password -user_type -email'
+            })
             .sort({ createdAt: -1 })
             .skip(documentsToSkip)
             .limit(pageSize);
