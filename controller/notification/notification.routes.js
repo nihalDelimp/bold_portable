@@ -7,6 +7,9 @@ const { hasRole } = require('../../middleware/checkRole');
 //Get all unseen Status
 router.get('/get-all-unseen-notfications', checkAuth, hasRole('ADMIN'), notificationController.getUnseenNotifications);
 
+//Get Specific unseen Status
+router.get('/get-specific-unseen-notfications/:id', checkAuth, hasRole('ADMIN'), notificationController.getSpecificUnseenNotificationsDeatils);
+
 //update all notification to true
 router.put('/mark-all-notfications-true', checkAuth, hasRole('ADMIN'), notificationController.markAllNotificationsAsSeen);
 

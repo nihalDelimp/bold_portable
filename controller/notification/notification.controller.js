@@ -34,6 +34,33 @@ exports.getUnseenNotifications = async (req, res) => {
 };
 
 
+exports.getSpecificUnseenNotificationsDeatils = async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+
+        const specificUnseenNotification = await Notification.findById(notificationId)
+            .populate({
+                path: 'order',
+                model: 'Order'
+            })
+            .populate({
+                path: 'user',
+                model: 'User',
+                select: '-password -user_type -email'
+            });
+
+        if (!specificUnseenNotification) {
+            return apiResponse.notFoundResponse(res, 'Notification not found');
+        }
+
+        return apiResponse.successResponseWithData(res, 'Specific unseen notification retrieved successfully', specificUnseenNotification);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
 exports.markAllNotificationsAsSeen = async (req, res) => {
     try {
         // Update all the notifications for the user to set status_seen to true
