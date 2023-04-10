@@ -13,6 +13,9 @@ router.get('/get-user-order-details/:id', checkAuth, orderController.getOrderDet
 //Get all orders
 router.get('/get-all-orders', checkAuth, hasRole('ADMIN'), orderController.getAllOrders);
 
+//Get all Filetered orders
+router.get('/get-all-filtered-orders', checkAuth, hasRole('ADMIN'), orderController.getFilteredOrders);
+
 //Cancel Single Order
 router.patch('/:orderId/cancel', checkAuth, hasRole('ADMIN'), orderController.cancelOrder);
 

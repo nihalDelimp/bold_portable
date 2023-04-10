@@ -111,7 +111,42 @@ exports.getAllOrders = async (req, res) => {
     }
 };
 
+exports.getFilteredOrders = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10; // default limit of 10 orders
+        const page = parseInt(req.query.page) || 1; // default page number is 1
+        const skip = (page - 1) * limit;
 
+        let filter = {};
+        if (req.query.status === 'completed') {
+            filter.status = 'completed';
+        } else if (req.query.status === 'cancelled') {
+            filter.status = 'cancelled';
+        } else if (req.query.status === 'pending') {
+            filter.status = 'pending';
+        }
+
+        const totalOrders = await Order.countDocuments(filter);
+        const orders = await Order.find(filter).populate({
+            path: 'products.product',
+            model: 'Product'
+        })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return apiResponse.successResponseWithData(res, 'Orders fetched successfully', {
+            orders,
+            totalPages,
+            currentPage: page,
+            perPage: limit,
+            totalOrders
+        });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
 
 
 exports.cancelOrder = async (req, res) => {
@@ -131,7 +166,7 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // Update the order status to "cancelled"
-        // order.status = "cancelled";
+        order.status = "cancelled";
         await order.save();
 
         // Emit the cancel order event to the socket server
