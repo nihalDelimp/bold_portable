@@ -172,7 +172,7 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // Update the order status to "cancelled"
-        // order.status = "cancelled";
+        order.status = "cancelled";
         await order.save();
 
         // Emit the cancel order event to the socket server
