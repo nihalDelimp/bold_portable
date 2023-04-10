@@ -6,8 +6,8 @@ const Notification = require('../../models/notification/notification.schema');
 
 exports.createOrder = async (req, res) => {
     try {
-        const { userId, products } = req.body;
-
+        const { userId, products, address, location } = req.body;
+        console.log(req.body)
         const orderedProducts = [];
         for (const { productId, product_quantity, product_price } of products) {
             const productDetails = await Product.findById(productId);
@@ -30,7 +30,9 @@ exports.createOrder = async (req, res) => {
         const newOrder = new Order({
             user: userId,
             products: orderedProducts,
-            total_price: totalPrice
+            total_price: totalPrice,
+            address,
+            location
         });
 
         // Save the new order document and populate the product field
