@@ -4,11 +4,16 @@ const { validate } = require("../../validators/validate")
 const checkAuth = require('../../middleware/checkAuth');
 const { hasRole } = require('../../middleware/checkRole');
 
-// login for existing users
+//Create orders for users
 router.post('/create-order', checkAuth, hasRole('USER'), orderController.createOrder);
 
+//get user order details
 router.get('/get-user-order-details/:id', checkAuth, orderController.getOrderDetails);
 
-router.patch('/:orderId/cancel', orderController.cancelOrder);
+//Get all orders
+router.get('/get-all-orders', checkAuth, hasRole('ADMIN'), orderController.getAllOrders);
+
+//Cancel Single Order
+router.patch('/:orderId/cancel', checkAuth, hasRole('ADMIN'), orderController.cancelOrder);
 
 module.exports = router;

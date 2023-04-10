@@ -3,7 +3,8 @@ const Product = require('../../models/product/product.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const Notification = require('../../models/notification/notification.schema');
-
+const { server } = require('../../server');
+const io = require('socket.io')(server);
 exports.createOrder = async (req, res) => {
     try {
         const { userId, products, address, location } = req.body;
@@ -80,6 +81,39 @@ exports.getOrderDetails = async (req, res) => {
 };
 
 
+
+exports.getAllOrders = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const limit = parseInt(req.query.limit) || 10; // default limit of 10 orders
+        const page = parseInt(req.query.page) || 1; // default page number is 1
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments({});
+        const orders = await Order.find({}).populate({
+            path: 'products.product',
+            model: 'Product'
+        })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return apiResponse.successResponseWithData(res, 'Orders fetched successfully', {
+            orders,
+            totalPages,
+            currentPage: page,
+            perPage: limit,
+            totalOrders
+        });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
+
 exports.cancelOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -88,18 +122,25 @@ exports.cancelOrder = async (req, res) => {
         const order = await Order.findById(orderId);
 
         if (!order) {
-            return apiResponse.ErrorResponse(res, "Order not found")
+            return apiResponse.ErrorResponse(res, "Order not found");
+        }
+
+        // Check if the order is pending
+        if (order.status !== "pending") {
+            return apiResponse.ErrorResponse(res, "Only pending orders can be cancelled");
         }
 
         // Update the order status to "cancelled"
-        order.status = 'cancelled';
+        // order.status = "cancelled";
         await order.save();
 
-        return apiResponse.successResponse(res, "Order cancelled succesfully")
+        // Emit the cancel order event to the socket server
+        io.emit("cancel_order", orderId);
 
+        return apiResponse.successResponse(res, "Order cancelled successfully");
     } catch (error) {
         console.error(error);
-        return apiResponse.ErrorResponse(res, error.message)
+        return apiResponse.ErrorResponse(res, error.message);
     }
 };
 
