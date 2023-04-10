@@ -132,6 +132,11 @@ exports.getFilteredOrders = async (req, res) => {
             path: 'products.product',
             model: 'Product'
         })
+            .populate({
+                path: 'user',
+                model: 'User',
+                select: "-password -user_type"
+            })
             .skip(skip)
             .limit(limit);
 
@@ -171,9 +176,8 @@ exports.cancelOrder = async (req, res) => {
         await order.save();
 
         // Emit the cancel order event to the socket server
-        io.emit("cancel_order", orderId);
-
-        return apiResponse.successResponse(res, "Order cancelled successfully");
+        io.emit("cancel_order", { orderId, order });
+        return apiResponse.successResponseWithData(res, "Order cancelled successfully", order);
     } catch (error) {
         console.error(error);
         return apiResponse.ErrorResponse(res, error.message);

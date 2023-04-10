@@ -24,11 +24,11 @@ io.on("connection", (socket) => {
     });
 
     // Send a cancel order event to the user panel
-    socket.on('cancel_order', (orderId) => {
-        console.log('cancel order received for orderId:', orderId, "heloo");
+    socket.on('cancel_order', (data) => {
+        console.log('cancel order received for orderId:', data.orderId, 'order:', data.order);
 
         // emit the cancel order event to the user panel
-        io.emit('cancel_order_received', orderId);
+        io.emit('cancel_order_received', data.order);
     });
 })
 
