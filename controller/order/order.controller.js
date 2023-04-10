@@ -7,7 +7,8 @@ const { server } = require('../../server');
 const io = require('socket.io')(server);
 exports.createOrder = async (req, res) => {
     try {
-        const { userId, products, address, location } = req.body;
+        const { _id } = req.userData.user;
+        const { products, address, location } = req.body;
         console.log(req.body)
         const orderedProducts = [];
         for (const { productId, product_quantity, product_price } of products) {
@@ -29,7 +30,7 @@ exports.createOrder = async (req, res) => {
 
         // Create a new order document with user id and ordered products
         const newOrder = new Order({
-            user: userId,
+            user: _id,
             products: orderedProducts,
             total_price: totalPrice,
             address,
@@ -51,7 +52,7 @@ exports.createOrder = async (req, res) => {
 
         // Create a new notification document with user id and order id
         const newNotification = new Notification({
-            user: userId,
+            user: _id,
             order: savedOrder._id
         });
 
@@ -166,7 +167,7 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // Update the order status to "cancelled"
-        order.status = "cancelled";
+        // order.status = "cancelled";
         await order.save();
 
         // Emit the cancel order event to the socket server

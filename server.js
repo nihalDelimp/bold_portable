@@ -17,11 +17,18 @@ io.on("connection", (socket) => {
     console.log("Socket is connected")
     // socket.emit('newOrder', order);
     socket.on('new_order', (order) => {
-        // handle the new order event here, e.g. save the order to a database
         console.log('new order received:', order);
 
         // emit the new order event to the admin panel
         io.emit('new_order_recieved', order);
+    });
+
+    // Send a cancel order event to the user panel
+    socket.on('cancel_order', (orderId) => {
+        console.log('cancel order received for orderId:', orderId, "heloo");
+
+        // emit the cancel order event to the user panel
+        io.emit('cancel_order_received', orderId);
     });
 })
 
