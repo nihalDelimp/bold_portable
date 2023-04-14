@@ -88,7 +88,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
         const {
             disasterNature,
             coordinator: { name, email, cellNumber },
-            supportNumber,
+            maxWorkers,
+            weeklyHours,
             placementDate,
             placementLocation,
             originPoint,
@@ -99,6 +100,19 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useInWinter,
             specialRequirements,
         } = req.body;
+
+
+        // Calculate the total number of hours
+        const totalHours = maxWorkers * weeklyHours;
+
+        // Calculate the number of units required
+        const numUnits = Math.ceil(totalHours / 400);
+
+        // Determine the service frequency
+        let serviceFrequency = "Once per week";
+        if (numUnits > 1) {
+            serviceFrequency = `${numUnits} units serviced once per week`;
+        }
 
         // Calculate the delivered price
         let deliveredPrice = 0;
@@ -114,9 +128,10 @@ exports.createDisasterReliefQuotation = async (req, res) => {
                 email,
                 cellNumber,
             },
-            supportNumber,
             placementDate,
             placementLocation,
+            maxWorkers,
+            weeklyHours,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
@@ -125,6 +140,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useAtNight,
             useInWinter,
             specialRequirements,
+            numUnits,
+            serviceFrequency
         };
 
         // Create a new DisasterRelief instance with the quotation object as properties

@@ -8,7 +8,8 @@ const disasterReliefSchema = new mongoose.Schema(
             email: String, // Email of the main contact for the event
             cellNumber: String // Cell number of the main contact for the event
         },
-        supportNumber: Number, // Estimated number of support workers or disaster victims that need to be served
+        maxWorkers: Number, // Largest number of workers utilizing the unit
+        weeklyHours: Number, // Number of hours per week workers are on site
         placementDate: Date, // Date and time the unit will be placed
         placementLocation: { // Where the unit will be placed
             type: { type: String, default: "Point" }, // Default value of "Point" for GeoJSON point location
@@ -25,7 +26,8 @@ const disasterReliefSchema = new mongoose.Schema(
         useAtNight: Boolean, // Whether the unit will be used at night
         useInWinter: Boolean, // Whether the unit will be used in the winter
         specialRequirements: String, // Any other special requirements
-        numUnits: Number // Number of units required for the construction site
+        numUnits: Number, // Number of units required for the construction site
+        serviceFrequency: String, // How often the service is required
     },
     { timestamps: true }
 );
