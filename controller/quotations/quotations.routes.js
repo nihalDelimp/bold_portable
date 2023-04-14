@@ -13,4 +13,10 @@ router.post('/create-quotation-for-disaster-relief', checkAuth, hasRole('USER'),
 //Create Quotation for Personal Business Site.
 router.post('/create-quotation-for-personal-business-site', checkAuth, hasRole('USER'), quotationsController.createPersonalOrBusinessQuotation);
 
+//Create Quotation for Personal Business Site.
+router.post('/create-quotation-for-farm-orchard-winery', checkAuth, hasRole('USER'), quotationsController.createFarmOrchardWineryQuotation);
+
+//Create Quotation for Event.
+router.post('/create-quotation-for-event', checkAuth, hasRole('USER'), quotationsController.createEventQuotation);
+
 module.exports = router;

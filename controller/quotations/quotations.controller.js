@@ -4,6 +4,8 @@ const logger = require("../../helpers/logger");
 const { server } = require('../../server');
 const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
 const io = require('socket.io')(server);
 
 exports.createConstructionQuotation = async (req, res) => {
@@ -232,3 +234,153 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
     }
 };
 
+
+exports.createFarmOrchardWineryQuotation = async (req, res) => {
+    try {
+        const {
+            useType,
+            coordinator: { name, email, cellNumber },
+            maxWorkers,
+            weeklyHours,
+            placement_datetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            night_use,
+            winter_use,
+            special_requirements,
+        } = req.body;
+
+        // Calculate the total number of hours
+        const totalHours = maxWorkers * weeklyHours;
+
+        // Calculate the number of units required
+        const numUnits = Math.ceil(totalHours / 400);
+        console.log(numUnits, "Jskjak")
+        // Determine the service frequency
+        let serviceFrequency = "Once per week";
+        if (numUnits > 1) {
+            serviceFrequency = `${numUnits} units serviced once per week`;
+        }
+
+        // Calculate the delivered price
+        let deliveredPrice = 0;
+        if (distanceFromKelowna > 10) {
+            deliveredPrice = (distanceFromKelowna - 10) * serviceCharge;
+        }
+
+        // Construct the FarmOrchardWinery object
+        const farmOrchardWinery = new FarmOrchardWinery({
+            useType,
+            coordinator: {
+                name,
+                email,
+                cellNumber,
+            },
+            maxWorkers,
+            weeklyHours,
+            placement_datetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            deliveredPrice,
+            night_use,
+            winter_use,
+            special_requirements,
+            numUnits,
+            serviceFrequency
+        });
+
+        // Save the FarmOrchardWinery instance
+        await farmOrchardWinery.save();
+
+        return apiResponse.successResponseWithData(
+            res,
+            "FarmOrchardWinery instance has been created successfully",
+            farmOrchardWinery
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
+exports.createEventQuotation = async (req, res) => {
+    try {
+        const {
+            eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
+            coordinator: { name, email, cellNumber },
+            maxWorkers,
+            weeklyHours,
+            placement_datetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            night_use,
+            winter_use,
+            special_requirements,
+        } = req.body;
+
+        // Calculate the total number of hours
+        const totalHours = maxWorkers * weeklyHours;
+
+        // Calculate the number of units required
+        const numUnits = Math.ceil(totalHours / 400);
+
+        // Determine the service frequency
+        let serviceFrequency = "Once per week";
+        if (numUnits > 1) {
+            serviceFrequency = `${numUnits} units serviced once per week`;
+        }
+
+        // Calculate the delivered price
+        let deliveredPrice = 0;
+        if (distanceFromKelowna > 10) {
+            deliveredPrice = (distanceFromKelowna - 10) * serviceCharge;
+        }
+
+        // Construct the Event object
+        const event = new Event({
+            coordinator: {
+                name,
+                email,
+                cellNumber,
+            },
+            maxWorkers,
+            weeklyHours,
+            placement_datetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            deliveredPrice,
+            night_use,
+            winter_use,
+            special_requirements,
+            numUnits,
+            serviceFrequency,
+            eventDetails: {
+                eventName,
+                eventDate,
+                eventType,
+                eventLocation,
+                eventMapLocation
+            }
+        });
+
+        // Save the Event instance
+        await event.save();
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Event instance has been created successfully",
+            event
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
