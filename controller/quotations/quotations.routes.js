@@ -10,4 +10,7 @@ router.post('/create-quotation-for-construction', checkAuth, hasRole('USER'), qu
 //Create Quotation for Disaster Relief.
 router.post('/create-quotation-for-disaster-relief', checkAuth, hasRole('USER'), quotationsController.createDisasterReliefQuotation);
 
+//Create Quotation for Personal Business Site.
+router.post('/create-quotation-for-personal-business-site', checkAuth, hasRole('USER'), quotationsController.createPersonalOrBusinessQuotation);
+
 module.exports = router;

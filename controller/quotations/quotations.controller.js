@@ -3,6 +3,7 @@ const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const { server } = require('../../server');
 const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const io = require('socket.io')(server);
 
 exports.createConstructionQuotation = async (req, res) => {
@@ -154,6 +155,77 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             res,
             "Quotation has been created successfully",
             disasterRelief
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.createPersonalOrBusinessQuotation = async (req, res) => {
+    try {
+        const {
+            useType,
+            coordinator: { name, email, cellNumber },
+            maxWorkers,
+            weeklyHours,
+            placementDatetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            nightUse,
+            winterUse,
+            specialRequirements,
+        } = req.body;
+
+        // Calculate the total number of hours
+        const totalHours = maxWorkers * weeklyHours;
+
+        // Calculate the number of units required
+        const numUnits = Math.ceil(totalHours / 400);
+
+        // Determine the service frequency
+        let serviceFrequency = "Once per week";
+        if (numUnits > 1) {
+            serviceFrequency = `${numUnits} units serviced once per week`;
+        }
+
+        // Calculate the delivered price
+        let deliveredPrice = 0;
+        if (distanceFromKelowna > 10) {
+            deliveredPrice = (distanceFromKelowna - 10) * serviceCharge;
+        }
+
+        // Construct the PersonalOrBusiness object
+        const personalOrBusiness = new PersonalOrBusiness({
+            useType,
+            coordinator: {
+                name,
+                email,
+                cellNumber,
+            },
+            maxWorkers,
+            weeklyHours,
+            placement_datetime: placementDatetime,
+            placement_location,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            deliveredPrice,
+            night_use: nightUse,
+            winter_use: winterUse,
+            special_requirements: specialRequirements,
+            numUnits,
+            serviceFrequency
+        });
+
+        // Save the PersonalOrBusiness instance
+        await personalOrBusiness.save();
+
+        return apiResponse.successResponseWithData(
+            res,
+            "PersonalOrBusiness instance has been created successfully",
+            personalOrBusiness
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
