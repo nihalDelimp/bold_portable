@@ -20,10 +20,8 @@ router.get('/get-specific-unseen-notfications/:id', checkAuth, hasRole('ADMIN'),
 router.put('/mark-all-notfications-true', checkAuth, hasRole('ADMIN'), notificationController.markAllNotificationsAsSeen);
 
 //update all specific user notification to true
-router.put('/mark-all-user-notfications-true', checkAuth, hasRole('ADMIN'), notificationController.markUserAllNotificationsAsSeen);
+router.put('/mark-all-user-notfications-true', checkAuth, hasRole('USER'), notificationController.markUserAllNotificationsAsSeen);
 
-//Update all Cancel Order notification to true
-router.put('/mark-all-notfications-true', checkAuth, hasRole('ADMIN'), notificationController.markAllNotificationsAsSeen);
 
 //update specific notification to true
 router.patch('/:id/mark-specific-notification-as-seen', checkAuth, hasRole('ADMIN'), notificationController.markSpecificNotificationsAsSeen);
