@@ -23,6 +23,14 @@ io.on("connection", (socket) => {
         io.emit('new_order_recieved', order);
     });
 
+
+    socket.on('new_quote', (quote) => {
+        console.log('new quote received:', quote);
+
+        // emit the new quote event to the admin panel
+        io.emit('new_quote_recieved', quote);
+    });
+
     // Send a cancel order event to the user panel
     socket.on('cancel_order', (data) => {
         console.log('cancel order received for orderId:', data.orderId, 'order:', data.order);
