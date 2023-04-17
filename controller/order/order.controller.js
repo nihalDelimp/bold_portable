@@ -53,7 +53,8 @@ exports.createOrder = async (req, res) => {
         // Create a new notification document with user id and order id
         const newNotification = new Notification({
             user: _id,
-            order: savedOrder._id
+            order: savedOrder._id,
+            type: "CREATE_ORDER"
         });
 
         // Save the new notification document
@@ -95,6 +96,7 @@ exports.getAllOrders = async (req, res) => {
             path: 'products.product',
             model: 'Product'
         })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
@@ -137,6 +139,7 @@ exports.getFilteredOrders = async (req, res) => {
                 model: 'User',
                 select: "-password -user_type"
             })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
@@ -177,6 +180,16 @@ exports.cancelOrder = async (req, res) => {
 
         // Emit the cancel order event to the socket server
         io.emit("cancel_order", { orderId, order });
+
+        // Save the cancellation as a notification of type "order_cancel" in the "Notification" collection
+        const notification = new Notification({
+            user: order.user,
+            order: order._id,
+            type: "ORDER_CANCEL",
+            status_seen: false
+        });
+        await notification.save();
+
         return apiResponse.successResponseWithData(res, "Order cancelled successfully", order);
     } catch (error) {
         console.error(error);
