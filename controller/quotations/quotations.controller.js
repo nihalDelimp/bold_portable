@@ -6,6 +6,7 @@ const DisasterRelief = require('../../models/disaster_relief/disasterRelief.sche
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
+const { default: mongoose } = require('mongoose');
 const io = require('socket.io')(server);
 
 exports.createConstructionQuotation = async (req, res) => {
@@ -83,8 +84,6 @@ exports.createConstructionQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
-
-
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
@@ -307,7 +306,6 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 };
 
 
-
 exports.createEventQuotation = async (req, res) => {
     try {
         const {
@@ -384,3 +382,65 @@ exports.createEventQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.getAllQuotation = async (req, res) => {
+    try {
+        const { quotationType } = req.params;
+        console.log(quotationType)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        let quotations;
+        switch (quotationType) {
+            case 'event':
+                quotations = await Event.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'farm-orchard-winery':
+                quotations = await FarmOrchardWinery.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'personal-or-business':
+                quotations = await PersonalOrBusiness.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'disaster-relief':
+                quotations = await DisasterRelief.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'construction':
+                quotations = await Construction.find()
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
+
+        const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join('');
+
+        const QuotationModel = mongoose.model(quotationTypeFormatted);
+
+        const count = await QuotationModel.countDocuments();
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotations retrieved successfully",
+            {
+                quotations: quotations,
+                page: page,
+                pages: Math.ceil(count / limit),
+                total: count
+            }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+

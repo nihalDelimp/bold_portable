@@ -1,8 +1,7 @@
 const router = require('express').Router();
 const quotationsController = require('./quotations.controller');
-const { validate } = require("../../validators/validate")
 const checkAuth = require('../../middleware/checkAuth');
-const { hasRole } = require('../../middleware/checkRole');
+const { hasRole, hasMultipleRole } = require('../../middleware/checkRole');
 
 //Create Quotation for Constructions.
 router.post('/create-quotation-for-construction', checkAuth, hasRole('USER'), quotationsController.createConstructionQuotation);
@@ -13,10 +12,13 @@ router.post('/create-quotation-for-disaster-relief', checkAuth, hasRole('USER'),
 //Create Quotation for Personal Business Site.
 router.post('/create-quotation-for-personal-business-site', checkAuth, hasRole('USER'), quotationsController.createPersonalOrBusinessQuotation);
 
-//Create Quotation for Personal Business Site.
+//Create Quotation for Farm Orchard Winery.
 router.post('/create-quotation-for-farm-orchard-winery', checkAuth, hasRole('USER'), quotationsController.createFarmOrchardWineryQuotation);
 
 //Create Quotation for Event.
 router.post('/create-quotation-for-event', checkAuth, hasRole('USER'), quotationsController.createEventQuotation);
+
+//Get All Quotation of Users.
+router.get('/get-quotation-of-user/:quotationType', checkAuth, hasMultipleRole(['USER', 'ADMIN']), quotationsController.getAllQuotation);
 
 module.exports = router;
