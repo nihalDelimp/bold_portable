@@ -27,8 +27,8 @@ const personalOrBusinessSchema = new mongoose.Schema(
         distanceFromKelowna: Number, // Distance from the center of Kelowna in kilometers
         serviceCharge: Number, // Service charge per km beyond a certain distance
         deliveredPrice: { type: Number, default: 0 }, // Price for delivering the unit, default value of 0
-        night_use: Boolean,
-        winter_use: Boolean,
+        useAtNight: Boolean, // Whether the unit will be used at night
+        useInWinter: Boolean, // Whether the unit will be used in the winter
         special_requirements: String,
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required

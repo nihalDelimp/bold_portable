@@ -238,8 +238,8 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            night_use: nightUse,
-            winter_use: winterUse,
+            useAtNight: nightUse, 
+            useInWinter: winterUse,
             special_requirements: specialRequirements,
             numUnits,
             serviceFrequency
@@ -320,8 +320,8 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            night_use,
-            winter_use,
+            useAtNight: night_use, 
+            useInWinter: winter_use,
             special_requirements,
             numUnits,
             serviceFrequency
