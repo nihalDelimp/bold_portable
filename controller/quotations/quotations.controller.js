@@ -443,55 +443,92 @@ exports.getAllQuotation = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
-        let quotations;
-        switch (quotationType) {
-            case 'event':
-                quotations = await Event.find()
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'farm-orchard-winery':
-                quotations = await FarmOrchardWinery.find()
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'personal-or-business':
-                quotations = await PersonalOrBusiness.find()
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'disaster-relief':
-                quotations = await DisasterRelief.find()
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'construction':
-                quotations = await Construction.find()
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            default:
-                throw new Error(`Quotation type '${quotationType}' not found`);
+
+        if (quotationType == 'all') {
+            const quotations = await Promise.all([
+                Event.find(),
+                FarmOrchardWinery.find(),
+                PersonalOrBusiness.find(),
+                DisasterRelief.find(),
+                Construction.find(),
+            ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions]) => {
+                return [
+                    ...events.map(event => ({ ...event.toObject(), type: 'event' })),
+                    ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
+                    ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
+                    ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
+                    ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+                ];
+            });
+
+            const count = await Event.countDocuments()
+                + await FarmOrchardWinery.countDocuments()
+                + await PersonalOrBusiness.countDocuments()
+                + await DisasterRelief.countDocuments()
+                + await Construction.countDocuments();
+
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotations retrieved successfully",
+                {
+                    quotations: quotations.slice((page - 1) * limit, page * limit),
+                    page: page,
+                    pages: Math.ceil(count / limit),
+                    total: count
+                }
+            );
         }
-
-        const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join('');
-
-        const QuotationModel = mongoose.model(quotationTypeFormatted);
-
-        const count = await QuotationModel.countDocuments();
-        return apiResponse.successResponseWithData(
-            res,
-            "Quotations retrieved successfully",
-            {
-                quotations: quotations,
-                page: page,
-                pages: Math.ceil(count / limit),
-                total: count
+        else {
+            let quotations;
+            switch (quotationType) {
+                case 'event':
+                    quotations = await Event.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                case 'farm-orchard-winery':
+                    quotations = await FarmOrchardWinery.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                case 'personal-or-business':
+                    quotations = await PersonalOrBusiness.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                case 'disaster-relief':
+                    quotations = await DisasterRelief.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                case 'construction':
+                    quotations = await Construction.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                default:
+                    throw new Error(`Quotation type '${quotationType}' not found`);
             }
-        );
+
+            const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join('');
+
+            const QuotationModel = mongoose.model(quotationTypeFormatted);
+
+            const count = await QuotationModel.countDocuments();
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotations retrieved successfully",
+                {
+                    quotations: quotations,
+                    page: page,
+                    pages: Math.ceil(count / limit),
+                    total: count
+                }
+            );
+        }
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
