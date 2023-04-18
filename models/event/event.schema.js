@@ -29,7 +29,8 @@ const eventSchema = new mongoose.Schema(
         distanceFromKelowna: Number, // Distance from the center of Kelowna in kilometers
         serviceCharge: Number, // Service charge per km beyond a certain distance
         deliveredPrice: { type: Number, default: 0 }, // Price for delivering the unit, default value of 0
-        maxAttendees: Number, // Maximum number of attendees estimated to be at the event
+        maxWorkers: Number, // Largest number of workers utilizing the unit
+        weeklyHours: Number, // Number of hours per week workers are on site
         peakUseTimes: String, // Peak times of use, if any
         alcoholServed: Boolean, // Whether alcohol will be served at the event
         useAtNight: Boolean, // Whether the unit will be used at night

@@ -1,6 +1,7 @@
 const logger = require("../../helpers/logger");
 const apiResponse = require("../../helpers/apiResponse");
 const Notification = require('../../models/notification/notification.schema');
+const { default: mongoose } = require('mongoose');
 
 
 exports.getUnseenNotifications = async (req, res) => {
@@ -37,7 +38,6 @@ exports.getUnseenNotifications = async (req, res) => {
 exports.getSpecificUnseenNotificationsDeatils = async (req, res) => {
     try {
         const notificationId = req.params.id;
-
         const specificUnseenNotification = await Notification.findById(notificationId)
             .populate({
                 path: 'order',
@@ -51,6 +51,22 @@ exports.getSpecificUnseenNotificationsDeatils = async (req, res) => {
 
         if (!specificUnseenNotification) {
             return apiResponse.notFoundResponse(res, 'Notification not found');
+        }
+
+        // If the notification has a quote_type, populate the quote_id based on the refPath
+        if (specificUnseenNotification.quote_type) {
+            const quotationTypeFormatted = specificUnseenNotification.quote_type.replace(/-/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join('');
+
+            const QuotationModel = mongoose.model(quotationTypeFormatted);
+            const quotation = await QuotationModel.findById(specificUnseenNotification.quote_id);
+            console.log(quotation, "Nihall")
+            if (!quotation) {
+                return apiResponse.notFoundResponse(res, 'Quotation not found');
+            }
+            specificUnseenNotification.quote_id = quotation;
         }
 
         return apiResponse.successResponseWithData(res, 'Specific unseen notification retrieved successfully', specificUnseenNotification);

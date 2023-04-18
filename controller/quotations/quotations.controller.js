@@ -82,6 +82,7 @@ exports.createConstructionQuotation = async (req, res) => {
         const notification = new Notification({
             user: quotation.user,
             quote_type: "construction",
+            quote_id: construction._id,
             type: "CREATE_QUOTE",
             status_seen: false
         });
@@ -168,7 +169,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 
         const notification = new Notification({
             user: quotation.user,
-            quote_type: "disaster_relief",
+            quote_type: "disaster-relief",
+            quote_id: disasterRelief._id,
             type: "CREATE_QUOTE",
             status_seen: false
         });
@@ -248,7 +250,8 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
 
         const notification = new Notification({
             user: personalOrBusiness.user,
-            quote_type: "personal_or_business",
+            quote_type: "personal-or-business",
+            quote_id: personalOrBusiness._id,
             type: "CREATE_QUOTE",
             status_seen: false
         });
@@ -329,7 +332,8 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 
         const notification = new Notification({
             user: farmOrchardWinery.user,
-            quote_type: "farm_orchad_winery",
+            quote_id: farmOrchardWinery._id,
+            quote_type: "farm-orchard-winery",
             type: "CREATE_QUOTE",
             status_seen: false
         });
@@ -417,6 +421,7 @@ exports.createEventQuotation = async (req, res) => {
         const notification = new Notification({
             user: event.user,
             quote_type: "event",
+            quote_id: event._id,
             type: "CREATE_QUOTE",
             status_seen: false
         });
@@ -495,59 +500,88 @@ exports.getAllQuotation = async (req, res) => {
 
 exports.getAllQuotationForUsers = async (req, res) => {
     try {
-        const { quotationType } = req.params;
-        console.log(quotationType)
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const { _id } = req.userData.user;
 
-        let quotations;
-        switch (quotationType) {
-            case 'event':
-                quotations = await Event.find({ userId: _id }) // filter by user ID
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'farm-orchard-winery':
-                quotations = await FarmOrchardWinery.find({ userId: _id }) // filter by user ID
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'personal-or-business':
-                quotations = await PersonalOrBusiness.find({ userId: _id }) // filter by user ID
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'disaster-relief':
-                quotations = await DisasterRelief.find({ userId: _id }) // filter by user ID
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            case 'construction':
-                quotations = await Construction.find({ userId: _id }) // filter by user ID
-                    .skip((page - 1) * limit)
-                    .limit(limit);
-                break;
-            default:
-                throw new Error(`Quotation type '${quotationType}' not found`);
-        }
+        const quotations = await Promise.all([
+            Event.find(),
+            FarmOrchardWinery.find(),
+            PersonalOrBusiness.find(),
+            DisasterRelief.find(),
+            Construction.find(),
+        ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions]) => {
+            return [
+                ...events.map(event => ({ ...event.toObject(), type: 'event' })),
+                ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
+                ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
+                ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
+                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+            ];
+        });
 
-        const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join('');
+        const count = await Event.countDocuments()
+            + await FarmOrchardWinery.countDocuments()
+            + await PersonalOrBusiness.countDocuments()
+            + await DisasterRelief.countDocuments()
+            + await Construction.countDocuments();
 
-        const QuotationModel = mongoose.model(quotationTypeFormatted);
-
-        const count = await QuotationModel.countDocuments({ userId: _id }); // filter by user ID
         return apiResponse.successResponseWithData(
             res,
             "Quotations retrieved successfully",
             {
-                quotations: quotations,
+                quotations: quotations.slice((page - 1) * limit, page * limit),
                 page: page,
                 pages: Math.ceil(count / limit),
                 total: count
+            }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+exports.getSpefcificQuotationQuoteId = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const quoteId = req.body.quote_id;
+
+        const quotations = await Promise.all([
+            Event.findOne({ _id: quoteId }),
+            FarmOrchardWinery.findOne({ _id: quoteId }),
+            PersonalOrBusiness.findOne({ _id: quoteId }),
+            DisasterRelief.findOne({ _id: quoteId }),
+            Construction.findOne({ _id: quoteId }),
+        ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+            const quotations = [];
+            if (event) {
+                quotations.push({ ...event.toObject(), type: 'event' });
+            }
+            if (farmOrchardWinery) {
+                quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+            }
+            if (personalOrBusiness) {
+                quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+            }
+            if (disasterRelief) {
+                quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+            }
+            if (construction) {
+                quotations.push({ ...construction.toObject(), type: 'construction' });
+            }
+            return quotations;
+        });
+
+        if (quotations.length === 0) {
+            return apiResponse.notFoundResponse(res, 'Quotation not found');
+        }
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotation retrieved successfully",
+            {
+                quotation: quotations[0],
             }
         );
     } catch (error) {

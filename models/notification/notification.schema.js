@@ -19,6 +19,10 @@ const notificationSchema = new mongoose.Schema(
             type: String,
             default: null
         },
+        quote_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            refPath: 'quote_type'
+        },
         type: {
             type: String,
             required: true

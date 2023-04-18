@@ -22,7 +22,6 @@ router.put('/mark-all-notfications-true', checkAuth, hasRole('ADMIN'), notificat
 //update all specific user notification to true
 router.put('/mark-all-user-notfications-true', checkAuth, hasRole('USER'), notificationController.markUserAllNotificationsAsSeen);
 
-
 //update specific notification to true
 router.patch('/:id/mark-specific-notification-as-seen', checkAuth, hasRole('ADMIN'), notificationController.markSpecificNotificationsAsSeen);
 
