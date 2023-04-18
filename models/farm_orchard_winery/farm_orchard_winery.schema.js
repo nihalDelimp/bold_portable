@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const farmOrchardWinerySchema = new mongoose.Schema(
     {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
         useType: String,
         coordinator: {
             name: String, // Name of the main contact for the event

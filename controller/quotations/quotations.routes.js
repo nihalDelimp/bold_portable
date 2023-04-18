@@ -21,4 +21,10 @@ router.post('/create-quotation-for-event', checkAuth, hasRole('USER'), quotation
 //Get All Quotation of Users.
 router.get('/get-quotation-of-user/:quotationType', checkAuth, hasMultipleRole(['USER', 'ADMIN']), quotationsController.getAllQuotation);
 
+//Get All Quotation for Specific Users.
+router.get('/get-quotation-for-specific-user/:quotationType', checkAuth, hasMultipleRole(['USER', 'ADMIN']), quotationsController.getAllQuotationForUsers);
+
+//Get All Quotation from All collection.
+router.get('/get-quotation-from-all-collection/:quotationType', checkAuth, hasMultipleRole(['USER', 'ADMIN']), quotationsController.getAllQuotationForUsers);
+
 module.exports = router;

@@ -7,10 +7,12 @@ const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
 const { default: mongoose } = require('mongoose');
+const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
+        const { _id } = req.userData.user;
         const {
             coordinator: { name, email, cellNumber },
             maxWorkers,
@@ -48,6 +50,7 @@ exports.createConstructionQuotation = async (req, res) => {
 
         // Construct the quotation object
         const quotation = {
+            user: _id,
             coordinator: {
                 name,
                 email,
@@ -75,6 +78,15 @@ exports.createConstructionQuotation = async (req, res) => {
         // Save the construction instance
         await construction.save();
 
+
+        const notification = new Notification({
+            user: quotation.user,
+            quote_type: "construction",
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -87,6 +99,7 @@ exports.createConstructionQuotation = async (req, res) => {
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
+        const { _id } = req.userData.user;
         const {
             disasterNature,
             coordinator: { name, email, cellNumber },
@@ -124,6 +137,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 
         // Construct the quotation object
         const quotation = {
+            user: _id,
             disasterNature,
             coordinator: {
                 name,
@@ -152,6 +166,13 @@ exports.createDisasterReliefQuotation = async (req, res) => {
         // Save the disaster relief instance
         await disasterRelief.save();
 
+        const notification = new Notification({
+            user: quotation.user,
+            quote_type: "disaster_relief",
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -164,6 +185,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 
 exports.createPersonalOrBusinessQuotation = async (req, res) => {
     try {
+        const { _id } = req.userData.user;
         const {
             useType,
             coordinator: { name, email, cellNumber },
@@ -199,6 +221,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
 
         // Construct the PersonalOrBusiness object
         const personalOrBusiness = new PersonalOrBusiness({
+            user: _id,
             useType,
             coordinator: {
                 name,
@@ -223,6 +246,13 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
         // Save the PersonalOrBusiness instance
         await personalOrBusiness.save();
 
+        const notification = new Notification({
+            user: personalOrBusiness.user,
+            quote_type: "personal_or_business",
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
         return apiResponse.successResponseWithData(
             res,
             "PersonalOrBusiness instance has been created successfully",
@@ -236,6 +266,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
 
 exports.createFarmOrchardWineryQuotation = async (req, res) => {
     try {
+        const { _id } = req.userData.user;
         const {
             useType,
             coordinator: { name, email, cellNumber },
@@ -271,6 +302,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 
         // Construct the FarmOrchardWinery object
         const farmOrchardWinery = new FarmOrchardWinery({
+            user: _id,
             useType,
             coordinator: {
                 name,
@@ -295,6 +327,14 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
         // Save the FarmOrchardWinery instance
         await farmOrchardWinery.save();
 
+        const notification = new Notification({
+            user: farmOrchardWinery.user,
+            quote_type: "farm_orchad_winery",
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
+
         return apiResponse.successResponseWithData(
             res,
             "FarmOrchardWinery instance has been created successfully",
@@ -308,6 +348,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 
 exports.createEventQuotation = async (req, res) => {
     try {
+        const { _id } = req.userData.user;
         const {
             eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
             coordinator: { name, email, cellNumber },
@@ -343,6 +384,7 @@ exports.createEventQuotation = async (req, res) => {
 
         // Construct the Event object
         const event = new Event({
+            user: _id,
             coordinator: {
                 name,
                 email,
@@ -372,7 +414,13 @@ exports.createEventQuotation = async (req, res) => {
 
         // Save the Event instance
         await event.save();
-
+        const notification = new Notification({
+            user: event.user,
+            quote_type: "event",
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
         return apiResponse.successResponseWithData(
             res,
             "Event instance has been created successfully",
@@ -444,3 +492,65 @@ exports.getAllQuotation = async (req, res) => {
     }
 };
 
+
+exports.getAllQuotationForUsers = async (req, res) => {
+    try {
+        const { quotationType } = req.params;
+        console.log(quotationType)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const { _id } = req.userData.user;
+
+        let quotations;
+        switch (quotationType) {
+            case 'event':
+                quotations = await Event.find({ userId: _id }) // filter by user ID
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'farm-orchard-winery':
+                quotations = await FarmOrchardWinery.find({ userId: _id }) // filter by user ID
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'personal-or-business':
+                quotations = await PersonalOrBusiness.find({ userId: _id }) // filter by user ID
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'disaster-relief':
+                quotations = await DisasterRelief.find({ userId: _id }) // filter by user ID
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            case 'construction':
+                quotations = await Construction.find({ userId: _id }) // filter by user ID
+                    .skip((page - 1) * limit)
+                    .limit(limit);
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
+
+        const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join('');
+
+        const QuotationModel = mongoose.model(quotationTypeFormatted);
+
+        const count = await QuotationModel.countDocuments({ userId: _id }); // filter by user ID
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotations retrieved successfully",
+            {
+                quotations: quotations,
+                page: page,
+                pages: Math.ceil(count / limit),
+                total: count
+            }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};

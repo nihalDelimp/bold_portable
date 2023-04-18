@@ -10,11 +10,14 @@ const notificationSchema = new mongoose.Schema(
         order: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Order',
-            required: true
         },
         status_seen: {
             type: Boolean,
             default: false
+        },
+        quote_type: {
+            type: String,
+            default: null
         },
         type: {
             type: String,

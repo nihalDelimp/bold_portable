@@ -14,7 +14,6 @@ const io = socket(server, {
 });
 
 io.on("connection", (socket) => {
-    console.log("Socket is connected")
     // socket.emit('newOrder', order);
     socket.on('new_order', (order) => {
         console.log('new order received:', order);
