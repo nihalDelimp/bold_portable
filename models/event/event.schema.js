@@ -42,6 +42,9 @@ const eventSchema = new mongoose.Schema(
         },
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
+        serviceFrequency: String, // How often the service is required
+        special_requirements: String
+
     },
     { timestamps: true }
 );

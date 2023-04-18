@@ -32,6 +32,7 @@ const constructionSchema = new mongoose.Schema(
         specialRequirements: String, // Any other special requirements
         numUnits: Number, // Number of units required for the job
         serviceFrequency: String, // How often the service is required
+        special_requirements: String
     },
     { timestamps: true }
 );

@@ -26,7 +26,7 @@ exports.createConstructionQuotation = async (req, res) => {
             useAtNight,
             useInWinter,
             deliveredPrice,
-            specialRequirements,
+            special_requirements,
         } = req.body;
 
         // Calculate the total number of hours
@@ -67,7 +67,7 @@ exports.createConstructionQuotation = async (req, res) => {
             deliveredPrice: updatedDeliveredPrice,
             useAtNight,
             useInWinter,
-            specialRequirements,
+            special_requirements,
             numUnits,
             serviceFrequency,
         };
@@ -114,7 +114,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             hazards,
             useAtNight,
             useInWinter,
-            specialRequirements,
+            special_requirements,
         } = req.body;
 
 
@@ -156,7 +156,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             hazards,
             useAtNight,
             useInWinter,
-            specialRequirements,
+            special_requirements,
             numUnits,
             serviceFrequency
         };
@@ -200,7 +200,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             serviceCharge,
             nightUse,
             winterUse,
-            specialRequirements,
+            special_requirements,
         } = req.body;
 
         // Calculate the total number of hours

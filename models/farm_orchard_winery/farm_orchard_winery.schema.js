@@ -32,6 +32,8 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         special_requirements: String,
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
+        special_requirements: String
+
     },
     { timestamps: true }
 );
