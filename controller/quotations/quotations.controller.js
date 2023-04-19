@@ -238,7 +238,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: nightUse, 
+            useAtNight: nightUse,
             useInWinter: winterUse,
             special_requirements,
             numUnits,
@@ -320,7 +320,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: night_use, 
+            useAtNight: night_use,
             useInWinter: winter_use,
             special_requirements,
             numUnits,
@@ -365,7 +365,15 @@ exports.createEventQuotation = async (req, res) => {
             serviceCharge,
             night_use,
             winter_use,
+            peakUseTimes,
+            peakTimeSlot,
             special_requirements,
+            vipSection: {
+                payPerUse,
+                fencedOff,
+                activelyCleaned
+            },
+
         } = req.body;
 
         // Calculate the total number of hours
@@ -402,7 +410,7 @@ exports.createEventQuotation = async (req, res) => {
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: night_use, 
+            useAtNight: night_use,
             useInWinter: winter_use,
             special_requirements,
             numUnits,
@@ -413,7 +421,13 @@ exports.createEventQuotation = async (req, res) => {
                 eventType,
                 eventLocation,
                 eventMapLocation
-            }
+            },
+            vipSection: {
+                payPerUse,
+                fencedOff,
+                activelyCleaned
+            },
+
         });
 
         // Save the Event instance
