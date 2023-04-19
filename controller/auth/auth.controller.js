@@ -101,15 +101,15 @@ exports.getListAllUsers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const totalUsers = await User.countDocuments({ user_type: { $ne: 'ADMIN' } });
-        const totalPages = Math.ceil(totalUsers / limit);
+        const total = await User.countDocuments({ user_type: { $ne: 'ADMIN' } });
+        const totalPages = Math.ceil(total / limit);
 
         const users = await User.find({ user_type: { $ne: 'ADMIN' } })
             .sort({ createdAt: 1 })
             .skip(skip)
             .limit(limit);
 
-        return apiResponse.successResponseWithData(res, "Data retrieved successfully", { users, totalPages, currentPage: page });
+        return apiResponse.successResponseWithData(res, "Data retrieved successfully", { users, totalPages, total, currentPage: page });
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
