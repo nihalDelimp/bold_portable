@@ -6,7 +6,7 @@ const path = require('path');
 
 exports.addNewProducts = async (req, res, next) => {
     try {
-        let { title, description, product_price } = req.body;
+        let { title, description, product_price, product_type } = req.body;
         let images = [];
         console.log(req.files)
         // check if a single file or an array of files is uploaded
@@ -28,7 +28,8 @@ exports.addNewProducts = async (req, res, next) => {
             title,
             description,
             product_images: images,
-            product_price
+            product_price,
+            product_type
         });
 
         const savedProduct = await product.save();
@@ -51,9 +52,9 @@ exports.addNewProducts = async (req, res, next) => {
 exports.updateProducts = async (req, res, next) => {
     try {
         let { id } = req.params;
-        let { title, description, product_price } = req.body;
+        let { title, description, product_price, product_type } = req.body;
 
-        let updateFields = { title, description, product_price };
+        let updateFields = { title, description, product_price, product_type };
         if (req.files && req.files.length > 0) {
             let productImages = req.files.map(file => ({ image_path: file.path, image_type: file.mimetype }));
             updateFields.product_images = productImages;
