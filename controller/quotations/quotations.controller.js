@@ -367,6 +367,8 @@ exports.createEventQuotation = async (req, res) => {
             winter_use,
             peakUseTimes,
             peakTimeSlot,
+            maxAttendees,
+            alcoholServed,
             special_requirements,
             vipSection: {
                 payPerUse,
@@ -404,6 +406,8 @@ exports.createEventQuotation = async (req, res) => {
             },
             maxWorkers,
             weeklyHours,
+            maxAttendees,
+            alcoholServed,
             placement_datetime,
             placement_location,
             originPoint,

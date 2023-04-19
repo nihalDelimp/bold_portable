@@ -33,7 +33,8 @@ const eventSchema = new mongoose.Schema(
         weeklyHours: Number, // Number of hours per week workers are on site
         peakUseTimes: { type: Boolean, default: false }, // Peak times of use, if any
         peakTimeSlot: { type: String, default: null },
-        alcoholServed: Boolean, // Whether alcohol will be served at the event
+        maxAttendees: Number,
+        alcoholServed: { type: Boolean, default: false }, // Whether alcohol will be served at the event
         useAtNight: Boolean, // Whether the unit will be used at night
         useInWinter: Boolean, // Whether the unit will be used in the winter
         vipSection: {
