@@ -20,6 +20,6 @@ router.get('/get-specific-unseen-notfications/:id', checkAuth, hasRole('ADMIN'),
 router.put('/mark-all-notfications-true', checkAuth, hasMultipleRole(['ADMIN', 'USER']), notificationController.markAllNotificationsAsSeen);
 
 //update specific notification to true
-router.patch('/:id/mark-specific-notification-as-seen', checkAuth, hasRole('ADMIN'), notificationController.markSpecificNotificationsAsSeen);
+router.patch('/:id/mark-specific-notification-as-seen', checkAuth, hasMultipleRole(['ADMIN', 'USER']), notificationController.markSpecificNotificationsAsSeen);
 
 module.exports = router;

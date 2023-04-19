@@ -116,23 +116,41 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
 exports.markSpecificNotificationsAsSeen = async (req, res) => {
     try {
         const notificationId = req.params.id;
-
-        // Update the specific notification to set status_seen to true
-        const updateResult = await Notification.updateOne({ _id: notificationId }, { $set: { status_seen: true } });
-
-        // Return a success response with the updated document
-        if (updateResult.nModified === 0) {
+        const { user_type, _id } = req.userData.user;
+        // Find the specific notification
+        const notification = await Notification.findById(notificationId);
+        if (!notification) {
             return apiResponse.notFoundResponse(res, 'Notification not found');
-        } else {
-            const updatedNotification = await Notification.findById(notificationId).populate('order');
+        }
+
+        if (user_type === 'ADMIN') {
+            // Update the notification if type is CREATE_ORDER or CREATE_QUOTE
+            const updateResult = await Notification.updateOne({ _id: notificationId, type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE'] } }, { $set: { status_seen: true } });
+            console.log(updateResult.matchedCount, "Updateddd")
+            if (updateResult.matchedCount === 0) {
+                return apiResponse.notFoundResponse(res, 'Notification not found');
+            }
+            // Return a success response with the updated document
+            const updatedNotification = await Notification.findById(notificationId);
             return apiResponse.successResponseWithData(res, 'Notification marked as seen', updatedNotification);
         }
-    } catch (error) {
+        else if (user_type === 'USER' && notification.type === 'ORDER_CANCEL') {
+            if (notification.user.toString() === _id.toString()) {
+                console.log()
+                const updateResult = await Notification.updateOne({ _id: notificationId, user: _id, type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
+                return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
+            }
+            else {
+                return apiResponse.notFoundResponse(res, 'Notification not found');
+            }
+        } else {
+            return apiResponse.ErrorResponse(res, 'Only admins and users can update notification status_seen');
+        }
+    }
+    catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
-
-
 
 // Get Cancel Order Notification for specific user
 exports.getCancelOrderNotifications = async (req, res) => {
