@@ -2,7 +2,7 @@ const logger = require("../../helpers/logger");
 const apiResponse = require("../../helpers/apiResponse");
 const Notification = require('../../models/notification/notification.schema');
 const { default: mongoose } = require('mongoose');
-
+const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.getUnseenNotifications = async (req, res) => {
     try {
@@ -79,30 +79,33 @@ exports.getSpecificUnseenNotificationsDeatils = async (req, res) => {
 
 exports.markAllNotificationsAsSeen = async (req, res) => {
     try {
-        // Update all the notifications for the user to set status_seen to true
-        const updateResult = await Notification.updateMany({ $set: { status_seen: true } });
+        const { user_type, _id } = req.userData.user;
+        if (user_type === 'ADMIN') {
+            // Update all the notifications for the user to set status_seen to true
+            const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE'] } }, { $set: { status_seen: true } });
 
-        // Return a success response with the number of updated documents
-        return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
-    } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message);
-    }
-};
+            // Return a success response with the number of updated documents
+            return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
+        } else if (user_type === 'USER') {
+            const notifications = await Notification.find({ user: _id, type: 'ORDER_CANCEL' });
+            if (!notifications) {
+                return apiResponse.notFoundResponse(res, 'Notification not found');
+            }
 
+            const firstNotificationUserId = notifications[0].user.toString();
+            // Check if the notification belongs to the user
+            if (firstNotificationUserId !== _id.toString()) {
+                return apiResponse.unauthorizedResponse(res, 'Unauthorized');
+            }
+            // Update the status_seen to true
+            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId), type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
 
+            // Return a success response with the number of updated documents
+            return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
 
-
-exports.markUserAllNotificationsAsSeen = async (req, res) => {
-    try {
-        const { _id } = req.userData.user;
-        // Update all the notifications for the user to set status_seen to true
-        const updateResult = await Notification.updateMany(
-            { user: _id }, // Add a filter to match the user's _id
-            { $set: { status_seen: true } }
-        );
-
-        // Return a success response with the number of updated documents
-        return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
+        } else {
+            return apiResponse.ErrorResponse(res, 'Only admins and users can update notification status_seen');
+        }
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
