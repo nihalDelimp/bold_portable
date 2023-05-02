@@ -44,7 +44,12 @@ const eventSchema = new mongoose.Schema(
         },
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
-        special_requirements: String
+        special_requirements: String,
+        status: {
+            type: String,
+            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
     },
     { timestamps: true }
 );

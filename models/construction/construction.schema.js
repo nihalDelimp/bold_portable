@@ -32,7 +32,13 @@ const constructionSchema = new mongoose.Schema(
         specialRequirements: String, // Any other special requirements
         numUnits: Number, // Number of units required for the job
         serviceFrequency: String, // How often the service is required
-        special_requirements: String
+        special_requirements: String,
+        designatedWorkers: { type: Boolean, default: false },
+        status: {
+            type: String,
+            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
     },
     { timestamps: true }
 );
