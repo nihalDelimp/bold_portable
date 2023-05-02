@@ -34,6 +34,11 @@ const constructionSchema = new mongoose.Schema(
         serviceFrequency: String, // How often the service is required
         special_requirements: String,
         designatedWorkers: { type: Boolean, default: false },
+        workerTypes: { type: String, default: 'male' },
+        handwashing: { type: Boolean, default: true },
+        handSanitizerPump: { type: Boolean, default: false },
+        twiceWeeklyService: { type: Boolean, default: false },
+        dateTillUse: Date,
         status: {
             type: String,
             enum: ['pending', 'completed', 'modified', 'cancelled'],
