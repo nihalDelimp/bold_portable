@@ -22,7 +22,6 @@ io.on("connection", (socket) => {
         io.emit('new_order_recieved', order);
     });
 
-
     socket.on('new_quote', (quote) => {
         console.log('new quote received:', quote);
 
