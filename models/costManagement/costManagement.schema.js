@@ -8,6 +8,10 @@ const costManagement = new mongoose.Schema(
             required: true
         },
         quotationType: String, // Type of quotation
+        quotationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
+        },
         useAtNightCost:{ type: Number, default: 0 }, // Cost for using the unit at night  
         useInWinterCost:{ type: Number, default: 0 }, // Cost for using the unit in the winter
         numberOfUnitsCost:{ type: Number, default: 0 }, // Cost for the number of units
@@ -25,9 +29,9 @@ const costManagement = new mongoose.Schema(
     { timestamps: true }
 );
 
-const DisasterRelief = mongoose.model('DisasterRelief', disasterReliefSchema);
+const CostManagement = mongoose.model('costmanagement', costManagement);
 
-module.exports = DisasterRelief;
+module.exports = CostManagement;
 
 
 

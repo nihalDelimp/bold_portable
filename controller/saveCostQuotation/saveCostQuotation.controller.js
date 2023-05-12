@@ -1,4 +1,4 @@
-const costManagement = require('../../models/construction/costManagement.schema');
+const CostManagement = require('../../models/costManagement/costManagement.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const { server } = require('../../server');
@@ -9,43 +9,37 @@ const Event = require('../../models/event/event.schema');
 const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
+const config = require('../../config/config');
 
 exports.createCostManagement = async (req, res) => {
+    console.log(await config.getQuotationTypesConfig(req.body.quotationType));
     try {
-        const costManagement = new costManagement({
-          user: req.user._id, // Assuming that you have user authentication middleware in place that adds the user ID to the request object
-          quotationType: req.body.quotationType,
-          useAtNightCost: req.body.useAtNightCost,
-          useInWinterCost: req.body.useInWinterCost,
-          numberOfUnitsCost: req.body.numberOfUnitsCost,
-          workersCost: req.body.workersCost,
-          workersTypeCost: req.body.workersTypeCost,
-          handWashingCost: req.body.handWashingCost,
-          handSanitizerPumpCost: req.body.handSanitizerPumpCost,
-          twiceWeeklyServicingCost: req.body.twiceWeeklyServicingCost,
-          specialRequirementsCost: req.body.specialRequirementsCost,
-          deliveryCost: req.body.deliveryCost,
-          distanceFromKelownaCost: req.body.distanceFromKelownaCost,
-          maxWorkersCost: req.body.maxWorkersCost,
+        const costManagement = new CostManagement({
+            user: req.userData.user._id,
+            quotationType: req.body.quotationType,
+            quotationId: req.body.quotationId,
+            useAtNightCost: req.body.useAtNightCost,
+            useInWinterCost: req.body.useInWinterCost,
+            numberOfUnitsCost: req.body.numberOfUnitsCost,
+            workersCost: req.body.workersCost,
+            workersTypeCost: req.body.workersTypeCost,
+            handWashingCost: req.body.handWashingCost,
+            handSanitizerPumpCost: req.body.handSanitizerPumpCost,
+            twiceWeeklyServicingCost: req.body.twiceWeeklyServicingCost,
+            specialRequirementsCost: req.body.specialRequirementsCost,
+            deliveryCost: req.body.deliveryCost,
+            distanceFromKelownaCost: req.body.distanceFromKelownaCost,
+            maxWorkersCost: req.body.maxWorkersCost,
         });
-    
-        const data = await costManagement.save();
-    
 
+        const savedCostManagement = await costManagement.save();
 
-        const notification = new Notification({
-            user: quotation.user,
-            quote_type: "construction",
-            quote_id: construction._id,
-            type: "CREATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
+        io.emit("cost_management", { costManagement, savedCostManagement });
 
         return apiResponse.successResponseWithData(
             res,
-            "Quotation has been created successfully",
-            construction
+            "Data saved successfully.",
+            savedCostManagement
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
