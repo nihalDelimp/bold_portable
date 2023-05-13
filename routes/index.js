@@ -4,12 +4,16 @@ const productRouter = require('../controller/products/product.routes')
 const orderRouter = require('../controller/order/order.routes')
 const notificationRouter = require('../controller/notification/notification.routes')
 const quotationRouter = require('../controller/quotations/quotations.routes')
+const paymentRouter = require('../controller/stripe/stripe.routes')
+const webhookRouter = require('../controller/stripe/webhook/webhook.routes')
 const app = express();
 
 app.use("/auth", authRouter);
 app.use("/product", productRouter);
 app.use("/order", orderRouter);
 app.use("/notification", notificationRouter);
-app.use("/quotation", quotationRouter)
+app.use("/quotation", quotationRouter);
+app.use("/payment", paymentRouter);
+app.use("/webhook", webhookRouter);
 
 module.exports = app;

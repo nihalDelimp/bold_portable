@@ -9,7 +9,6 @@ const path = require('path');
 exports.registerUsers = async (req, res) => {
     try {
         const { name, email, password, mobile, user_type } = req.body;
-        console.log(req.body)
         // Check if the user with the given email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -47,7 +46,7 @@ exports.registerUsers = async (req, res) => {
 exports.loginUser = async (req, res) => {
     try {
         let { email, password } = req.body;
-        email = email.toLowerCase();
+        //email = email.toLowerCase();
         if (email && password) {
             let user = await User.findOne({ email });
             if (!user) {

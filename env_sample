@@ -1,0 +1,10 @@
+NODE_ENV=development
+MONGODB_URL=mongodb://localhost:27017/bold_portable 
+SECRET_KEY="abcdefghijklmnopqrstuvwxyz1234567890"
+PORT=4000
+EXPIRES_IN="1d"
+STRIPE_PUBLIC_KEY=pk_test_XNBOVr2KoWfIVcjMnSUg8jlb000wFjxhvc
+STRIPE_SECRET_KEY=sk_test_E0tOjK8cGhuFrA6J0M2OAzOs00eq5vUJax
+SUCCESS_URL=https://example.com/success
+CANCEL_URL=https://example.com/cancel
+STRIPE_WEBHOOK_SECRET_KEY=whsec_0bc4af707b54476376ee67df1684d34cd629e2fa8ab4c9871d87b6dca4f693e3
