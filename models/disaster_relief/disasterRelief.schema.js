@@ -34,7 +34,18 @@ const disasterReliefSchema = new mongoose.Schema(
         specialRequirements: String, // Any other special requirements
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
+        designatedWorkers: { type: Boolean, default: false },
+        workerTypes: { type: String, default: 'male' },
+        handwashing: { type: Boolean, default: true },
+        handSanitizerPump: { type: Boolean, default: false },
+        twiceWeeklyService: { type: Boolean, default: false },
+        dateTillUse: Date,
         special_requirements: String,
+        status: {
+            type: String,
+            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,

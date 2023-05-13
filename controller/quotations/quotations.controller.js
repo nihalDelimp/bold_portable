@@ -27,6 +27,12 @@ exports.createConstructionQuotation = async (req, res) => {
             useInWinter,
             deliveredPrice,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         } = req.body;
 
         // Calculate the total number of hours
@@ -70,6 +76,12 @@ exports.createConstructionQuotation = async (req, res) => {
             special_requirements,
             numUnits,
             serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         };
 
         // Create a new Construction instance with the quotation object as properties
