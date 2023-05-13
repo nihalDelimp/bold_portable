@@ -1,28 +1,32 @@
 const mongoose = require('mongoose');
 
-const farmOrchardWinerySchema = new mongoose.Schema(
+const quotationSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'FARM_ORCHARD_WINERY' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
         },
-        useType: String,
         coordinator: {
             name: String, // Name of the main contact for the event
             email: String, // Email of the main contact for the event
             cellNumber: String // Cell number of the main contact for the event
         },
+        quotationType: {
+            type: String,
+            enum: ['CONSTRUCTION', 'DISASTER_RELIEF', 'FARM_ORCHARD_WINERY', 'PERSONAL_OR_BUSINESS', 'EVENT'], // Replace with your desired quotation types
+            required: true
+        },
         maxWorkers: Number, // Largest number of workers utilizing the unit
         weeklyHours: Number, // Number of hours per week workers are on site
-        placement_datetime: Date,
-        placement_location: {
-            type: { type: String, default: "Point" },
-            coordinates: { type: [Number], default: [0, 0] }
+        placementDate: Date, // Date and time the unit will be placed
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        placementLocation: { // Where the unit will be placed
+            type: { type: String, default: 'Point' }, // Default value of 'Point' for GeoJSON point location
+            coordinates: { type: [Number], default: [0, 0] } // Default value of [0, 0] for coordinates
         },
         originPoint: { // Where the Origin Point
-            type: { type: String, default: "Point" }, // Default value of "Point" for GeoJSON point location
+            type: { type: String, default: 'Point' }, // Default value of 'Point' for GeoJSON point location
             coordinates: { type: [Number], default: [0, 0] } // Default value of [0, 0] for coordinates
         },
         distanceFromKelowna: Number, // Distance from the center of Kelowna in kilometers
@@ -30,10 +34,10 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         deliveredPrice: { type: Number, default: 0 }, // Price for delivering the unit, default value of 0
         useAtNight: Boolean, // Whether the unit will be used at night
         useInWinter: Boolean, // Whether the unit will be used in the winter
-        special_requirements: String,
-        numUnits: Number, // Number of units required for the construction site
+        specialRequirements: String, // Any other special requirements
+        numUnits: Number, // Number of units required for the job
         serviceFrequency: String, // How often the service is required
-        special_requirements: String,
+        special_requirements: String, // Additional special requirements
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,
@@ -90,7 +94,7 @@ const farmOrchardWinerySchema = new mongoose.Schema(
             weeklyHoursCost: {
                 type: Number,
                 default: 0
-            }, 
+            },
             payPerUse: {
                 type: Number,
                 default: 0
@@ -108,10 +112,9 @@ const farmOrchardWinerySchema = new mongoose.Schema(
                 default: 0
             }
         }
-
     },
     { timestamps: true }
 );
-const FarmOrchardWinery = mongoose.model('FarmOrchardWinery', farmOrchardWinerySchema);
+const Quotation = mongoose.model('Quotation', quotationSchema);
 
-module.exports = FarmOrchardWinery;
+module.exports = Quotation;
