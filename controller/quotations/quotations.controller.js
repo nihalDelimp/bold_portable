@@ -29,6 +29,7 @@ exports.createConstructionQuotation = async (req, res) => {
             special_requirements,
             designatedWorkers,
             workerTypes,
+            femaleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -78,6 +79,7 @@ exports.createConstructionQuotation = async (req, res) => {
             serviceFrequency,
             designatedWorkers,
             workerTypes,
+            femaleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -167,6 +169,13 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useAtNight,
             useInWinter,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         } = req.body;
 
 
@@ -210,7 +219,14 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useInWinter,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         };
 
         // Create a new DisasterRelief instance with the quotation object as properties
@@ -292,6 +308,13 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             nightUse,
             winterUse,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         } = req.body;
 
         // Calculate the total number of hours
@@ -333,7 +356,14 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             useInWinter: winterUse,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the PersonalOrBusiness instance
@@ -413,6 +443,13 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             night_use,
             winter_use,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         } = req.body;
 
         // Calculate the total number of hours
@@ -454,7 +491,14 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             useInWinter: winter_use,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the FarmOrchardWinery instance
@@ -543,6 +587,13 @@ exports.createEventQuotation = async (req, res) => {
                 fencedOff,
                 activelyCleaned
             },
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
 
         } = req.body;
 
@@ -599,7 +650,13 @@ exports.createEventQuotation = async (req, res) => {
                 fencedOff,
                 activelyCleaned
             },
-
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the Event instance
