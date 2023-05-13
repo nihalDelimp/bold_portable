@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
-const constructionSchema = new mongoose.Schema(
+const quotationSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'CONSTRUCTION' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -12,6 +11,11 @@ const constructionSchema = new mongoose.Schema(
             name: String, // Name of the main contact for the event
             email: String, // Email of the main contact for the event
             cellNumber: String // Cell number of the main contact for the event
+        },
+        quotationType: {
+            type: String,
+            enum: ['CONSTRUCTION', 'DISASTER_RELIEF', 'FARM_ORCHARD_WINERY', 'PERSONAL_OR_BUSINESS', 'EVENT'], // Replace with your desired quotation types
+            required: true
         },
         maxWorkers: Number, // Largest number of workers utilizing the unit
         weeklyHours: Number, // Number of hours per week workers are on site
@@ -33,19 +37,7 @@ const constructionSchema = new mongoose.Schema(
         specialRequirements: String, // Any other special requirements
         numUnits: Number, // Number of units required for the job
         serviceFrequency: String, // How often the service is required
-        special_requirements: String,
-        designatedWorkers: { type: Boolean, default: false },
-        workerTypes: { type: String, default: 'male' },
-        femaleWorkers:{ type: Number, default: 0},
-        handwashing: { type: Boolean, default: true },
-        handSanitizerPump: { type: Boolean, default: false },
-        twiceWeeklyService: { type: Boolean, default: false },
-        dateTillUse: Date,
-        status: {
-            type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
-            default: 'pending'
-        },
+        special_requirements: String, // Additional special requirements
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,
@@ -120,12 +112,9 @@ const constructionSchema = new mongoose.Schema(
                 default: 0
             }
         }
-        
-
     },
     { timestamps: true }
 );
+const Quotation = mongoose.model('Quotation', quotationSchema);
 
-const Construction = mongoose.model('Construction', constructionSchema);
-
-module.exports = Construction;
+module.exports = Quotation;
