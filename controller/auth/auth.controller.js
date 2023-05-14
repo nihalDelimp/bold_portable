@@ -57,6 +57,7 @@ exports.loginUser = async (req, res) => {
                     return apiResponse.ErrorResponse(res, err)
                 }
                 if (result) {
+                    console.log(user)
                     let userData = { user };
                     const jwtPayload = userData;
                     const secret = process.env.SECRET_KEY;
