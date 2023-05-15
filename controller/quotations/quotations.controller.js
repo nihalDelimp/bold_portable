@@ -873,47 +873,87 @@ exports.getAllQuotationForUsers = async (req, res) => {
 
 exports.getSpefcificQuotationQuoteId = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const { user_type, _id } = req.userData.user;
+        console.log(user_type, _id);
         const quoteId = req.body.quote_id;
 
-        const quotations = await Promise.all([
-            Event.findOne({ _id: quoteId }),
-            FarmOrchardWinery.findOne({ _id: quoteId }),
-            PersonalOrBusiness.findOne({ _id: quoteId }),
-            DisasterRelief.findOne({ _id: quoteId }),
-            Construction.findOne({ _id: quoteId }),
-        ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
-            const quotations = [];
-            if (event) {
-                quotations.push({ ...event.toObject(), type: 'event' });
-            }
-            if (farmOrchardWinery) {
-                quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
-            }
-            if (personalOrBusiness) {
-                quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
-            }
-            if (disasterRelief) {
-                quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
-            }
-            if (construction) {
-                quotations.push({ ...construction.toObject(), type: 'construction' });
-            }
-            return quotations;
-        });
+        if (user_type === 'USER') {
+            const quotations = await Promise.all([
+                Event.findOne({ _id: quoteId, user: _id }),
+                FarmOrchardWinery.findOne({ _id: quoteId, user: _id }),
+                PersonalOrBusiness.findOne({ _id: quoteId, user: _id }),
+                DisasterRelief.findOne({ _id: quoteId, user: _id }),
+                Construction.findOne({ _id: quoteId, user: _id }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                const quotations = [];
+                if (event) {
+                    quotations.push({ ...event.toObject(), type: 'event' });
+                }
+                if (farmOrchardWinery) {
+                    quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                }
+                if (personalOrBusiness) {
+                    quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                }
+                if (disasterRelief) {
+                    quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                }
+                if (construction) {
+                    quotations.push({ ...construction.toObject(), type: 'construction' });
+                }
+                return quotations;
+            });
 
-        if (quotations.length === 0) {
-            return apiResponse.notFoundResponse(res, 'Quotation not found');
+            if (quotations.length === 0) {
+                return apiResponse.notFoundResponse(res, 'Quotation not found');
+            }
+
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotation retrieved successfully",
+                {
+                    quotation: quotations[0],
+                }
+            );
+        } else {
+            const quotations = await Promise.all([
+                Event.findOne({ _id: quoteId }),
+                FarmOrchardWinery.findOne({ _id: quoteId }),
+                PersonalOrBusiness.findOne({ _id: quoteId }),
+                DisasterRelief.findOne({ _id: quoteId }),
+                Construction.findOne({ _id: quoteId }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                const quotations = [];
+                if (event) {
+                    quotations.push({ ...event.toObject(), type: 'event' });
+                }
+                if (farmOrchardWinery) {
+                    quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                }
+                if (personalOrBusiness) {
+                    quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                }
+                if (disasterRelief) {
+                    quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                }
+                if (construction) {
+                    quotations.push({ ...construction.toObject(), type: 'construction' });
+                }
+                return quotations;
+            });
+
+            if (quotations.length === 0) {
+                return apiResponse.notFoundResponse(res, 'Quotation not found');
+            }
+
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotation retrieved successfully",
+                {
+                    quotation: quotations[0],
+                }
+            );
         }
-
-        return apiResponse.successResponseWithData(
-            res,
-            "Quotation retrieved successfully",
-            {
-                quotation: quotations[0],
-            }
-        );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
