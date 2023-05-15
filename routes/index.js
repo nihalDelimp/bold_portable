@@ -6,6 +6,7 @@ const notificationRouter = require('../controller/notification/notification.rout
 const quotationRouter = require('../controller/quotations/quotations.routes')
 const stripeRouter = require('../controller/stripe/subscriptions.routes')
 const costManagement = require('../controller/saveCostQuotation/saveCostQuotation.routes')
+const tracking = require('../controller/tracking/tracking.routes')
 const app = express();
 
 app.use("/auth", authRouter);
@@ -15,5 +16,6 @@ app.use("/notification", notificationRouter);
 app.use("/quotation", quotationRouter);
 app.use("/stripe", stripeRouter);
 app.use("/cost-management", costManagement);
+app.use("/tracking", tracking);
 
 module.exports = app;
