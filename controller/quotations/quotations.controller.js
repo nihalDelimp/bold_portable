@@ -818,30 +818,41 @@ exports.getAllQuotation = async (req, res) => {
 
 exports.getAllQuotationForUsers = async (req, res) => {
     try {
+        const { user_type, _id } = req.userData.user;
+        console.log(user_type, _id);
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
-        const quotations = await Promise.all([
-            Event.find(),
-            FarmOrchardWinery.find(),
-            PersonalOrBusiness.find(),
-            DisasterRelief.find(),
-            Construction.find(),
-        ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions]) => {
-            return [
+        let quotations = [];
+
+        if (user_type === 'USER') {
+            const [
+                events,
+                farmOrchardWineries,
+                personalOrBusinesses,
+                disasterReliefs,
+                constructions
+            ] = await Promise.all([
+                Event.find({ user: _id }),
+                FarmOrchardWinery.find({ user: _id }),
+                PersonalOrBusiness.find({ user: _id }),
+                DisasterRelief.find({ user: _id }),
+                Construction.find({ user: _id })
+            ]);
+
+            quotations = [
                 ...events.map(event => ({ ...event.toObject(), type: 'event' })),
                 ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
                 ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
                 ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
-                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' }))
             ];
-        });
+        } else {
+            // Handle other user types if needed
+            return apiResponse.ErrorResponse(res, "Invalid user_type");
+        }
 
-        const count = await Event.countDocuments()
-            + await FarmOrchardWinery.countDocuments()
-            + await PersonalOrBusiness.countDocuments()
-            + await DisasterRelief.countDocuments()
-            + await Construction.countDocuments();
+        const count = quotations.length;
 
         return apiResponse.successResponseWithData(
             res,
@@ -857,6 +868,7 @@ exports.getAllQuotationForUsers = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 exports.getSpefcificQuotationQuoteId = async (req, res) => {
