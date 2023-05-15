@@ -10,7 +10,7 @@ const trackingSchema = new mongoose.Schema(
     quotationType: {
       type: String,
       required: true,
-      enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness']
+      enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
     },
     address: {
       type: String,
@@ -24,7 +24,11 @@ const trackingSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    // Add more fields as needed
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'modified', 'cancelled'],
+        default: 'pending'
+    }
   },
   { timestamps: true }
 );
