@@ -36,6 +36,14 @@ io.on("connection", (socket) => {
         // emit the cancel order event to the user panel
         io.emit('cancel_order_received', data.order);
     });
+
+    // Send a cancel order event to the user panel
+    socket.on('update_quote', (data) => {
+        console.log('Quote has been sent to user:', data);
+
+        // emit the cancel order event to the user panel
+        io.emit('update_quote_received', data);
+    });
 })
 
 module.exports = { server, io };

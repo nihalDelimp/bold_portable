@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const disasterReliefSchema = new mongoose.Schema(
     {
+        quotationType:{ type: String, default: 'DISASTER_RELIEF' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -33,7 +34,92 @@ const disasterReliefSchema = new mongoose.Schema(
         specialRequirements: String, // Any other special requirements
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
-        special_requirements: String
+        designatedWorkers: { type: Boolean, default: false },
+        workerTypes: { type: String, default: 'male' },
+        handwashing: { type: Boolean, default: true },
+        handSanitizerPump: { type: Boolean, default: false },
+        twiceWeeklyService: { type: Boolean, default: false },
+        dateTillUse: Date,
+        special_requirements: String,
+        status: {
+            type: String,
+            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
+        costDetails: { // Cost details for various components
+            handWashing: {
+                type: Number,
+                default: 0
+            },
+            handSanitizerPump: {
+                type: Number,
+                default: 0
+            },
+            twiceWeeklyServicing: {
+                type: Number,
+                default: 0
+            },
+            useAtNightCost: {
+                type: Number,
+                default: 0
+            },
+            useInWinterCost: {
+                type: Number,
+                default: 0
+            },
+            numberOfUnitsCost: {
+                type: Number,
+                default: 0
+            },
+            deliveryPrice: {
+                type: Number,
+                default: 0
+            },
+            pickUpPrice: {
+                type: Number,
+                default: 0
+            },
+            workersCost: {
+                type: Number,
+                default: 0
+            },
+            handWashingCost: {
+                type: Number,
+                default: 0
+            },
+            handSanitizerPumpCost: {
+                type: Number,
+                default: 0
+            },
+            specialRequirementsCost: {
+                type: Number,
+                default: 0
+            },
+            serviceFrequencyCost: {
+                type: Number,
+                default: 0
+            },
+            weeklyHoursCost: {
+                type: Number,
+                default: 0
+            },
+            payPerUse: {
+                type: Number,
+                default: 0
+            },
+            fencedOff: {
+                type: Number,
+                default: 0
+            },
+            activelyCleaned: {
+                type: Number,
+                default: 0
+            },
+            alcoholServed:{
+                type: Number,
+                default: 0
+            }
+        }
 
     },
     { timestamps: true }

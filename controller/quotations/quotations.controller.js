@@ -27,6 +27,12 @@ exports.createConstructionQuotation = async (req, res) => {
             useInWinter,
             deliveredPrice,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         } = req.body;
 
         // Calculate the total number of hours
@@ -70,6 +76,12 @@ exports.createConstructionQuotation = async (req, res) => {
             special_requirements,
             numUnits,
             serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         };
 
         // Create a new Construction instance with the quotation object as properties
@@ -97,6 +109,46 @@ exports.createConstructionQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.updateConstructionQuotation = async (req, res) => {
+    try {
+      const { constructionId } = req.params; // Get the construction ID from the request parameters
+      const { costDetails } = req.body;
+  
+      // Find the existing construction document
+      const construction = await Construction.findById(constructionId);
+  
+      if (!construction) {
+        return apiResponse.ErrorResponse(res, "Construction document not found.");
+      }
+  
+      // Update the costDetails field
+      construction.costDetails = costDetails;
+  
+      // Save the updated construction document
+      await construction.save();
+  
+      const notification = new Notification({
+        user: construction.user,
+        quote_type: "construction",
+        quote_id: construction._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { construction });
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        construction
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+  };
+  
+  
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
@@ -185,6 +237,45 @@ exports.createDisasterReliefQuotation = async (req, res) => {
     }
 };
 
+exports.updateDisasterReliefQuotation = async (req, res) => {
+    try {
+      const { disasterReliefId } = req.params; // Get the construction ID from the request parameters
+      const { costDetails } = req.body;
+  
+      // Find the existing construction document
+      const disasterRelief = await DisasterRelief.findById(disasterReliefId);
+  
+      if (!disasterRelief) {
+        return apiResponse.ErrorResponse(res, "Disaster Relief Quotation not found.");
+      }
+  
+      // Update the costDetails field
+      disasterRelief.costDetails = costDetails;
+  
+      // Save the updated disasterRelief document
+      await disasterRelief.save();
+  
+      const notification = new Notification({
+        user: disasterRelief.user,
+        quote_type: "disaster_relief",
+        quote_id: disasterRelief._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { disasterRelief });
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        disasterRelief
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+  };
+
+
 exports.createPersonalOrBusinessQuotation = async (req, res) => {
     try {
         const { _id } = req.userData.user;
@@ -266,6 +357,45 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
     }
 };
 
+
+
+exports.updatePersonalOrBusinessQuotation = async (req, res) => {
+    try {
+      const { personalOrBusinessId } = req.params; // Get the construction ID from the request parameters
+      const { costDetails } = req.body;
+  
+      // Find the existing construction document
+      const personalOrBusiness = await PersonalOrBusiness.findById(personalOrBusinessId);
+  
+      if (!personalOrBusiness) {
+        return apiResponse.ErrorResponse(res, "Personal or Business Quotation not found.");
+      }
+  
+      // Update the costDetails field
+      personalOrBusiness.costDetails = costDetails;
+  
+      // Save the updated disasterRelief document
+      await personalOrBusiness.save();
+  
+      const notification = new Notification({
+        user: personalOrBusiness.user,
+        quote_type: "personal-or-business",
+        quote_id: personalOrBusiness._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { personalOrBusiness });
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        personalOrBusiness
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+  };
 
 exports.createFarmOrchardWineryQuotation = async (req, res) => {
     try {
@@ -349,6 +479,44 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
     }
 };
 
+
+exports.updateFarmOrchardWineryQuotation = async (req, res) => {
+    try {
+      const { farmOrchardWineryId } = req.params; // Get the construction ID from the request parameters
+      const { costDetails } = req.body;
+  
+      // Find the existing construction document
+      const farmOrchardWinery = await FarmOrchardWinery.findById(farmOrchardWineryId);
+  
+      if (!farmOrchardWinery) {
+        return apiResponse.ErrorResponse(res, "Farm, Orchard or Winery Quotation not found.");
+      }
+  
+      // Update the costDetails field
+      farmOrchardWinery.costDetails = costDetails;
+  
+      // Save the updated disasterRelief document
+      await farmOrchardWinery.save();
+  
+      const notification = new Notification({
+        user: farmOrchardWinery.user,
+        quote_type: "farm-orchard-winery",
+        quote_id: farmOrchardWinery._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { farmOrchardWinery });
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        farmOrchardWinery
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+  };
 
 exports.createEventQuotation = async (req, res) => {
     try {
@@ -453,6 +621,44 @@ exports.createEventQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.updateEventQuotation = async (req, res) => {
+    try {
+      const { eventId } = req.params; // Get the construction ID from the request parameters
+      const { costDetails } = req.body;
+  
+      // Find the existing construction document
+      const event = await Event.findById(eventId);
+  
+      if (!event) {
+        return apiResponse.ErrorResponse(res, "Event Quotation not found.");
+      }
+  
+      // Update the costDetails field
+      event.costDetails = costDetails;
+  
+      // Save the updated disasterRelief document
+      await event.save();
+  
+      const notification = new Notification({
+        user: event.user,
+        quote_type: "event",
+        quote_id: event._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { event });
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        event
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+  };
 
 exports.getAllQuotation = async (req, res) => {
     try {
