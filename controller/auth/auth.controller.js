@@ -1,3 +1,4 @@
+const passport = require('passport');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/user/user.schema');
@@ -46,34 +47,33 @@ exports.registerUsers = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
     try {
-        let { email, password } = req.body;
-        email = email.toLowerCase();
-        if (email && password) {
-            let user = await User.findOne({ email });
-            if (!user) {
-                return apiResponse.ErrorResponse(res, "User is not present")
+        passport.authenticate('local', {session: false}, (err, user, info) => {
+            console.log(err);
+            if (err || !user) {
+
+                return apiResponse.ErrorResponse(res, info ? info.message : 'Login failed',)
             }
-            bcrypt.compare(password, user.password, async (err, result) => {
+    
+            req.login(user, {session: false}, (err) => {
                 if (err) {
-                    return apiResponse.ErrorResponse(res, err)
+                    res.send(err);
                 }
-                if (result) {
-                    let userData = { user };
-                    const jwtPayload = userData;
-                    const secret = process.env.SECRET_KEY;
-                    const jwtData = {
-                        expiresIn: "1d",
-                    };
-                    userData.token = jwt.sign(jwtPayload, secret, jwtData);
-                    let { _id, name, email, user_type, mobile } = userData.user;
-                    let { token } = userData;
-                    return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type, mobile }, token })
-                }
-                else {
-                    return apiResponse.ErrorResponse(res, "Not a valid password")
-                }
-            })
-        }
+    
+                let userData = { user };
+                const jwtPayload = userData;
+                const secret = process.env.SECRET_KEY;
+                const jwtData = {
+                    expiresIn: "1d",
+                };
+                userData.token = jwt.sign(jwtPayload, secret, jwtData);
+                let { _id, name, email, user_type, mobile } = userData.user;
+                let { token } = userData;
+                
+                return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type, mobile }, token })
+            });
+        })
+        (req, res);
+        
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message)
 
