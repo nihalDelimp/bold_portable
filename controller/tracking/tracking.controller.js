@@ -48,3 +48,22 @@ exports.updateTracking = async (req, res) => {
 	return apiResponse.ErrorResponse(res, error.message);
 	}
 };
+
+exports.getTrackingList = async (req, res) => {
+	try {
+		const { address, quotationType, driver_name } = req.query;
+	
+		const filters = {};
+		if (address) filters.address = address;
+		if (quotationType) filters.quotationType = quotationType;
+		if (driver_name) filters.driver_name = driver_name;
+  
+	  	const trackingList = await Tracking.find(filters)
+			.sort({ createdAt: -1, updatedAt: -1 });
+  
+	  	return apiResponse.successResponseWithData(res, "Tracking list retrieved successfully.", trackingList);
+	} catch (error) {
+	  	return apiResponse.ErrorResponse(res, error.message);
+	}
+  };
+  
