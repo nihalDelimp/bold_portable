@@ -35,6 +35,7 @@ const personalOrBusinessSchema = new mongoose.Schema(
         serviceFrequency: String, // How often the service is required
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
+        femaleWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },

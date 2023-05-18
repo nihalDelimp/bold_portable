@@ -65,5 +65,5 @@ exports.getTrackingList = async (req, res) => {
 	} catch (error) {
 	  	return apiResponse.ErrorResponse(res, error.message);
 	}
-  };
+};
   

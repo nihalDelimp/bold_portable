@@ -29,6 +29,7 @@ exports.createConstructionQuotation = async (req, res) => {
             special_requirements,
             designatedWorkers,
             workerTypes,
+            femaleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -78,6 +79,7 @@ exports.createConstructionQuotation = async (req, res) => {
             serviceFrequency,
             designatedWorkers,
             workerTypes,
+            femaleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -167,6 +169,13 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useAtNight,
             useInWinter,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
         } = req.body;
 
 
@@ -210,7 +219,14 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             useInWinter,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         };
 
         // Create a new DisasterRelief instance with the quotation object as properties
@@ -292,6 +308,13 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             nightUse,
             winterUse,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         } = req.body;
 
         // Calculate the total number of hours
@@ -333,7 +356,14 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             useInWinter: winterUse,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the PersonalOrBusiness instance
@@ -413,6 +443,13 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             night_use,
             winter_use,
             special_requirements,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         } = req.body;
 
         // Calculate the total number of hours
@@ -454,7 +491,14 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             useInWinter: winter_use,
             special_requirements,
             numUnits,
-            serviceFrequency
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the FarmOrchardWinery instance
@@ -543,6 +587,13 @@ exports.createEventQuotation = async (req, res) => {
                 fencedOff,
                 activelyCleaned
             },
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
 
         } = req.body;
 
@@ -599,7 +650,13 @@ exports.createEventQuotation = async (req, res) => {
                 fencedOff,
                 activelyCleaned
             },
-
+            designatedWorkers,
+            workerTypes,
+            femaleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse
         });
 
         // Save the Event instance
@@ -761,30 +818,41 @@ exports.getAllQuotation = async (req, res) => {
 
 exports.getAllQuotationForUsers = async (req, res) => {
     try {
+        const { user_type, _id } = req.userData.user;
+        console.log(user_type, _id);
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
-        const quotations = await Promise.all([
-            Event.find(),
-            FarmOrchardWinery.find(),
-            PersonalOrBusiness.find(),
-            DisasterRelief.find(),
-            Construction.find(),
-        ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions]) => {
-            return [
+        let quotations = [];
+
+        if (user_type === 'USER') {
+            const [
+                events,
+                farmOrchardWineries,
+                personalOrBusinesses,
+                disasterReliefs,
+                constructions
+            ] = await Promise.all([
+                Event.find({ user: _id }),
+                FarmOrchardWinery.find({ user: _id }),
+                PersonalOrBusiness.find({ user: _id }),
+                DisasterRelief.find({ user: _id }),
+                Construction.find({ user: _id })
+            ]);
+
+            quotations = [
                 ...events.map(event => ({ ...event.toObject(), type: 'event' })),
                 ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
                 ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
                 ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
-                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' }))
             ];
-        });
+        } else {
+            // Handle other user types if needed
+            return apiResponse.ErrorResponse(res, "Invalid user_type");
+        }
 
-        const count = await Event.countDocuments()
-            + await FarmOrchardWinery.countDocuments()
-            + await PersonalOrBusiness.countDocuments()
-            + await DisasterRelief.countDocuments()
-            + await Construction.countDocuments();
+        const count = quotations.length;
 
         return apiResponse.successResponseWithData(
             res,
@@ -802,49 +870,90 @@ exports.getAllQuotationForUsers = async (req, res) => {
 };
 
 
+
 exports.getSpefcificQuotationQuoteId = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const { user_type, _id } = req.userData.user;
+        console.log(user_type, _id);
         const quoteId = req.body.quote_id;
 
-        const quotations = await Promise.all([
-            Event.findOne({ _id: quoteId }),
-            FarmOrchardWinery.findOne({ _id: quoteId }),
-            PersonalOrBusiness.findOne({ _id: quoteId }),
-            DisasterRelief.findOne({ _id: quoteId }),
-            Construction.findOne({ _id: quoteId }),
-        ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
-            const quotations = [];
-            if (event) {
-                quotations.push({ ...event.toObject(), type: 'event' });
-            }
-            if (farmOrchardWinery) {
-                quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
-            }
-            if (personalOrBusiness) {
-                quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
-            }
-            if (disasterRelief) {
-                quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
-            }
-            if (construction) {
-                quotations.push({ ...construction.toObject(), type: 'construction' });
-            }
-            return quotations;
-        });
+        if (user_type === 'USER') {
+            const quotations = await Promise.all([
+                Event.findOne({ _id: quoteId, user: _id }),
+                FarmOrchardWinery.findOne({ _id: quoteId, user: _id }),
+                PersonalOrBusiness.findOne({ _id: quoteId, user: _id }),
+                DisasterRelief.findOne({ _id: quoteId, user: _id }),
+                Construction.findOne({ _id: quoteId, user: _id }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                const quotations = [];
+                if (event) {
+                    quotations.push({ ...event.toObject(), type: 'event' });
+                }
+                if (farmOrchardWinery) {
+                    quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                }
+                if (personalOrBusiness) {
+                    quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                }
+                if (disasterRelief) {
+                    quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                }
+                if (construction) {
+                    quotations.push({ ...construction.toObject(), type: 'construction' });
+                }
+                return quotations;
+            });
 
-        if (quotations.length === 0) {
-            return apiResponse.notFoundResponse(res, 'Quotation not found');
+            if (quotations.length === 0) {
+                return apiResponse.notFoundResponse(res, 'Quotation not found');
+            }
+
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotation retrieved successfully",
+                {
+                    quotation: quotations[0],
+                }
+            );
+        } else {
+            const quotations = await Promise.all([
+                Event.findOne({ _id: quoteId }),
+                FarmOrchardWinery.findOne({ _id: quoteId }),
+                PersonalOrBusiness.findOne({ _id: quoteId }),
+                DisasterRelief.findOne({ _id: quoteId }),
+                Construction.findOne({ _id: quoteId }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                const quotations = [];
+                if (event) {
+                    quotations.push({ ...event.toObject(), type: 'event' });
+                }
+                if (farmOrchardWinery) {
+                    quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                }
+                if (personalOrBusiness) {
+                    quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                }
+                if (disasterRelief) {
+                    quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                }
+                if (construction) {
+                    quotations.push({ ...construction.toObject(), type: 'construction' });
+                }
+                return quotations;
+            });
+
+            if (quotations.length === 0) {
+                return apiResponse.notFoundResponse(res, 'Quotation not found');
+            }
+
+            return apiResponse.successResponseWithData(
+                res,
+                "Quotation retrieved successfully",
+                {
+                    quotation: quotations[0],
+                }
+            );
         }
-
-        return apiResponse.successResponseWithData(
-            res,
-            "Quotation retrieved successfully",
-            {
-                quotation: quotations[0],
-            }
-        );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }

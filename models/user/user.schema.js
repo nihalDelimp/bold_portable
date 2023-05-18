@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: true
+            required: true,
+            unique: true,
         },
         profile_picture: {
             type: String,
@@ -20,8 +21,8 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: true,
-            // select:false
+            required: true
+            // select: false   Will look into this how to handle this
         },
         user_type: {
             type: String,
@@ -30,6 +31,10 @@ const userSchema = new mongoose.Schema(
         },
         privacy_acceptance: {
             type: Boolean,
+            required: false
+        },
+        stripe_customer_id: {
+            type: String,
             required: false
         }
     },
