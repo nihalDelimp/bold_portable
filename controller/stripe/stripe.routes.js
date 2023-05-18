@@ -32,12 +32,18 @@ router.post(
 router.get(
     "/subscription",
     checkAuth,
-    hasRole("ADMIN"),
     stripeConteoller.getSubscriptionList
 );
 router.get(
     "/subscription/:subscriptionId",
     checkAuth,
     stripeConteoller.getSubscriptionPaymentList
+);
+
+router.get(
+    "/admin/subscription",
+    checkAuth,
+    hasRole("ADMIN"),
+    stripeConteoller.getSubscriptionListForAdmin
 );
 module.exports = router;

@@ -96,18 +96,15 @@ exports.createCheckoutSession = async (req, res) => {
 
 exports.getSubscriptionList = async (req, res) => {
     try {
-        let { limit = 10, page = 1, status } = req.query;
+        const { _id } = req.userData.user;
+        let { limit = 10, page = 1 } = req.query;
         limit = parseInt(limit);
         page = parseInt(page);
         const skip = (page - 1) * limit;
-
-        let query = {};
-        if (status) {
-            query.status = status;
-        }
-
-        const totalSubscription = await Subscription.countDocuments(query);
-        const subscriptions = await Subscription.find(query)
+        const totalSubscription = await Subscription.countDocuments({
+            user: _id,
+        });
+        const subscriptions = await Subscription.find({ user: _id })
             .populate({ path: "user", model: "User" })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -130,7 +127,6 @@ exports.getSubscriptionList = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
-
 
 exports.getSubscriptionPaymentList = async (req, res) => {
     try {
@@ -221,6 +217,43 @@ exports.endSubscription = async (req, res) => {
             res,
             "Subscription end in-progress",
             { id, url, customer }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.getSubscriptionListForAdmin = async (req, res) => {
+    try {
+        let { limit = 10, page = 1, status } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+        const skip = (page - 1) * limit;
+
+        let query = {};
+        if (status) {
+            query.status = status;
+        }
+
+        const totalSubscription = await Subscription.countDocuments(query);
+        const subscriptions = await Subscription.find(query)
+            .populate({ path: "user", model: "User" })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalSubscription / limit);
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Subscription fetched successfully",
+            {
+                subscriptions,
+                totalPages,
+                currentPage: page,
+                perPage: limit,
+                totalSubscription,
+            }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
