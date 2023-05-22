@@ -12,10 +12,19 @@ const trackingSchema = new mongoose.Schema(
       required: true,
       enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
     },
-    address: {
-      type: String,
-      required: true
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false
     },
+    subscriptionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subscription',
+      required: false
+    },
+    address: [{
+      type: String,
+    }],
     driver_name: {
       type: String,
       required: true

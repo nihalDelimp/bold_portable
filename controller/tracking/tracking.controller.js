@@ -3,14 +3,26 @@ const apiResponse = require("../../helpers/apiResponse");
 
 exports.saveTracking = async (req, res) => {
 	try {
+
+		let quotationType = req.body.quotationType;
+
+		const quoteModel = require('../../models/' + quotationType.toLowerCase() + '/' + quotationType.toLowerCase() + '.schema');
+
+		const modelInstance = await quoteModel.findById(req.body.quotationId);
 	
 		const tracking = new Tracking({
 			quotationType: req.body.quotationType,
 			quotationId: req.body.quotationId,
+			subscriptionId: req.body.subscriptionId,
 			address: req.body.address,
 			driver_name: req.body.driver_name,
 			driver_phone_number: req.body.driver_phone_number,
+			user: modelInstance.user
 		});
+
+		
+
+		console.log(quoteModel);
 	
 		const data = await tracking.save();
 	
@@ -27,11 +39,11 @@ exports.saveTracking = async (req, res) => {
 exports.updateTracking = async (req, res) => {
 	try {
 		const { trackingId } = req.params;
-		const { address, driver_name, driver_phone_number } = req.body;
+		const { driver_name, driver_phone_number } = req.body;
 	
 		const updatedTracking = await Tracking.findByIdAndUpdate(
 			trackingId,
-			{ address, driver_name, driver_phone_number },
+			{ $push: { address: req.body.address }, driver_name, driver_phone_number },
 			{ new: true }
 		);
 	
@@ -51,17 +63,41 @@ exports.updateTracking = async (req, res) => {
 
 exports.getTrackingList = async (req, res) => {
 	try {
+
+		let { limit = 3, page = 1, status } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+        const skip = (page - 1) * limit;
+
 		const { address, quotationType, driver_name } = req.query;
 	
 		const filters = {};
 		if (address) filters.address = address;
 		if (quotationType) filters.quotationType = quotationType;
 		if (driver_name) filters.driver_name = driver_name;
+
+		const totalCount = await Tracking.countDocuments(filters);
+
+		const totalPages = Math.ceil(totalCount / limit);
+
+		
   
 	  	const trackingList = await Tracking.find(filters)
-			.sort({ createdAt: -1, updatedAt: -1 });
+			.populate({ path: "user", model: "User" })
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(limit);
   
-	  	return apiResponse.successResponseWithData(res, "Tracking list retrieved successfully.", trackingList);
+	  	return apiResponse.successResponseWithData(
+			res,
+			"Tracking list retrieved successfully.", 
+			{
+				trackingList,
+				totalPages,
+				currentPage: page,
+				perPage: limit,
+				totalCount
+			});
 	} catch (error) {
 	  	return apiResponse.ErrorResponse(res, error.message);
 	}
