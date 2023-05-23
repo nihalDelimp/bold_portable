@@ -63,7 +63,7 @@ exports.updateTracking = async (req, res) => {
 
 exports.getTrackingList = async (req, res) => {
 	try {
-
+		/* for pagination */
 		let { limit = 3, page = 1, status } = req.query;
         limit = parseInt(limit);
         page = parseInt(page);
@@ -71,23 +71,24 @@ exports.getTrackingList = async (req, res) => {
 
 		const { address, quotationType, driver_name } = req.query;
 	
+		/* initiate filter */
 		const filters = {};
 		if (address) filters.address = address;
 		if (quotationType) filters.quotationType = quotationType;
 		if (driver_name) filters.driver_name = driver_name;
 
+		/* count total data */
 		const totalCount = await Tracking.countDocuments(filters);
-
 		const totalPages = Math.ceil(totalCount / limit);
-
-		
   
+		/* get data */
 	  	const trackingList = await Tracking.find(filters)
 			.populate({ path: "user", model: "User" })
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit);
-  
+		
+		/* return response */
 	  	return apiResponse.successResponseWithData(
 			res,
 			"Tracking list retrieved successfully.", 
@@ -97,9 +98,29 @@ exports.getTrackingList = async (req, res) => {
 				currentPage: page,
 				perPage: limit,
 				totalCount
-			});
+			}
+		);
 	} catch (error) {
 	  	return apiResponse.ErrorResponse(res, error.message);
 	}
 };
+
+exports.fetchTrackingList = async (req, res) => {
+    try {
+        const quotationType = req.query.quotationType;
+        const quotationId = req.query.quotationId;
+        const userId = req.query.userId;
+
+        const trackingList = await Tracking.find({
+            quotationType: quotationType,
+            quotationId: quotationId,
+			user: userId
+        });
+
+        return apiResponse.successResponseWithData(res, "Tracking list:", trackingList);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
   
