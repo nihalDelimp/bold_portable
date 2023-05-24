@@ -35,64 +35,79 @@ exports.createCustomer = async (req, res) => {
 
 exports.createCheckoutSession = async (req, res) => {
     try {
-        const { email } = req.userData.user;
-        const user = await User.findOne({ email });
-        const { stripe_customer_id } = user;
-        if (!stripe_customer_id) {
-            return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
-        }
-        const {
-            price = 0,
-            product_name = "",
-            product_description = "",
-            interval = "month",
-            shipping_amount = 0,
-            success_url = "",
-            cancel_url = "",
-        } = req.body;
-        const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
-            cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
-            customer: stripe_customer_id,
-            line_items: [
-                {
-                    price_data: {
-                        currency: "usd",
-                        unit_amount: price * 100,
-                        product_data: {
-                            name: product_name,
-                            description: product_description,
-                        },
-                        recurring: {
-                            interval,
-                        },
-                    },
-                    quantity: 1,
-                },
-                {
-                    price_data: {
-                        currency: "usd",
-                        unit_amount: shipping_amount * 100,
-                        product_data: {
-                            name: "Shiping charges",
-                            description: "$1 * distanse",
-                        },
-                    },
-                    quantity: 1,
-                },
-            ],
-            mode: PaymentMode.Subscription,
-        });
-        const { id, url, customer } = session;
-        return apiResponse.successResponseWithData(
-            res,
-            "Stipe session created successfully",
-            { id, url, customer }
-        );
+      const { email } = req.userData.user;
+      const user = await User.findOne({ email });
+      const { stripe_customer_id } = user;
+      if (!stripe_customer_id) {
+        return apiResponse.ErrorResponse(res, "Stripe customer does not exist");
+      }
+  
+      const {
+        price = 0,
+        product_name = "",
+        product_description = "",
+        interval = "month",
+        shipping_amount = 0,
+        success_url = "",
+        cancel_url = "",
+        quotationId = "",
+        quotationType = "",
+      } = req.body;
+  
+      const encodedQuotationId = encodeURIComponent(quotationId);
+      const encodedQuotationType = encodeURIComponent(quotationType);
+  
+      const session = await stripe.checkout.sessions.create({
+        // success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+        success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
+        cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
+        customer: stripe_customer_id,
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: price * 100,
+              product_data: {
+                name: product_name,
+                description: product_description,
+              },
+              recurring: {
+                interval,
+              },
+            },
+            quantity: 1,
+          },
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: shipping_amount * 100,
+              product_data: {
+                name: "Shipping charges",
+                description: "$1 * distance",
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: PaymentMode.Subscription,
+        metadata: {
+          quotationId: encodedQuotationId,
+          quotationType: encodedQuotationType,
+        },
+      });
+  
+      const { id, url } = session;
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Stripe session created successfully",
+        { id, url, customer }
+      );
     } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message);
+      return apiResponse.ErrorResponse(res, error.message);
     }
 };
+  
 
 exports.getSubscriptionList = async (req, res) => {
     try {

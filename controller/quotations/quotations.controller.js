@@ -5,6 +5,7 @@ const { server } = require('../../server');
 const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Quotation = require('../../models/quotations/quotation.schema');
 const Event = require('../../models/event/event.schema');
 const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
@@ -87,25 +88,25 @@ exports.createConstructionQuotation = async (req, res) => {
         };
 
         // Create a new Construction instance with the quotation object as properties
-        const construction = new Construction(quotation);
+        const quotationModel = new Quotation(quotation);
 
         // Save the construction instance
-        await construction.save();
+        await quotationModel.save();
 
 
-        const notification = new Notification({
+        const notificquotationation = new Notification({
             user: quotation.user,
             quote_type: "construction",
-            quote_id: construction._id,
+            quote_id: quotationModel._id,
             type: "CREATE_QUOTE",
             status_seen: false
         });
-        await notification.save();
+        await notificquotationation.save();
 
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
-            construction
+            quotationModel
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
