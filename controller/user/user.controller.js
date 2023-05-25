@@ -34,3 +34,40 @@ exports.updateProfile = async (req, res) => {
 
 };
 
+exports.updateProfileImage = async (req, res) => {
+    try {
+        const { _id } = req.userData.user;
+
+        if (!req.file) {
+            return apiResponse.ErrorResponse(res, "No file found");
+        }
+
+        const user = await User.findById(_id);
+
+        if (!user) {
+            return apiResponse.notFoundResponse(res, "User not found");
+        }
+
+        // Delete old profile picture file if it exists
+        if (user.profile_picture) {
+            await fs.unlink(user.profile_picture).catch(err => {
+                console.error("Failed to delete old profile picture file:", err);
+            });
+        }
+
+        // Update user's profile picture
+        user.profile_picture = req.file.path;
+        const updatedUser = await user.save();
+
+        if (updatedUser) {
+            console.log("File uploaded successfully");
+            return apiResponse.successResponseWithData(res, "User image uploaded successfully", updatedUser);
+        } else {
+            console.warn("Failed to update user profile picture");
+            return apiResponse.ErrorResponse(res, "Failed to update user profile picture");
+        }
+    } catch (error) {
+        console.error("Error updating profile image:", error);
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
