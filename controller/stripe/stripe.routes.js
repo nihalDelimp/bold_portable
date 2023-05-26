@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const stripeConteoller = require("./stripe.controller");
+const subscriptionConteoller = require("./subscription.controller");
 const checkAuth = require("../../middleware/checkAuth");
 const { hasRole } = require("../../middleware/checkRole");
 const { createStripeCheckoutValidation, endStripeCustomerValidation } = require("./stripe.schema");
@@ -46,4 +47,12 @@ router.get(
     hasRole("ADMIN"),
     stripeConteoller.getSubscriptionListForAdmin
 );
+
+router.get(
+    "/admin/subscription-detail/:subscriptionId",
+    checkAuth,
+    hasRole("ADMIN"),
+    subscriptionConteoller.getDetails
+);
+
 module.exports = router;
