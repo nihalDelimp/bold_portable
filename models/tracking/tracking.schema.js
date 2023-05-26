@@ -23,7 +23,14 @@ const trackingSchema = new mongoose.Schema(
       required: false
     },
     address: [{
-      type: String,
+      address: {
+        type: String,
+        required: true
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
     }],
     driver_name: {
       type: String,

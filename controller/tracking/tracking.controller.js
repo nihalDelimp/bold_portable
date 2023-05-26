@@ -39,11 +39,16 @@ exports.saveTracking = async (req, res) => {
 exports.updateTracking = async (req, res) => {
 	try {
 		const { trackingId } = req.params;
-		const { driver_name, driver_phone_number } = req.body;
+		const { driver_name, driver_phone_number, address } = req.body;
 	
+		const updatedAddress = address.map(address => ({
+			address,
+			timestamp: Date.now()
+		}));
+
 		const updatedTracking = await Tracking.findByIdAndUpdate(
 			trackingId,
-			{ $push: { address: req.body.address }, driver_name, driver_phone_number },
+			{ $push: { address: { $each: updatedAddress } }, driver_name, driver_phone_number },
 			{ new: true }
 		);
 	
@@ -57,7 +62,7 @@ exports.updateTracking = async (req, res) => {
 			updatedTracking
 		);
 	} catch (error) {
-	return apiResponse.ErrorResponse(res, error.message);
+		return apiResponse.ErrorResponse(res, error.message);
 	}
 };
 
