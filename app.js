@@ -5,10 +5,15 @@ const cors = require('cors')
 const path = require('path')
 const authRoutes = require('./routes');
 const passport = require('passport');
+const bcrypt = require('bcrypt');
 const strategy = require('./config/jwtOptions');
+const LocalStrategy = require('passport-local').Strategy;
 const database = require('./config/database');
 const bodyParser = require('body-parser');
+const User = require('./models/user/user.schema');
 app.use(cors());
+
+require('./config/passport');
 
 // Database 
 database;
@@ -27,8 +32,7 @@ app.use(function (req, res, next) {
 	res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
 	next();
 });
-// use the strategy
-passport.use("strategy", strategy);
+
 
 //routes
 app.use('/', authRoutes);

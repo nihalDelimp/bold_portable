@@ -39,4 +39,11 @@ router.get(
     checkAuth,
     stripeConteoller.getSubscriptionPaymentList
 );
+
+router.get(
+    "/admin/subscription",
+    checkAuth,
+    hasRole("ADMIN"),
+    stripeConteoller.getSubscriptionListForAdmin
+);
 module.exports = router;

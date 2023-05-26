@@ -6,6 +6,20 @@ const subscriptionsSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
+        quotationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            refPath: 'quotationType'
+        },
+        quotationType: {
+            type: String,
+            required: true,
+            enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
+        },
+        subscription: {
+            type: String,
+            required: true,
+        },
         subscription: {
             type: String,
             required: true,

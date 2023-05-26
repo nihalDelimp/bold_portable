@@ -12,7 +12,6 @@ const io = require('socket.io')(server);
 const config = require('../../config/config');
 
 exports.createCostManagement = async (req, res) => {
-    console.log(await config.getQuotationTypesConfig(req.body.quotationType));
     try {
         const costManagement = new CostManagement({
             user: req.userData.user._id,

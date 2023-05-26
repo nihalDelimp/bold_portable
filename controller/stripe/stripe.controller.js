@@ -39,8 +39,9 @@ exports.createCheckoutSession = async (req, res) => {
         const user = await User.findOne({ email });
         const { stripe_customer_id } = user;
         if (!stripe_customer_id) {
-            return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
+            return apiResponse.ErrorResponse(res, "Stripe customer does not exist");
         }
+
         const {
             price = 0,
             product_name = "",
@@ -49,9 +50,16 @@ exports.createCheckoutSession = async (req, res) => {
             shipping_amount = 0,
             success_url = "",
             cancel_url = "",
+            quotationId = "",
+            quotationType = "",
         } = req.body;
+
+        const encodedQuotationId = encodeURIComponent(quotationId);
+        const encodedQuotationType = encodeURIComponent(quotationType);
+
         const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            // success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,
             line_items: [
@@ -74,25 +82,33 @@ exports.createCheckoutSession = async (req, res) => {
                         currency: "usd",
                         unit_amount: shipping_amount * 100,
                         product_data: {
-                            name: "Shiping charges",
-                            description: "$1 * distanse",
+                            name: "Shipping charges",
+                            description: "$1 * distance",
                         },
                     },
                     quantity: 1,
                 },
             ],
             mode: PaymentMode.Subscription,
+            metadata: {
+                quotationId: encodedQuotationId,
+                quotationType: encodedQuotationType,
+            },
         });
-        const { id, url, customer } = session;
+
+        const { id, url } = session;
+
         return apiResponse.successResponseWithData(
             res,
-            "Stipe session created successfully",
-            { id, url, customer }
+            "Stripe session created successfully",
+            { id, url, stripe_customer_id }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+  
 
 exports.getSubscriptionList = async (req, res) => {
     try {
@@ -217,6 +233,43 @@ exports.endSubscription = async (req, res) => {
             res,
             "Subscription end in-progress",
             { id, url, customer }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.getSubscriptionListForAdmin = async (req, res) => {
+    try {
+        let { limit = 10, page = 1, status } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+        const skip = (page - 1) * limit;
+
+        let query = {};
+        if (status) {
+            query.status = status;
+        }
+
+        const totalSubscription = await Subscription.countDocuments(query);
+        const subscriptions = await Subscription.find(query)
+            .populate({ path: "user", model: "User" })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalSubscription / limit);
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Subscription fetched successfully",
+            {
+                subscriptions,
+                totalPages,
+                currentPage: page,
+                perPage: limit,
+                totalSubscription,
+            }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);

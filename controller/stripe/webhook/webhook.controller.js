@@ -24,13 +24,13 @@ exports.subscription = async (req, res) => {
     } = event;
     try {
         switch (type) {
-            case "invoice.payment_succeeded":
+            case "checkout.session.completed":
                 await paymentSucceeded(object);
             break;
 
-            case "checkout.session.completed":
-                await endSubscription(object);
-            break;
+            // case "invoice.payment_succeeded":
+            //     await endSubscription(object);
+            // break;
         }
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
