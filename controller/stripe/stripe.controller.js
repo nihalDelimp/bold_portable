@@ -6,6 +6,7 @@ const Subscription = require("./models/subscription.schema");
 const Payment = require("./models/payment_succeeded.schema");
 const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
+const Tracking = require('../../models/tracking/tracking.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -258,13 +259,26 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
+        const subscriptionIds = subscriptions.map(subscription => subscription._id);
+
+        const trackingDetails = await Tracking.find({ subscriptionId: { $in: subscriptionIds } });
+
+        const formattedSubscriptions = subscriptions.map(subscription => {
+            const subscriptionId = subscription._id;
+            const subscriptionTracking = trackingDetails.find(tracking => tracking.subscriptionId.equals(subscriptionId));
+            const trackingId = subscriptionTracking ? subscriptionTracking._id : null;
+            return {
+                ...subscription.toObject(),
+                trackingId,            };
+        });
+
         const totalPages = Math.ceil(totalSubscription / limit);
 
         return apiResponse.successResponseWithData(
             res,
             "Subscription fetched successfully",
             {
-                subscriptions,
+                formattedSubscriptions,
                 totalPages,
                 currentPage: page,
                 perPage: limit,

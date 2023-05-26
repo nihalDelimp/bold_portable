@@ -14,16 +14,25 @@ exports.saveTracking = async (req, res) => {
 			quotationType: req.body.quotationType,
 			quotationId: req.body.quotationId,
 			subscriptionId: req.body.subscriptionId,
-			address: req.body.address,
 			driver_name: req.body.driver_name,
 			driver_phone_number: req.body.driver_phone_number,
-			user: modelInstance.user
+			user: modelInstance.user,
+			address: [
+				{
+					address:req.body.address,
+					timestamp: new Date()
+				}
+			]
 		});
 
-		
+		// // Save the address array if it exists in the request body
+		// req.body.address.forEach(addr => {
+		// 	tracking.address.push({
+		// 		address: addr.address,
+		// 		timestamp: addr.timestamp || new Date()
+		// 	});
+		// });
 
-		console.log(quoteModel);
-	
 		const data = await tracking.save();
 	
 		return apiResponse.successResponseWithData(
