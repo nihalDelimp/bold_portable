@@ -71,3 +71,5 @@ exports.updateProfileImage = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+

@@ -4,7 +4,7 @@ const checkAuth = require('../../middleware/checkAuth');
 const { hasRole, hasMultipleRole } = require('../../middleware/checkRole');
 
 //Create Quotation for Constructions.
-router.post('/create-quotation-for-construction', checkAuth, hasRole('USER'), quotationsController.createConstructionQuotation);
+router.post('/create-quotation-for-construction', quotationsController.createConstructionQuotation);
 
 //Update Quotation for Constructions.
 router.put('/update-quotation-for-construction/:constructionId', checkAuth, hasRole('ADMIN'), quotationsController.updateConstructionQuotation);

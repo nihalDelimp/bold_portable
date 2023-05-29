@@ -9,10 +9,23 @@ const Event = require('../../models/event/event.schema');
 const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
+const userHelper = require('../../helpers/user');
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        if(!req.userData) {
+            let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+            console.log('sakdjkjshkdhskd', user._id.toString());
+            if(error) {
+                return apiResponse.ErrorResponse(res, message);
+            }
+
+            const _id = await user._id.toString();
+
+        } else {
+            const { _id } = req.userData.user;
+        }
+        
         const {
             coordinator: { name, email, cellNumber },
             maxWorkers,
@@ -108,6 +121,7 @@ exports.createConstructionQuotation = async (req, res) => {
             construction
         );
     } catch (error) {
+        console.log(error);
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
