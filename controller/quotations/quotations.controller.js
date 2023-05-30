@@ -775,6 +775,7 @@ exports.getAllQuotation = async (req, res) => {
                     ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
                 ];
             });
+            quotations.sort((a, b) => b.createdAt - a.createdAt);
 
             const count = await Event.countDocuments()
                 + await FarmOrchardWinery.countDocuments()
@@ -889,6 +890,7 @@ exports.getAllQuotationForUsers = async (req, res) => {
         }
 
         const count = quotations.length;
+        console.log("quotationsData" , quotations)
 
         return apiResponse.successResponseWithData(
             res,
