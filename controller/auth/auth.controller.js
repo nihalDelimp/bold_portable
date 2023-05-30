@@ -6,6 +6,8 @@ const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const fs = require('fs');
 const path = require('path');
+const mailer = require("../../helpers/nodemailer");
+const PasswordVerification = require('../../models/passwordVerification/passwordVerification.schema');
 
 exports.registerUsers = async (req, res) => {
     try {
@@ -175,3 +177,113 @@ exports.updateProfileImage = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 }
+
+function generateOTP(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        result += characters.charAt(randomIndex);
+    }
+  
+    return result;
+}
+
+exports.sendOtp = async (req, res) => {
+    try {
+
+        const user = await User.findOne({email: req.body.email});
+        if (!user) {
+            return apiResponse.notFoundResponse(res, "User not found");
+        }
+
+        const otp = generateOTP(6);
+
+        const passwordVerification = new PasswordVerification({
+            user: user._id.toString(),
+            otp: otp,
+            expiryOn: new Date().setHours(new Date().getHours() + 48)
+        });
+
+        await passwordVerification.save();
+        
+        const mailOptions = {
+            from: 'hello@boldportable.com',
+            to: req.body.email,
+            subject: 'OTP to reset your password',
+            text: `Hi ${user.name},\n\nThe OTP to reset your password is ${otp} \n\nThanks,\nBold Portable Team`
+        };
+        
+        mailer.sendMail(mailOptions);
+
+        return apiResponse.successResponseWithData(res, 'OTP sent successfully', user);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, otp, password, confirm_password } = req.body;
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return apiResponse.notFoundResponse(res, 'User not found');
+        }
+
+        // Find the corresponding password verification entry
+        const passwordVerification = await PasswordVerification.findOne({
+            user: user._id.toString(),
+            otp,
+            expiryOn: { $gt: new Date() }, // Verify that the OTP is not expired
+            status: 'pending', // Verify that the status is 'pending'
+        });
+        if (!passwordVerification) {
+            return apiResponse.validationErrorWithData(res, 'Invalid OTP');
+        }
+
+        // Verify that the password and confirm_password match
+        if (password !== confirm_password) {
+            return apiResponse.validationErrorWithData(res, "Passwords don't match");
+        }
+
+        // Check if the OTP has expired
+        if (passwordVerification.expiryOn <= new Date()) {
+            // Update the status to 'expired'
+            passwordVerification.status = 'expired';
+            await passwordVerification.save();
+            return apiResponse.validationErrorWithData(res, 'OTP has expired');
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the status to 'verified'
+        passwordVerification.status = 'verified';
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        // Update all other records associated with the user to 'expired'
+        await PasswordVerification.updateMany(
+            {
+                user: user._id.toString(),
+                status: 'pending',
+            },
+            {
+                $set: { status: 'expired' },
+            }
+        );
+
+        // Save the updated password verification entry
+        await passwordVerification.save();
+
+        return apiResponse.successResponse(res, 'Password reset successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+

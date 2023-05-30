@@ -41,5 +41,11 @@ router.use((error, req, res, next) => {
     }
 });
 
+// sent otp to user
+router.post('/send-otp', authController.sendOtp);
+
+// reset password
+router.post('/reset-otp', authController.resetPassword);
+
 
 module.exports = router;
