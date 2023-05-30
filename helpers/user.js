@@ -2,27 +2,32 @@ const User = require('../models/user/user.schema');
 const mailer = require('./nodemailer');
 const bcrypt = require('bcrypt');
 
+function generateRandomPassword(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        result += characters.charAt(randomIndex);
+    }
+  
+    return result;
+}
+
+  
 exports.createUser = async (userData) => {
     try {
         const { name, email, cellNumber } = userData;
-        // Check if the user with the given email already exists
-        // const existingUser = await User.findOne({ email });
-        // if (existingUser) {
-        //     return apiResponse.ErrorResponse(res, 'User with the given email already exists');
-        // }
-        // Create the user object
-
-        // Compose the email
+        const tempPassword = generateRandomPassword(8);
+        // Hash the temporary password
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
         const mailOptions = {
             from: 'hello@boldportable.com',
             to: email,
             subject: 'Set your password',
-            text: `Hi ${name},\n\nYour username is ${email}, and temprory password is 12345678. You may reset your password by logging in to account\n\nThanks,\nBold Portable Team`
+            text: `Hi ${name},\n\nYour username is ${email}, and temprory password is ${tempPassword}. You may reset your password by logging in to account\n\nThanks,\nBold Portable Team`
         };
-
-        const salt = await bcrypt.genSalt(10);
-
-        const hashedPassword = await bcrypt.hash('12345678', salt);
 
         const newUser = new User({
             name,
@@ -42,6 +47,10 @@ exports.createUser = async (userData) => {
             return { error: true, message: 'User not created' };
         }        
     } catch (error) {
-        return { error: true, error: error.message };
+        if (error.code === 11000 && error.keyPattern) {
+            const fields = Object.keys(error.keyPattern).join(', ');
+            return { error: true, message: `Duplicate key error. The combination of ${fields} already exists.` };
+        }
+        return { error: true, message: error.message };
     }
 };

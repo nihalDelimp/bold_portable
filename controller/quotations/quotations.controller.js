@@ -13,18 +13,14 @@ const userHelper = require('../../helpers/user');
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
-        if(!req.userData) {
-            let {error, user, message} = await userHelper.createUser(req.body.coordinator);
-            console.log('sakdjkjshkdhskd', user._id.toString());
-            if(error) {
-                return apiResponse.ErrorResponse(res, message);
-            }
 
-            const _id = await user._id.toString();
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
 
-        } else {
-            const { _id } = req.userData.user;
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
         }
+
+        const _id = user._id.toString();
         
         const {
             coordinator: { name, email, cellNumber },
@@ -168,7 +164,14 @@ exports.updateConstructionQuotation = async (req, res) => {
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
+
         const {
             disasterNature,
             coordinator: { name, email, cellNumber },
@@ -308,7 +311,13 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
 exports.createPersonalOrBusinessQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             useType,
             coordinator: { name, email, cellNumber },
@@ -443,7 +452,13 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
 exports.createFarmOrchardWineryQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             useType,
             coordinator: { name, email, cellNumber },
@@ -471,7 +486,6 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 
         // Calculate the number of units required
         const numUnits = Math.ceil(totalHours / 400);
-        console.log(numUnits, "Jskjak")
         // Determine the service frequency
         let serviceFrequency = "Once per week";
         if (numUnits > 1) {
@@ -578,7 +592,13 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
 exports.createEventQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
             coordinator: { name, email, cellNumber },

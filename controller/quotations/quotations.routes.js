@@ -10,25 +10,25 @@ router.post('/create-quotation-for-construction', quotationsController.createCon
 router.put('/update-quotation-for-construction/:constructionId', checkAuth, hasRole('ADMIN'), quotationsController.updateConstructionQuotation);
 
 //Create Quotation for Disaster Relief.
-router.post('/create-quotation-for-disaster-relief', checkAuth, hasRole('USER'), quotationsController.createDisasterReliefQuotation);
+router.post('/create-quotation-for-disaster-relief', quotationsController.createDisasterReliefQuotation);
 
 //Update Quotation for Disaster Relief.
 router.put('/update-quotation-for-disaster-relief/:disasterReliefId', checkAuth, hasRole('ADMIN'), quotationsController.updateDisasterReliefQuotation);
 
 //Create Quotation for Personal Business Site.
-router.post('/create-quotation-for-personal-business-site', checkAuth, hasRole('USER'), quotationsController.createPersonalOrBusinessQuotation);
+router.post('/create-quotation-for-personal-business-site', quotationsController.createPersonalOrBusinessQuotation);
 
 //Update Quotation for Personal Business Site.
 router.put('/update-quotation-for-personal-business-site/:personalOrBusinessId', checkAuth, hasRole('ADMIN'), quotationsController.updatePersonalOrBusinessQuotation);
 
 //Create Quotation for Farm Orchard Winery.
-router.post('/create-quotation-for-farm-orchard-winery', checkAuth, hasRole('USER'), quotationsController.createFarmOrchardWineryQuotation);
+router.post('/create-quotation-for-farm-orchard-winery', quotationsController.createFarmOrchardWineryQuotation);
 
 //Update Quotation for Farm Orchard Winery.
 router.put('/update-quotation-for-farm-orchard-winery/:farmOrchardWineryId', checkAuth, hasRole('ADMIN'), quotationsController.updateFarmOrchardWineryQuotation);
 
 //Create Quotation for Event.
-router.post('/create-quotation-for-event', checkAuth, hasRole('USER'), quotationsController.createEventQuotation);
+router.post('/create-quotation-for-event', quotationsController.createEventQuotation);
 
 //Update Quotation for Farm Orchard Winery.
 router.put('/update-quotation-for-event/:eventId', checkAuth, hasRole('ADMIN'), quotationsController.updateEventQuotation);
