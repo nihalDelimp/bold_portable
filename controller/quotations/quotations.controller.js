@@ -881,6 +881,8 @@ exports.getAllQuotationForUsers = async (req, res) => {
                 ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
                 ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' }))
             ];
+
+            quotations.sort((a, b) => b.createdAt - a.createdAt);
         } else {
             // Handle other user types if needed
             return apiResponse.ErrorResponse(res, "Invalid user_type");
