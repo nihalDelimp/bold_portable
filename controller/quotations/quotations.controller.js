@@ -926,6 +926,10 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
+                    const costDetails = data.quotation.costDetails;
+
+                    // Calculating the sum of property values
+                    const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
@@ -964,18 +968,43 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
+                    const costDetails = event.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                    const costDetails = event.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                    const costDetails = personalOrBusiness.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (disasterRelief) {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                    const costDetails = disasterRelief.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
+                    const costDetails = construction.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 return quotations;
             });

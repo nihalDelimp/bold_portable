@@ -29,6 +29,12 @@ exports.createUser = async (userData) => {
             text: `Hi ${name},\n\nYour username is ${email}, and temprory password is ${tempPassword}. You may reset your password by logging in to account\n\nThanks,\nBold Portable Team`
         };
 
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return { error: false, message: "User exist", user: existingUser };
+        }
+
         const newUser = new User({
             name,
             email,
