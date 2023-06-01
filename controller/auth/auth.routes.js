@@ -45,7 +45,7 @@ router.use((error, req, res, next) => {
 router.post('/send-otp', authController.sendOtp);
 
 // reset password
-router.post('/reset-otp', authController.resetPassword);
+router.post('/reset-password', authController.resetPassword);
 
 
 module.exports = router;
