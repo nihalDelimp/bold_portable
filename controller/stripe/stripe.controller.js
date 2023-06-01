@@ -165,6 +165,24 @@ exports.getSubscriptionPaymentList = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+        
+        for (const payment of payments) {
+
+            const quotationType = payment.subscription?.quotationType;
+            const quotationId = payment.subscription?.quotationId.toString();
+
+            if(quotationType && quotationId) {
+
+                const quoteModel = require(`../../models/${quotationType.toLowerCase()}/${quotationType.toLowerCase()}.schema`);
+                const quotation = await quoteModel.findById(quotationId);
+
+                console.log(quotation);
+
+                // payment.costDetails = quotation.costDetails;
+                payments.push({costDetails: quotation.costDetails});
+            }
+            
+        }
 
         const totalPages = Math.ceil(totalPayment / limit);
 
