@@ -9,6 +9,8 @@ const tracking = require('../controller/tracking/tracking.routes')
 const paymentRouter = require('../controller/stripe/stripe.routes')
 const webhookRouter = require('../controller/stripe/webhook/webhook.routes')
 const userRouter = require('../controller/user/user.routes')
+const contactRouter = require('../controller/contacts/contacts.routes')
+const serviceRouter = require('../controller/services/services.routes')
 const app = express();
 
 app.use("/auth", authRouter);
@@ -21,5 +23,7 @@ app.use("/webhook", webhookRouter);
 app.use("/cost-management", costManagement);
 app.use("/tracking", tracking);
 app.use("/user", userRouter);
+app.use("/contact", contactRouter);
+app.use("/service", serviceRouter);
 
 module.exports = app;
