@@ -3,6 +3,7 @@ const apiResponse = require("../../helpers/apiResponse");
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const mailer = require("../../helpers/nodemailer");
 
 exports.updateProfile = async (req, res) => {
     try {
@@ -71,5 +72,40 @@ exports.updateProfileImage = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.sendMailToMultipleUser = async (req, res) => {
+    try {
+        const { emailList, subject, message } = req.body;
+        
+        // Check if emailList is provided and is an array
+        if (!Array.isArray(emailList) || emailList.length === 0) {
+            return apiResponse.ErrorResponse(res, 'Invalid emailList');
+        }
+        
+        // Find users based on the provided email addresses
+        // const users = await User.find({ email: { $in: emailList } });
+        
+        // if (!users || users.length === 0) {
+        //     return apiResponse.notFoundResponse(res, 'Users not found');
+        // }
+        
+        // Loop through each email address and send mail
+        for (const userEmail of emailList) {
+            const mailOptions = {
+                from: 'hello@boldportable.com',
+                to: userEmail,
+                subject,
+                text: message
+            };
+            
+            await mailer.sendMail(mailOptions);
+        }
+
+        return apiResponse.successResponseWithData(res, 'Emails sent successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
 
 

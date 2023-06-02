@@ -6,5 +6,6 @@ const { hasRole } = require('../../middleware/checkRole');
 
 router.post('/save-profile', checkAuth, hasRole('USER'), userController.updateProfile);
 router.post('/save-image', checkAuth, hasRole('USER'), upload.single("profile_picture"), userController.updateProfileImage);
+router.post('/send-mail-multi-user', checkAuth, hasRole('ADMIN'), userController.sendMailToMultipleUser);
 
 module.exports = router;
