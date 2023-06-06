@@ -10,6 +10,7 @@ const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
 const userHelper = require('../../helpers/user');
+const Subscription = require("../stripe/models/subscription.schema");
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
@@ -922,11 +923,21 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 PersonalOrBusiness.findOne({ _id: quoteId, user: _id }),
                 DisasterRelief.findOne({ _id: quoteId, user: _id }),
                 Construction.findOne({ _id: quoteId, user: _id }),
-            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+            ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
                     const costDetails = event.costDetails;
+                    
+                    const quotationId = event._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "Event",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                    }
 
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
@@ -937,6 +948,16 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
                     const costDetails = farmOrchardWinery.costDetails;
 
+                    const quotationId = farmOrchardWinery._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "FarmOrchardWinery",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                    }
+
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
@@ -945,6 +966,16 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
                     const costDetails = personalOrBusiness.costDetails;
+
+                    const quotationId = personalOrBusiness._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "PersonalOrBusiness",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                    }
 
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
@@ -955,6 +986,16 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
                     const costDetails = disasterRelief.costDetails;
 
+                    const quotationId = disasterRelief._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "DisasterRelief",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                    }
+
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
@@ -964,6 +1005,15 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
                     const costDetails = construction.costDetails;
 
+                    const quotationId = construction._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "Construction",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                    }
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
