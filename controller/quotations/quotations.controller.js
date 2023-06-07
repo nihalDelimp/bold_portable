@@ -937,6 +937,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     });
                     if(subscription) {
                         quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
                     }
 
                     if(costDetails){
@@ -956,6 +957,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     });
                     if(subscription) {
                         quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
                     }
 
                     if(costDetails){
@@ -975,6 +977,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     });
                     if(subscription) {
                         quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
                     }
 
                     if(costDetails){
@@ -994,6 +997,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     });
                     if(subscription) {
                         quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
                     }
 
                     if(costDetails){
@@ -1013,6 +1017,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                     });
                     if(subscription) {
                         quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
                     }
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
