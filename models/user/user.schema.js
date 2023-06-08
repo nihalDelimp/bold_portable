@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
         stripe_customer_id: {
             type: String,
             required: false
+        },
+        address: {
+            type: String,
+            required: false
         }
     },
     {

@@ -11,7 +11,7 @@ const PasswordVerification = require('../../models/passwordVerification/password
 
 exports.registerUsers = async (req, res) => {
     try {
-        const { name, email, password, mobile, user_type } = req.body;
+        const { name, email, password, mobile, user_type, address } = req.body;
         // Check if the user with the given email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -24,6 +24,7 @@ exports.registerUsers = async (req, res) => {
             password,
             mobile,
             user_type,
+            address
         });
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {

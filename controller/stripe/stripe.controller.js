@@ -214,7 +214,7 @@ exports.endSubscription = async (req, res) => {
         const subscription = await Subscription.findOne({
             _id: subscriptionID,
         });
-        if (subscription.status === Status.Inactive) {
+        if (subscription.status === Status.INACTIVE) {
             return apiResponse.ErrorResponse(res, "Subscription already ended");
         }
 
