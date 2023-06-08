@@ -134,10 +134,10 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
             const updatedNotification = await Notification.findById(notificationId);
             return apiResponse.successResponseWithData(res, 'Notification marked as seen', updatedNotification);
         }
-        else if (user_type === 'USER' && notification.type === 'ORDER_CANCEL') {
+        else if (user_type === 'USER') {
             if (notification.user.toString() === _id.toString()) {
                 console.log()
-                const updateResult = await Notification.updateOne({ _id: notificationId, user: _id, type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
+                const updateResult = await Notification.updateOne({ _id: notificationId, user: _id }, { $set: { status_seen: true } });
                 return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
             }
             else {
@@ -153,7 +153,7 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
 };
 
 // Get Cancel Order Notification for specific user
-exports.getCancelOrderNotifications = async (req, res) => {
+exports.getSpecificUserNotifications = async (req, res) => {
     try {
         const { _id } = req.userData.user;
         // Get the page number and page size from the query parameters
@@ -163,7 +163,7 @@ exports.getCancelOrderNotifications = async (req, res) => {
 
         // Calculate the number of documents to skip based on the page number and page size
         const documentsToSkip = (pageNumber - 1) * pageSize;
-        const cancelOrderNotifications = await Notification.find({ status_seen: false, type: "ORDER_CANCEL", user: _id })
+        const cancelOrderNotifications = await Notification.find({ status_seen: false, user: _id })
             .populate({
                 path: 'order',
                 model: 'Order'

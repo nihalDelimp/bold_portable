@@ -7,8 +7,8 @@ const { hasRole, hasMultipleRole } = require('../../middleware/checkRole');
 //Get all unseen Status
 router.get('/get-all-unseen-notfications', checkAuth, hasRole('ADMIN'), notificationController.getUnseenNotifications);
 
-//Get Cancel Order Notifications
-router.get('/get-cancel-order-notfications', checkAuth, hasRole('USER'), notificationController.getCancelOrderNotifications);
+//Get Specific user Notifications
+router.get('/get-specific-user-notfications', checkAuth, hasRole('USER'), notificationController.getSpecificUserNotifications);
 
 //Get Specific Cancel Order Notifications
 router.get('/get-specific-cancel-order-notfications', checkAuth, hasRole('USER'), notificationController.getSpecificCancelOrderNotifications);
