@@ -8,9 +8,9 @@ const mailer = require("../../helpers/nodemailer");
 exports.updateProfile = async (req, res) => {
     try {
         const { _id } = req.userData.user;
-        const { name, mobile, password } = req.body;
+        const { name, mobile, address, password } = req.body;
 
-        let update = { name, mobile };
+        let update = { name, mobile, address };
 
         // Hash the new password if it exists
         if (password) {

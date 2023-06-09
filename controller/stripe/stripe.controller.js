@@ -224,8 +224,13 @@ exports.endSubscription = async (req, res) => {
         if (!stripe_customer_id) {
             return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
         }
+
+        const encodedQuotationId = encodeURIComponent(subscription.quotationId);
+        const encodedQuotationType = encodeURIComponent(subscription.quotationType);
+
         const session = await stripe.checkout.sessions.create({
             success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,
             line_items: [
