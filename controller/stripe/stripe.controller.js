@@ -214,7 +214,7 @@ exports.endSubscription = async (req, res) => {
         const subscription = await Subscription.findOne({
             _id: subscriptionID,
         });
-        if (subscription.status === Status.INACTIVE) {
+        if (subscription.status === Status.Inactive) {
             return apiResponse.ErrorResponse(res, "Subscription already ended");
         }
 
@@ -229,7 +229,6 @@ exports.endSubscription = async (req, res) => {
         const encodedQuotationType = encodeURIComponent(subscription.quotationType);
 
         const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
             success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,

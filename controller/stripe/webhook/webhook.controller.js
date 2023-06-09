@@ -22,15 +22,16 @@ exports.subscription = async (req, res) => {
         type,
         data: { object },
     } = event;
+
     try {
         switch (type) {
-            case "checkout.session.completed":
+            case "invoice.payment_succeeded":
                 await paymentSucceeded(object);
             break;
 
-            // case "invoice.payment_succeeded":
-            //     await endSubscription(object);
-            // break;
+            case "checkout.session.completed":
+                await endSubscription(object);
+            break;
         }
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
