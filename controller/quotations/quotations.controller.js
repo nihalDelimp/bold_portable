@@ -1057,7 +1057,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
-                    const costDetails = event.costDetails;
+                    const costDetails = farmOrchardWinery.costDetails;
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;

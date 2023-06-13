@@ -29,7 +29,7 @@ const generateQRCode = async (text) => {
 exports.showQRCode = async (req, res) => {
     try {
 
-        const link = 'https://example.com';
+        const link = 'https://bold-portable-user-panel.netlify.app/services';
 
         const code = await generateQRCode(link)
 
@@ -70,7 +70,7 @@ const saveQRCodeAsFile = async (dataURL) => {
 
 exports.downloadQRCode = async (req, res) => {
     try {
-        const link = 'https://example.com';
+        const link = 'https://bold-portable-user-panel.netlify.app/services';
 
         const code = await generateQRCode(link);
         if (!code) {
