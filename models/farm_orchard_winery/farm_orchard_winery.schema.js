@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const farmOrchardWinerySchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'FARM_ORCHARD_WINERY' }, 
+        quotationType:{ type: String, default: 'farm-orchard-winery' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
