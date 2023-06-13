@@ -75,6 +75,13 @@ exports.createCheckoutSession = async (req, res) => {
                         recurring: {
                             interval,
                         },
+                        product_data: {
+                            name: 'knskjk',
+                            metadata: {
+                                quotationId: encodedQuotationId,
+                                quotationType: encodedQuotationType,
+                            }
+                        }
                     },
                     quantity: 1,
                 },

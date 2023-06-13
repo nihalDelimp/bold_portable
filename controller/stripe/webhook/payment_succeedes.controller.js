@@ -6,17 +6,36 @@ const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 exports.paymentSucceeded = async (object) => {
+
     try {
-        const { customer_details, subscription, payment_status } = object;
-        const user = await User.findOne({ email: customer_details.email });
+
+        const subscriptiontest = await stripe.subscriptions.retrieve(
+            object.subscription
+        );
+
+        const priceId = subscriptiontest.items.data[0].plan.id;
+
+        const pricetest = await stripe.prices.retrieve(
+            priceId
+        );
+
+        const prod_uid = pricetest.product;
+
+        const product = await stripe.products.retrieve(
+            prod_uid
+        );
+
+        const { customer_email, subscription, status } = object;
+
+        const user = await User.findOne({ email: customer_email });
         let sub;
-        if (payment_status === "paid") {
-            
+        if (status === "paid") {
+            console.log('sdkksjkd', object);
             sub = await new Subscription({
                 user: user._id,
                 subscription,
-                quotationId: object.metadata.quotationId,
-                quotationType: object.metadata.quotationType,
+                quotationId: product.metadata.quotationId,
+                quotationType: product.metadata.quotationType,
                 status: "ACTIVE",
             }).save();
         } else {
@@ -25,16 +44,14 @@ exports.paymentSucceeded = async (object) => {
             });
         }
 
-        const invoice = await stripe.invoices.retrieve(
-            object.invoice
-        );
-
         const payment = new Payment({
             subscription: sub._id,
-            payment: invoice,
+            payment: object,
         });
         return await payment.save();
+        
     } catch (error) {
+        console.log(error);
         throw error;
     }
 };
