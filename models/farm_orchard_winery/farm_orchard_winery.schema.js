@@ -16,8 +16,8 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         },
         maxWorkers: Number, // Largest number of workers utilizing the unit
         weeklyHours: Number, // Number of hours per week workers are on site
-        placement_datetime: Date,
-        placement_location: {
+        placementDate: Date,
+        placementLocation: {
             type: { type: String, default: "Point" },
             coordinates: { type: [Number], default: [0, 0] }
         },

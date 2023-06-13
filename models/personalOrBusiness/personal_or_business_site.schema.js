@@ -16,8 +16,8 @@ const personalOrBusinessSchema = new mongoose.Schema(
         },
         maxWorkers: Number, // Largest number of workers utilizing the unit
         weeklyHours: Number, // Number of hours per week workers are on site
-        placement_datetime: Date,
-        placement_location: {
+        placementDate: Date,
+        placementLocation: {
             type: { type: String, default: "Point" },
             coordinates: { type: [Number], default: [0, 0] }
         },
@@ -30,7 +30,6 @@ const personalOrBusinessSchema = new mongoose.Schema(
         deliveredPrice: { type: Number, default: 0 }, // Price for delivering the unit, default value of 0
         useAtNight: Boolean, // Whether the unit will be used at night
         useInWinter: Boolean, // Whether the unit will be used in the winter
-        special_requirements: String,
         numUnits: Number, // Number of units required for the construction site
         serviceFrequency: String, // How often the service is required
         designatedWorkers: { type: Boolean, default: false },
