@@ -87,7 +87,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
         } else if (user_type === 'USER') {
-            const notifications = await Notification.find({ user: _id, type: 'ORDER_CANCEL' });
+            const notifications = await Notification.find({ user: _id });
             if (!notifications) {
                 return apiResponse.notFoundResponse(res, 'Notification not found');
             }
@@ -98,7 +98,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
                 return apiResponse.unauthorizedResponse(res, 'Unauthorized');
             }
             // Update the status_seen to true
-            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId), type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId) }, { $set: { status_seen: true } });
 
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
