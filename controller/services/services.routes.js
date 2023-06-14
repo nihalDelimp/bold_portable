@@ -6,7 +6,7 @@ const { hasRole } = require('../../middleware/checkRole');
 // save a new service
 router.post('/save', checkAuth, hasRole('ADMIN'), serviceController.save);
 router.get('/list', serviceController.getAllServices);
-router.delete('/delete/:id', serviceController.deleteService);
-router.put('/update/:id', serviceController.updateService);
+router.delete('/delete/:id', checkAuth, hasRole('ADMIN'), serviceController.deleteService);
+router.put('/update/:id', checkAuth, hasRole('ADMIN'), serviceController.updateService);
 
 module.exports = router;

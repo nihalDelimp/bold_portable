@@ -104,8 +104,8 @@ exports.updateService = async (req, res) => {
         // Save the updated service
         const updatedService = await service.save();
 
-        return res.status(200).json(updatedService);
+        return apiResponse.successResponseWithData(res, 'Service updqated successfully', updatedService);
     } catch (error) {
-        return res.status(500).json({ message: 'Internal server error' });
+        return apiResponse.ErrorResponse(res, error.message);
     }
 };
