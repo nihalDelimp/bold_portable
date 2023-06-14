@@ -62,5 +62,50 @@ exports.getAllServices = async (req, res) => {
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
-  };
+};
   
+exports.deleteService = async (req, res) => {
+    try {
+        const serviceId = req.params.id;
+    
+        // Check if the service exists
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            return apiResponse.notFoundResponse(res, 'Service not found');
+        }
+    
+        // Delete the service
+        await Service.findByIdAndDelete(serviceId);
+  
+        return apiResponse.successResponse(res, 'Service deleted successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.updateService = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the service ID from the request parameters
+        const { name, categories, description } = req.body; // Extract the updated service data from the request body
+
+        // Find the service by ID
+        const service = await Service.findById(id);
+
+        // Check if the service exists
+        if (!service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
+
+        // Update the service data
+        service.name = name;
+        service.categories = categories;
+        service.description = description;
+
+        // Save the updated service
+        const updatedService = await service.save();
+
+        return res.status(200).json(updatedService);
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
