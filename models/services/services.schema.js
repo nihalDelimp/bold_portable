@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const serviceSchema = new mongoose.Schema(
     {
-        fullName: String,
-        phone: String,
-        postalCode: String,
-        email: String,
-        subject: String,
-        message: String,
+        name: String,
+        categories: {
+            type: [String],
+            default: [],
+        },
+        description: String,
     },
     { timestamps: true }
 );
