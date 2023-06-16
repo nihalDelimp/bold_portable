@@ -32,7 +32,7 @@ exports.paymentSucceeded = async (object) => {
         let sub;
         if (status === "paid") {
 
-            const serviceUrl = process.env.APP_URL+'/services?quotationType=' + product.metadata.quotationType;
+            const serviceUrl = process.env.APP_URL+'/services?quotationType=' + product.metadata.quotationType + '&quotationId=' +product.metadata.quotationId;
 
             const dataURL = await qrcode.toDataURL(serviceUrl);
 
