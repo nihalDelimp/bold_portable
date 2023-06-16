@@ -12,6 +12,7 @@ const userRouter = require('../controller/user/user.routes')
 const contactRouter = require('../controller/contacts/contacts.routes')
 const serviceRouter = require('../controller/services/services.routes')
 const qrCodeRouter = require('../controller/qrCode/qrCode.routes')
+const userServiceRouter = require('../controller/userService/userService.routes')
 const app = express();
 
 app.use("/auth", authRouter);
@@ -27,5 +28,6 @@ app.use("/user", userRouter);
 app.use("/contact", contactRouter);
 app.use("/service", serviceRouter);
 app.use("/qr-code", qrCodeRouter);
+app.use("/user-service", userServiceRouter);
 
 module.exports = app;
