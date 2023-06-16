@@ -4,6 +4,7 @@ const Subscription = require("../models/subscription.schema");
 const logger = require("../../../helpers/logger.js");
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const qrcode = require('qrcode');
 
 exports.paymentSucceeded = async (object) => {
 
@@ -30,13 +31,18 @@ exports.paymentSucceeded = async (object) => {
         const user = await User.findOne({ email: customer_email });
         let sub;
         if (status === "paid") {
-            console.log('sdkksjkd', object);
+
+            const serviceUrl = process.env.APP_URL+'/services?quotationType=' + product.metadata.quotationType;
+
+            const dataURL = await qrcode.toDataURL(serviceUrl);
+
             sub = await new Subscription({
                 user: user._id,
                 subscription,
                 quotationId: product.metadata.quotationId,
                 quotationType: product.metadata.quotationType,
                 status: "ACTIVE",
+                qrCode: dataURL
             }).save();
         } else {
             sub = await Subscription.findOne({
@@ -48,6 +54,7 @@ exports.paymentSucceeded = async (object) => {
             subscription: sub._id,
             payment: object,
         });
+        
         return await payment.save();
         
     } catch (error) {

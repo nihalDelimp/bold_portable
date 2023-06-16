@@ -28,6 +28,10 @@ const subscriptionsSchema = new mongoose.Schema(
             type: String,
             enum: ['ACTIVE', 'INACTIVE'],
             default: 'ACTIVE'
+        },
+        qrCode: {
+            type: String,
+            required: false,
         }
     },
     { timestamps: true }
