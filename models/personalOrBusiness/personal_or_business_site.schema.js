@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const personalOrBusinessSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'PERSONAL_OR_BUSINESS' }, 
+        quotationType:{ type: String, default: 'personal-or-business' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

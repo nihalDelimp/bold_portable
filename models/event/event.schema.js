@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'EVENT' }, 
+        quotationType:{ type: String, default: 'event' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

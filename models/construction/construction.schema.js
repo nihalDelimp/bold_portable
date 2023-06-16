@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const constructionSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'CONSTRUCTION' }, 
+        quotationType:{ type: String, default: 'construction' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

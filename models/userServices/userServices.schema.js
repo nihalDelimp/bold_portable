@@ -23,7 +23,7 @@ const userServicesSchema = new mongoose.Schema(
         quotationType: {
             type: String,
             required: true,
-            enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
+            enum: ['construction', 'disaster-relief', 'personal-or-business', 'farm-orchard-winery', 'event']
         }
     },
     {

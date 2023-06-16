@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const disasterReliefSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'DISASTER_RELIEF' }, 
+        quotationType:{ type: String, default: 'disaster-relief' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
