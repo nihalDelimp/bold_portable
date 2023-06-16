@@ -31,4 +31,35 @@ exports.save = async (req, res) => {
 		return apiResponse.ErrorResponse(res, error.message);
 	}
 };
+
+exports.getAllUserServices = async (req, res) => {
+	try {
+		const page = parseInt(req.query.page) || 1; 
+		const limit = parseInt(req.query.limit) || 10;
+
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+
+		const totalDocuments = await UserService.countDocuments();
+
+		const userServices = await UserService.find()
+			.skip(startIndex)
+			.limit(limit);
+
+		const pagination = {
+			currentPage: page,
+			totalPages: Math.ceil(totalDocuments / limit),
+			totalDocuments: totalDocuments
+		};
+
+		return apiResponse.successResponseWithData(
+			res,
+			"List of UserServices retrieved successfully.",
+			{ userServices, pagination }
+		);
+	} catch (error) {
+		return apiResponse.ErrorResponse(res, error.message);
+	}
+};
+  
   
