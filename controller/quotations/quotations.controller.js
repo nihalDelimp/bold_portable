@@ -2,7 +2,7 @@ const Construction = require('../../models/construction/construction.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const { server } = require('../../server');
-const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
@@ -291,7 +291,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
   
       const notification = new Notification({
         user: disasterRelief.user,
-        quote_type: "disaster_relief",
+        quote_type: "disasterRelief",
         quote_id: disasterRelief._id,
         type: "UPDATE_QUOTE",
         status_seen: false
@@ -1102,6 +1102,28 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 }
             );
         }
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.quotatByIdAndType = async (req, res) => {
+    try {
+        const { quotationId, quotationType } = req.query;
+        const quoteModel = require(`../../models/${quotationType}/${quotationType}.schema`);
+        const quotation = await quoteModel.find({
+            _id: quotationId,
+        });
+
+        if (!quotation) {
+            return apiResponse.ErrorResponse(res, "Quotation not found");
+        }
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotation retrieved successfully",
+            quotation
+        );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }

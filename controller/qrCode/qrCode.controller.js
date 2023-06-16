@@ -94,6 +94,33 @@ exports.downloadQRCode = async (req, res) => {
         console.log(error);
         return apiResponse.ErrorResponse(res, error.message);
     }
+};
 
+exports.downloadServiceQuotationQRCode = async (req, res) => {
+    try {
+        const link = process.env.APP_URL+'/quotation/quotation-by-id-and-type?'+'quotationId='+req.query.quotationId+'&quotationType='+req.query.quotationType;
+
+        const code = await generateQRCode(link);
+        if (!code) {
+            throw new Error('Failed to generate QR code.');
+        }
+
+        const filePath = await saveQRCodeAsFile(code);
+        if (!filePath) {
+            throw new Error('Failed to save QR code as file.');
+        }
+
+        // Get the public URL for the QR code file
+        const publicURL = `${req.protocol}://${req.get('host')}/public/qrcodes/${path.basename(filePath)}`;
+
+        return apiResponse.successResponseWithData(
+            res,
+            "QR code generated and saved successfully",
+            { publicURL }
+        );
+    } catch (error) {
+        console.log(error);
+        return apiResponse.ErrorResponse(res, error.message);
+    }
 };
 

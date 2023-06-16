@@ -45,4 +45,6 @@ router.get('/get-quotation-from-all-collection', checkAuth, hasMultipleRole(['US
 //Get a Specific Quotation from All collection.
 router.post('/get-specific-quotation-from-all-collection', checkAuth,  hasMultipleRole(['USER', 'ADMIN']), quotationsController.getSpefcificQuotationQuoteId);
 
+router.get('/quotation-by-id-and-type', quotationsController.quotatByIdAndType);
+
 module.exports = router;
