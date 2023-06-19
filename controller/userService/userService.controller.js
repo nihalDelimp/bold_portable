@@ -1,5 +1,6 @@
 const UserService = require('../../models/userServices/userServices.schema');
 const apiResponse = require("../../helpers/apiResponse");
+const Notification = require('../../models/notification/notification.schema');
 const { server } = require('../../server');
 const io = require('socket.io')(server);
 
@@ -19,6 +20,16 @@ exports.save = async (req, res) => {
 
 		// Save the new UserServices instance to the database
 		const savedUserServices = await newUserServices.save();
+
+		// Save the new Notification for Admmin panel 
+		const notification = new Notification({
+			user: req.userData.user,
+			quote_type: quotationType,
+			quote_id: quotationId,
+			type: "SERVICE_REQUEST",
+			status_seen: false
+		  });
+		  await notification.save();
 
 		io.emit("user_service_saved", { savedUserServices });
 
