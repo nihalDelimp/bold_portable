@@ -58,12 +58,14 @@ exports.paymentSucceeded = async (object) => {
             from: 'hello@boldportable.com',
             to: customer_email,
             subject: 'QR Code for your Portable Rental',
-            text: `
-                <p>Hi,</p>
-                <p>Please find the attached QR code to scan and redirect to the service page:</p>
-                <img src="data:image/png;base64,${dataURL}" alt="QR Code" />
-                <p>Thanks,</p>
-                <p>Bold Portable Team</p>`
+            text: `Hi,\n\nPlease find the atached QR code to scan and redirect to the service page  \n\nThanks,\nBold Portable Team`,
+            attachments: [
+                {
+                    filename: 'qrcode.png',
+                    content: dataURL.split(';base64,').pop(),
+                    encoding: 'base64'
+                }
+            ]
         };
         
         mailer.sendMail(mailOptions);
