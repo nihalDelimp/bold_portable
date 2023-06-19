@@ -2,6 +2,7 @@ const User = require("../../../models/user/user.schema");
 const Payment = require("../models/payment_succeeded.schema");
 const Subscription = require("../models/subscription.schema");
 const logger = require("../../../helpers/logger.js");
+const sendSms = require("../../../helpers/twillioSms.js");
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const qrcode = require('qrcode');
@@ -30,7 +31,7 @@ exports.paymentSucceeded = async (object) => {
         const { customer_email, subscription, status } = object;
 
         const user = await User.findOne({ email: customer_email });
-        
+
         let sub;
 
         const serviceUrl = process.env.APP_URL+'/services?quotationType=' + product.metadata.quotationType + '&quotationId=' +product.metadata.quotationId;
@@ -57,17 +58,19 @@ exports.paymentSucceeded = async (object) => {
             from: 'hello@boldportable.com',
             to: customer_email,
             subject: 'QR Code for your Portable Rental',
-            text: `Hi,\n\nPlease find the atached QR code to scan and redirect to the service page  \n\nThanks,\nBold Portable Team`,
-            attachments: [
-                {
-                    filename: 'qrcode.png',
-                    content: dataURL.split(';base64,').pop(),
-                    encoding: 'base64'
-                }
-            ]
+            text: `
+                <p>Hi,</p>
+                <p>Please find the attached QR code to scan and redirect to the service page:</p>
+                <img src="data:image/png;base64,${dataURL}" alt="QR Code" />
+                <p>Thanks,</p>
+                <p>Bold Portable Team</p>`
         };
         
         mailer.sendMail(mailOptions);
+
+        const text = "You subscription is succesfull";
+
+        sendSms.sendSMS(user.mobile, text);
 
         const payment = new Payment({
             subscription: sub._id,
