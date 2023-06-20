@@ -1,4 +1,5 @@
 const Service = require('../../models/services/services.schema');
+const UserService = require('../../models/userServices/userServices.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const mailer = require("../../helpers/nodemailer");
 const User = require("../../models/user/user.schema");
@@ -164,7 +165,7 @@ exports.mailServiceAcknowledgement = async (req, res) => {
         const { user_id, service_id } = req.body; // Extract the necessary details from the request body
 
         // Retrieve the service details from the Service model based on the service ID
-        const service = await Service.findById(service_id);
+        const service = await UserService.findById(service_id);
 
         if (!service) {
             return apiResponse.notFoundResponse(res, 'Service not found');
