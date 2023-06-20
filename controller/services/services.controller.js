@@ -51,18 +51,36 @@ exports.save = async (req, res) => {
 
 exports.getAllServices = async (req, res) => {
     try {
-        // Retrieve all services from the database
-        const allServices = await Service.find();
+        // Extract the page and limit values from the request query parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Calculate the skip value based on the page and limit
+        const skip = (page - 1) * limit;
+
+        // Retrieve the total count of services
+        const totalCount = await Service.countDocuments();
+
+        // Retrieve services based on the pagination parameters
+        const services = await Service.find()
+            .skip(skip)
+            .limit(limit);
 
         return apiResponse.successResponseWithData(
             res,
             'Services retrieved successfully',
-            allServices
+            {
+                services,
+                totalCount,
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit)
+            }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
   
 exports.deleteService = async (req, res) => {
     try {
@@ -109,3 +127,21 @@ exports.updateService = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.getServiceByName = async (req, res) => {
+    try {
+        const { name } = req.body;
+
+        // Find the service by name
+        const service = await Service.findOne({ name });
+
+        if (!service) {
+            return apiResponse.notFoundResponse(res, 'Service not found');
+        }
+
+        return apiResponse.successResponseWithData(res, 'Service retrieved successfully', service);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+  

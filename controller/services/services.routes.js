@@ -8,5 +8,6 @@ router.post('/save', checkAuth, hasRole('ADMIN'), serviceController.save);
 router.get('/list', serviceController.getAllServices);
 router.delete('/delete/:id', checkAuth, hasRole('ADMIN'), serviceController.deleteService);
 router.put('/update/:id', checkAuth, hasRole('ADMIN'), serviceController.updateService);
+router.post('/find-by-name', serviceController.getServiceByName);
 
 module.exports = router;
