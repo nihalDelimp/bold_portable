@@ -116,7 +116,7 @@ const personalOrBusinessSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
 

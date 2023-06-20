@@ -44,7 +44,7 @@ const disasterReliefSchema = new mongoose.Schema(
         special_requirements: String,
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
         costDetails: { // Cost details for various components

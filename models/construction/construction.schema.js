@@ -43,7 +43,7 @@ const constructionSchema = new mongoose.Schema(
         dateTillUse: Date,
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
         costDetails: { // Cost details for various components
