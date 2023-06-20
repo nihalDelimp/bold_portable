@@ -1,5 +1,7 @@
 const Service = require('../../models/services/services.schema');
 const apiResponse = require("../../helpers/apiResponse");
+const mailer = require("../../helpers/nodemailer");
+const User = require("../../models/user/user.schema");
 
 // exports.save = async (req, res) => {
 //     try {
@@ -156,4 +158,43 @@ exports.getServiceByName = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.mailServiceAcknowledgement = async (req, res) => {
+    try {
+        const { user_id, service_id } = req.body; // Extract the necessary details from the request body
+
+        // Retrieve the service details from the Service model based on the service ID
+        const service = await Service.findById(service_id);
+
+        if (!service) {
+            return apiResponse.notFoundResponse(res, 'Service not found');
+        }
+
+        // Retrieve the user details from the User model based on the user ID
+        const user = await User.findById(user_id);
+
+        if (!user) {
+            return apiResponse.notFoundResponse(res, 'User not found');
+        }
+
+        const { name, email } = user; // Extract the username and email from the retrieved user
+        const { name: service_name } = service; // Extract the service name from the retrieved service
+
+        const mailOptions = {
+            from: 'hello@boldportable.com',
+            to: email,
+            subject: 'Service Request Acknowledgement',
+            text: `Hi ${name},\n\nThank you for your service request for ${service_name} (ID: ${service_id}).\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
+        };
+
+        // Send the email using the mailer module or service of your choice
+        mailer.sendMail(mailOptions);
+
+        return apiResponse.successResponse(res, 'Service request acknowledgement email sent successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
   

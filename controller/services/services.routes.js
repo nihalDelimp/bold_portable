@@ -9,5 +9,6 @@ router.get('/list', serviceController.getAllServices);
 router.delete('/delete/:id', checkAuth, hasRole('ADMIN'), serviceController.deleteService);
 router.put('/update/:id', checkAuth, hasRole('ADMIN'), serviceController.updateService);
 router.post('/find-by-name', serviceController.getServiceByName);
+router.post('/mail-acknowledgement', serviceController.mailServiceAcknowledgement);
 
 module.exports = router;
