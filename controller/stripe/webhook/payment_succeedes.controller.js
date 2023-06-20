@@ -72,7 +72,7 @@ exports.paymentSucceeded = async (object) => {
 
         const text = "You subscription is succesfull";
 
-        sendSms.sendSMS(user.mobile, text);
+        // sendSms.sendSMS(user.mobile, text);
 
         const payment = new Payment({
             subscription: sub._id,
