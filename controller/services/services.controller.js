@@ -28,6 +28,12 @@ exports.save = async (req, res) => {
     try {
         const { name, categories, description } = req.body;
 
+        // Check if a service with the same name already exists
+        const existingService = await Service.findOne({ name });
+        if (existingService) {
+            return apiResponse.ErrorResponse(res, 'Service with the same name already exists');
+        }
+
         // Create a new instance of the Service model
         const newService = new Service({
             name,
@@ -111,7 +117,13 @@ exports.updateService = async (req, res) => {
 
         // Check if the service exists
         if (!service) {
-            return res.status(404).json({ message: 'Service not found' });
+            return apiResponse.notFoundResponse(res, 'Service not found');
+        }
+
+        // Check if a service with the updated name already exists
+        const existingService = await Service.findOne({ name });
+        if (existingService && existingService._id.toString() !== id) {
+            return apiResponse.ErrorResponse(res, 'Service with the same name already exists');
         }
 
         // Update the service data
@@ -122,7 +134,7 @@ exports.updateService = async (req, res) => {
         // Save the updated service
         const updatedService = await service.save();
 
-        return apiResponse.successResponseWithData(res, 'Service updqated successfully', updatedService);
+        return apiResponse.successResponseWithData(res, 'Service updated successfully', updatedService);
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
