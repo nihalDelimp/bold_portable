@@ -181,7 +181,7 @@ exports.mailServiceAcknowledgement = async (req, res) => {
         const { name, email } = user; // Extract the username and email from the retrieved user
 
         const mailOptions = {
-            from: 'hello@boldportable.com',
+            from: process.env.MAIL_FROM,
             to: email,
             subject: 'Service Request Acknowledgement',
             text: `Hi ${name},\n\nThank you for your service request for ${service.service} (ID: ${service_id}).\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`

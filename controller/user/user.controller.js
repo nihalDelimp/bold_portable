@@ -92,7 +92,7 @@ exports.sendMailToMultipleUser = async (req, res) => {
         // Loop through each email address and send mail
         for (const userEmail of emailList) {
             const mailOptions = {
-                from: 'hello@boldportable.com',
+                from: process.env.MAIL_FROM,
                 to: userEmail,
                 subject,
                 text: message

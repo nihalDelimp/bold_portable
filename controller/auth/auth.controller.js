@@ -211,7 +211,7 @@ exports.sendOtp = async (req, res) => {
         await passwordVerification.save();
         
         const mailOptions = {
-            from: 'hello@boldportable.com',
+            from: process.env.MAIL_FROM,
             to: req.body.email,
             subject: 'OTP to reset your password',
             text: `Hi ${user.name},\n\nThe OTP to reset your password is ${otp} \n\nThanks,\nBold Portable Team`

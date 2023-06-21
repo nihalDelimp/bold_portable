@@ -91,7 +91,7 @@ exports.paymentSucceeded = async (object) => {
         }
 
         const mailOptions = {
-            from: 'hello@boldportable.com',
+            from: process.env.MAIL_FROM,
             to: customer_email,
             subject: 'QR Code for your Portable Rental',
             text: `Hi,\n\nPlease find the atached QR code to scan and redirect to the service page  \n\nThanks,\nBold Portable Team`,
@@ -108,7 +108,7 @@ exports.paymentSucceeded = async (object) => {
 
         const text = "You subscription is succesfull";
 
-        // sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         const payment = new Payment({
             subscription: sub._id,

@@ -23,7 +23,7 @@ exports.createUser = async (userData) => {
         // Hash the temporary password
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
         const mailOptions = {
-            from: 'hello@boldportable.com',
+            from: process.env.MAIL_FROM,
             to: email,
             subject: 'Set your password',
             text: `Hi ${name},\n\nYour username is ${email}, and temprory password is ${tempPassword}. You may reset your password by logging in to account\n\nThanks,\nBold Portable Team`
