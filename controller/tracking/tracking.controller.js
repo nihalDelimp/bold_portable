@@ -161,4 +161,20 @@ exports.fetchTrackingList = async (req, res) => {
     }
 };
 
+exports.getTrackingById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const tracking = await Tracking.findById(id);
+
+        if (!tracking) {
+            return apiResponse.notFoundResponse(res, "Tracking not found");
+        }
+
+        return apiResponse.successResponseWithData(res, "Tracking Detail:", tracking);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
   
