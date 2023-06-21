@@ -54,6 +54,7 @@ exports.getAllUserServices = async (req, res) => {
 		const totalDocuments = await UserService.countDocuments();
 
 		const userServices = await UserService.find()
+			.sort({ createdAt: -1 })
 			.skip(startIndex)
 			.limit(limit);
 
