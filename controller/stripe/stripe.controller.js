@@ -7,6 +7,7 @@ const Payment = require("./models/payment_succeeded.schema");
 const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
 const Tracking = require('../../models/tracking/tracking.schema');
+const mailer = require("../../helpers/nodemailer");
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -105,6 +106,16 @@ exports.createCheckoutSession = async (req, res) => {
         });
 
         const { id, url } = session;
+
+        const mailOptions = {
+            from: 'hello@boldportable.com',
+            to: email,
+            subject: 'QR Code for your Portable Rental',
+            text: `Hi ${user.name},\n\nThank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action. To proceed with the payment, please click on the following link to make a secure payment via Stripe:\n\n${url}\n\nAlternatively, you can copy and paste the following link in your browser:\n\n${url}\n\nIf you have any questions or need further assistance, please feel free to contact our customer support team.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>Thank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action.</p><p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p><p><a href="${url}">Make Payment</a></p><p>Alternatively, you can copy and paste the following link in your browser:</p><p>${url}</p><p>If you have any questions or need further assistance, please feel free to contact our customer support team.</p><p>Thank you</p>`,
+        };
+        
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
@@ -259,6 +270,24 @@ exports.endSubscription = async (req, res) => {
             mode: PaymentMode.Payment,
         });
         const { id, url, customer } = session;
+
+        const mailOptions = {
+            from: 'hello@boldportable.com',
+            to: email,
+            subject: 'QR Code for your Portable Rental',
+            text: `Hi ${user.name},\n\nWe have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation.The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.\nTo proceed with the payment, please click on the following link to make a secure payment via Stripe:${url}"\nAlternatively, you can copy and paste the following link in your browser:${url}\n\n\Thank you`,
+            html: `<p>Hi ${user.name},</p>
+            <p>We have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation. The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.</p>
+            <p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p>
+            <p><a href="${url}">Make Payment</a></p>
+            <p>Alternatively, you can copy and paste the following link in your browser:</p>
+            <p>${url}</p>
+            <p>Thank you</p>
+            `,
+        };
+        
+        mailer.sendMail(mailOptions);
+
         return apiResponse.successResponseWithData(
             res,
             "Subscription end in-progress",
