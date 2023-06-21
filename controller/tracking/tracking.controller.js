@@ -1,5 +1,8 @@
 const Tracking = require('../../models/tracking/tracking.schema');
 const apiResponse = require("../../helpers/apiResponse");
+const User = require('../../models/user/user.schema');
+const mailer = require("../../helpers/nodemailer");
+const sendSms = require("../../helpers/twillioSms.js");
 
 exports.saveTracking = async (req, res) => {
 	try {
@@ -46,33 +49,49 @@ exports.saveTracking = async (req, res) => {
 };
 
 exports.updateTracking = async (req, res) => {
-	try {
-		const { trackingId } = req.params;
-		const { driver_name, driver_phone_number, address } = req.body;
-	
-		const updatedAddress = address.map(address => ({
-			address,
-			timestamp: Date.now()
-		}));
+    try {
+        const { trackingId } = req.params;
+        const { driver_name, driver_phone_number, address } = req.body;
 
-		const updatedTracking = await Tracking.findByIdAndUpdate(
-			trackingId,
-			{ $push: { address: { $each: updatedAddress } }, driver_name, driver_phone_number },
-			{ new: true }
-		);
-	
-		if (!updatedTracking) {
-		  	return apiResponse.notFoundResponse(res, "Tracking not found.");
-		}
-	
-		return apiResponse.successResponseWithData(
-			res,
-			"Tracking updated successfully.",
-			updatedTracking
-		);
-	} catch (error) {
-		return apiResponse.ErrorResponse(res, error.message);
-	}
+        const updatedAddress = address.map((address) => ({
+            address,
+            timestamp: Date.now(),
+        }));
+
+        const updatedTracking = await Tracking.findByIdAndUpdate(
+            trackingId,
+            { $push: { address: { $each: updatedAddress } }, driver_name, driver_phone_number },
+            { new: true }
+        ).populate('user');
+
+        if (!updatedTracking) {
+            return apiResponse.notFoundResponse(res, "Tracking not found.");
+        }
+
+        // Find user from tracking
+        const customer_email = updatedTracking.user.email;
+
+        const mailOptions = {
+			from: process.env.MAIL_FROM,
+			to: customer_email,
+			subject: 'Tracking status updated',
+			text: `Hi,\n\nWe would like to inform you that the tracking status has been updated. The new updated address is:\n\n${address.join('\n')}\n\nPlease feel free to contact us if you have any questions.\n\nThanks,\nBold Portable Team`,
+		};
+		
+		mailer.sendMail(mailOptions);
+		
+		const text = `The new updated address is:\n\n${address}`;
+
+		sendSms.sendSMS(updatedTracking.user.mobile, text);
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Tracking updated successfully.",
+            updatedTracking
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
 };
 
 exports.getTrackingList = async (req, res) => {
