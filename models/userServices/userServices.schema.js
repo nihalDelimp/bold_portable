@@ -44,6 +44,12 @@ const userServicesSchema = new mongoose.Schema(
         coordinates: {
             type: { type: String, default: 'Point' },
             coordinates: { type: [Number], default: [0, 0] }
+        },
+        status: {
+            type: String,
+            required: true,
+            enum: ['pending', 'processing', 'resolved'],
+            default:'pending'
         }
     },      
     {

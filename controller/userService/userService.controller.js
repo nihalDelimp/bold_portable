@@ -7,7 +7,7 @@ const io = require('socket.io')(server);
 exports.save = async (req, res) => {
 	try {
 
-		const { service, serviceTypes, quotationId, quotationType, email, phone, name, address, coordinates } = req.body;
+		const { service, serviceTypes, quotationId, quotationType, email, phone, name, address, coordinates, status } = req.body;
 
 		// Create a new UserServices instance with the extracted data
 		const newUserServices = new UserService({
@@ -20,7 +20,8 @@ exports.save = async (req, res) => {
 			phone,
 			name,
 			address,
-			coordinates
+			coordinates,
+			status
 		});
 
 		// Save the new UserServices instance to the database
