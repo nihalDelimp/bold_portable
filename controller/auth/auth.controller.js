@@ -9,6 +9,7 @@ const path = require('path');
 const mailer = require("../../helpers/nodemailer");
 const PasswordVerification = require('../../models/passwordVerification/passwordVerification.schema');
 const sendSms = require("../../helpers/twillioSms.js");
+const PhoneOtpVerification = require('../../models/phoneOtpVerification/phoneOtpVerification.schema');
 
 function generateOTP(length) {
     let result = '';
@@ -39,7 +40,6 @@ exports.registerUsers = async (req, res) => {
             mobile,
             user_type,
             address,
-            registrationOTP:"0000",
         });
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -49,11 +49,7 @@ exports.registerUsers = async (req, res) => {
                     .save()
                     .then(user => {
 
-                        const text = "OTP for account verification is 0000";
-
-                        sendSms.sendSMS(user.mobile, text);
-
-                        return apiResponse.successResponse(res, "Please verify your phone number")
+                        return apiResponse.successResponse(res, "Registration successful")
                     })
                     .catch(err => {
                         return apiResponse.ErrorResponse(res, err.message)
@@ -64,33 +60,6 @@ exports.registerUsers = async (req, res) => {
         res.status(500).json({ message: 'An errorss occurred while registering the user' });
     }
 };
-
-exports.verifyPhoneOtp = async (req, res) => {
-    try {
-        const { mobile, otp } = req.body;
-
-        const user = await User.findOne({ mobile });
-
-        if (!user) {
-            return apiResponse.notFoundResponse(res, "User not found");
-        }
-
-        if (user.registrationOTP !== otp) {
-            return apiResponse.validationErrorWithData(res, "Invalid OTP");
-        }
-
-        // OTP matches, update mobile_verified field
-        user.mobile_verified = true;
-        await user.save();
-
-        return apiResponse.successResponse(res, "Phone number verification successful");
-    } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message);
-    }
-};
-
-
-
 
 
 exports.loginUser = async (req, res) => {
@@ -323,4 +292,69 @@ exports.resetPassword = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.sendPhoneOtp = async (req, res) => {
+    try {
+        const { phone } = req.body;
+
+        // Create a new PhoneOtpVerification instance with the extracted data
+
+        // Set tep fake OTP
+
+        const otp = "0000";
+
+        const newPhoneOtpVerification = new PhoneOtpVerification({
+            phone,
+            otp,
+            expiryOn: new Date().setHours(new Date().getHours() + 48)
+        });
+
+        // Save the new PhoneOtpVerification instance to the database
+        const savedPhoneOtpVerification = await newPhoneOtpVerification.save();
+
+        // Send SMS with the OTP
+        const smsText = `Your OTP for verification: ${otp}`;
+        sendSms.sendSMS(phone, smsText);
+
+        return apiResponse.successResponseWithData(
+            res,
+            'OTP sent successfully.',
+            {}
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+exports.verifyPhoneOtp = async (req, res) => {
+    try {
+        const { phone, otp } = req.body;
+
+        // Find the PhoneOtpVerification entry with the matching phone number and OTP
+        const phoneOtpVerification = await PhoneOtpVerification.findOne({
+            phone,
+            otp
+        });
+
+        if (!phoneOtpVerification) {
+            return apiResponse.ErrorResponse(res, 'Invalid OTP');
+        }
+
+        // Check if the OTP is expired
+        const currentTimestamp = Date.now();
+        if (phoneOtpVerification.expiryOn < currentTimestamp) {
+            return apiResponse.ErrorResponse(res, 'OTP expired');
+        }
+
+        // Update the status of the PhoneOtpVerification entry to 'verified'
+        phoneOtpVerification.status = 'verified';
+        await phoneOtpVerification.save();
+
+        return apiResponse.successResponse(res, 'OTP verified successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
 
