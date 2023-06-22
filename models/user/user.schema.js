@@ -19,6 +19,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        mobile_verified:{
+            type: Boolean,
+            default:false
+        },
+        registrationOTP: {
+            type: String
+        },
         password: {
             type: String,
             required: true

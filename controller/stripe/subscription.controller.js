@@ -7,6 +7,11 @@ const Payment = require("./models/payment_succeeded.schema");
 const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
 const Tracking = require('../../models/tracking/tracking.schema');
+const Construction = require('../../models/construction/construction.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
 
 exports.getDetails = async (req, res) => {
     try {
@@ -19,14 +24,34 @@ exports.getDetails = async (req, res) => {
             return apiResponse.notFoundResponse(res, "Subscription not found");
         }
 
-        const quotationType = subscription.quotationType;
-        const quoteModel = require(`../../models/${quotationType.toLowerCase()}/${quotationType.toLowerCase()}.schema`);
-        const quotation = await quoteModel.findById(subscription.quotationId);
-
         const tracking = await Tracking.find({ subscriptionId: subscriptionId });
 
-        subscription.quotation = quotation;
-        subscription.tracking = tracking;
+        const quotationId = subscription.quotationId;
+
+        const quotationType = subscription.quotationType;
+
+        let quotation;
+        switch (quotationType) {
+            case 'event':
+                quotation = await Event.findOne({_id:quotationId});
+                break;
+            case 'farm-orchard-winery':
+                quotation = await FarmOrchardWinery.findOne({_id:quotationId});
+                break;
+            case 'personal-or-business':
+                quotation = await PersonalOrBusiness.findOne({_id:quotationId});
+                console.log('djkdjkd', quotation)
+                break;
+            case 'disaster-relief':
+                quotation = await DisasterRelief.findOne({_id:quotationId});
+                
+                break;
+            case 'construction':
+                quotation = await Construction.findOne({_id:quotationId});
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
 
         return apiResponse.successResponseWithData(res, "Subscription detail fetched successfully", {
             subscription, quotation, tracking

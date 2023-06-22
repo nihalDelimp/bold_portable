@@ -3,15 +3,41 @@ const apiResponse = require("../../helpers/apiResponse");
 const User = require('../../models/user/user.schema');
 const mailer = require("../../helpers/nodemailer");
 const sendSms = require("../../helpers/twillioSms.js");
+const Construction = require('../../models/construction/construction.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
 
 exports.saveTracking = async (req, res) => {
 	try {
 
 		let quotationType = req.body.quotationType;
 
-		const quoteModel = require('../../models/' + quotationType.toLowerCase() + '/' + quotationType.toLowerCase() + '.schema');
+		const quotationId = req.body.quotationId;
 
-		const modelInstance = await quoteModel.findById(req.body.quotationId);
+		let quotation;
+        switch (quotationType) {
+            case 'event':
+                quotation = await Event.findOne({_id:quotationId});
+                break;
+            case 'farm-orchard-winery':
+                quotation = await FarmOrchardWinery.findOne({_id:quotationId});
+                break;
+            case 'personal-or-business':
+                quotation = await PersonalOrBusiness.findOne({_id:quotationId});
+                console.log('djkdjkd', quotation)
+                break;
+            case 'disaster-relief':
+                quotation = await DisasterRelief.findOne({_id:quotationId});
+                
+                break;
+            case 'construction':
+                quotation = await Construction.findOne({_id:quotationId});
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
 	
 		const tracking = new Tracking({
 			quotationType: req.body.quotationType,
@@ -19,7 +45,7 @@ exports.saveTracking = async (req, res) => {
 			subscriptionId: req.body.subscriptionId,
 			driver_name: req.body.driver_name,
 			driver_phone_number: req.body.driver_phone_number,
-			user: modelInstance.user,
+			user: quotation.user,
 			address: [
 				{
 					address:req.body.address,

@@ -8,6 +8,20 @@ const fs = require('fs');
 const path = require('path');
 const mailer = require("../../helpers/nodemailer");
 const PasswordVerification = require('../../models/passwordVerification/passwordVerification.schema');
+const sendSms = require("../../helpers/twillioSms.js");
+
+function generateOTP(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        result += characters.charAt(randomIndex);
+    }
+  
+    return result;
+}
 
 exports.registerUsers = async (req, res) => {
     try {
@@ -24,7 +38,8 @@ exports.registerUsers = async (req, res) => {
             password,
             mobile,
             user_type,
-            address
+            address,
+            registrationOTP:"0000",
         });
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -33,7 +48,12 @@ exports.registerUsers = async (req, res) => {
                 newUser
                     .save()
                     .then(user => {
-                        return apiResponse.successResponse(res, user)
+
+                        const text = "OTP for account verification is 0000";
+
+                        sendSms.sendSMS(user.mobile, text);
+
+                        return apiResponse.successResponse(res, "Please verify your phone number")
                     })
                     .catch(err => {
                         return apiResponse.ErrorResponse(res, err.message)
@@ -44,6 +64,32 @@ exports.registerUsers = async (req, res) => {
         res.status(500).json({ message: 'An errorss occurred while registering the user' });
     }
 };
+
+exports.verifyPhoneOtp = async (req, res) => {
+    try {
+        const { mobile, otp } = req.body;
+
+        const user = await User.findOne({ mobile });
+
+        if (!user) {
+            return apiResponse.notFoundResponse(res, "User not found");
+        }
+
+        if (user.registrationOTP !== otp) {
+            return apiResponse.validationErrorWithData(res, "Invalid OTP");
+        }
+
+        // OTP matches, update mobile_verified field
+        user.mobile_verified = true;
+        await user.save();
+
+        return apiResponse.successResponse(res, "Phone number verification successful");
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
 
 
 
@@ -62,6 +108,9 @@ exports.loginUser = async (req, res) => {
                 }
     
                 let userData = { user };
+                // if(!userData.mobile_verified) {
+                //     return apiResponse.ErrorResponse(res, "Please verify your phone number",)
+                // }
                 const jwtPayload = userData;
                 const secret = process.env.SECRET_KEY;
                 const jwtData = {
@@ -177,19 +226,6 @@ exports.updateProfileImage = async (req, res) => {
         logger.log("error", { fileName: path.basename(__filename), message: error.message });
         return apiResponse.ErrorResponse(res, error.message);
     }
-}
-
-function generateOTP(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const charactersLength = characters.length;
-  
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * charactersLength);
-        result += characters.charAt(randomIndex);
-    }
-  
-    return result;
 }
 
 exports.sendOtp = async (req, res) => {
