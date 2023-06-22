@@ -178,6 +178,10 @@ exports.mailServiceAcknowledgement = async (req, res) => {
             return apiResponse.notFoundResponse(res, 'User not found');
         }
 
+        service.status = "resolved";
+
+        service.save();
+
         const { name, email } = user; // Extract the username and email from the retrieved user
 
         const mailOptions = {
