@@ -54,14 +54,6 @@ exports.saveTracking = async (req, res) => {
 			]
 		});
 
-		// // Save the address array if it exists in the request body
-		// req.body.address.forEach(addr => {
-		// 	tracking.address.push({
-		// 		address: addr.address,
-		// 		timestamp: addr.timestamp || new Date()
-		// 	});
-		// });
-
 		const data = await tracking.save();
 	
 		return apiResponse.successResponseWithData(

@@ -24,8 +24,28 @@ const userServicesSchema = new mongoose.Schema(
             type: String,
             required: true,
             enum: ['construction', 'disaster-relief', 'personal-or-business', 'farm-orchard-winery', 'event']
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        address: {
+            type: String,
+            required: true
+        },
+        coordinates: {
+            type: { type: String, default: 'Point' },
+            coordinates: { type: [Number], default: [0, 0] }
         }
-    },
+    },      
     {
         timestamps: true
     }
