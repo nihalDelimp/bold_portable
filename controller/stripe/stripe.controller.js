@@ -8,6 +8,11 @@ const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
 const Tracking = require('../../models/tracking/tracking.schema');
 const mailer = require("../../helpers/nodemailer");
+const Construction = require('../../models/construction/construction.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -189,17 +194,28 @@ exports.getSubscriptionPaymentList = async (req, res) => {
             const quotationType = payment.subscription?.quotationType;
             const quotationId = payment.subscription?.quotationId.toString();
 
-            if(quotationType && quotationId) {
+            let quotation;
+            switch (quotationType) {
+                case 'event':
+                    quotation = await Event.findOne({_id:quotationId});
+                    break;
+                case 'farm-orchard-winery':
+                    quotation = await FarmOrchardWinery.findOne({_id:quotationId});
+                    break;
+                case 'personal-or-business':
+                    quotation = await PersonalOrBusiness.findOne({_id:quotationId});
+                    break;
+                case 'disaster-relief':
+                    quotation = await DisasterRelief.findOne({_id:quotationId});
+                    break;
+                case 'construction':
+                    quotation = await Construction.findOne({_id:quotationId});
+                    break;
+            }
 
-                const quoteModel = require(`../../models/${quotationType.toLowerCase()}/${quotationType.toLowerCase()}.schema`);
-                const quotation = await quoteModel.findById(quotationId);
-
-                console.log(quotation);
-
-                // payment.costDetails = quotation.costDetails;
+            if(quotation) {
                 payments.push({costDetails: quotation.costDetails});
             }
-            
         }
 
         const totalPages = Math.ceil(totalPayment / limit);
