@@ -49,6 +49,33 @@ exports.registerUsers = async (req, res) => {
                     .save()
                     .then(user => {
 
+                        const mailOptions = {
+                            from: process.env.MAIL_FROM,
+                            to: user.email,
+                            subject: 'Welcome to Bold Portable',
+                            text: `Dear ${user.name},
+                        
+                                Thank you for registering with our platform! We are delighted to have you as a new member of our community.
+                                
+                                At Bold Portable, we strive to provide an exceptional user experience and offer a wide range of services to meet your needs. Whether you are looking for specific services or features, our team is dedicated to ensuring your satisfaction.
+
+                                If you have any questions, concerns, or feedback, please don't hesitate to reach out to us. We are here to assist you and make your experience as smooth as possible.
+                                
+                                Once again, welcome to Bold Portable. We are thrilled to have you on board and look forward to serving you.
+                                
+                                Best regards,
+                                The Bold Portable Team`,
+                            html: `<p>Dear ${user.name},</p>
+                                <p>Thank you for registering with our platform! We are delighted to have you as a new member of our community.</p>
+                                <p>At Bold Portable, we strive to provide an exceptional user experience and offer a wide range of services to meet your needs. Whether you are looking for specific services or features, our team is dedicated to ensuring your satisfaction.</p>
+                                <p>If you have any questions, concerns, or feedback, please don't hesitate to reach out to us. We are here to assist you and make your experience as smooth as possible.</p>
+                                <p>Once again, welcome to Bold Portable. We are thrilled to have you on board and look forward to serving you.</p>
+                                <p>Best regards,</p>
+                                <p>The Bold Portable Team</p>`
+                        };
+                        
+                        mailer.sendMail(mailOptions);
+
                         return apiResponse.successResponse(res, "Registration successful")
                     })
                     .catch(err => {
