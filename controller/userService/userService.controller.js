@@ -8,6 +8,21 @@ exports.save = async (req, res) => {
 	try {
 
 		const { service, serviceTypes, quotationId, quotationType, email, phone, name, address, coordinates, status } = req.body;
+		let images = [];
+
+		if (req.files) {
+            // multiple files uploaded
+            images = req.files.map(file => ({
+                image_path: file.path,
+                image_type: file.mimetype
+            }));
+        } else {
+            // single file uploaded
+            images.push({
+                image_path: req.file.path,
+                image_type: req.file.mimetype
+            });
+        }
 
 		// Create a new UserServices instance with the extracted data
 		const newUserServices = new UserService({
@@ -21,7 +36,8 @@ exports.save = async (req, res) => {
 			name,
 			address,
 			coordinates,
-			status
+			status,
+			images
 		});
 
 		// Save the new UserServices instance to the database

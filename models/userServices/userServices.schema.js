@@ -50,6 +50,15 @@ const userServicesSchema = new mongoose.Schema(
             required: true,
             enum: ['pending', 'processing', 'resolved'],
             default:'pending'
+        },
+        images: {
+            type: Array,
+            validate: {
+                validator: function (value) {
+                    return value.length <= 3;
+                },
+                message: 'Maximum of 3 images allowed.'
+            }
         }
     },      
     {
