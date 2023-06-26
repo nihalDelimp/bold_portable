@@ -3,5 +3,6 @@ const contactController = require('./contacts.controller');
 
 // save a new service
 router.post('/save', contactController.save);
+router.post('/send-query', contactController.queryMail);
 
 module.exports = router;

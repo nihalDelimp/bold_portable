@@ -31,3 +31,23 @@ exports.save = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.queryMail = async (req, res) => {
+    try {
+        const { email, message } = req.body;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.ADMIN_MAIL,
+            subject: 'Thankyou for contacting us',
+            text: `Hi,\n\nYou have a query mail with following message from email: ${email}\n${message}.\n\nThank you`,
+            html: `<p>Hi,</p><p>You have a query mail with following message from email: ${email}</p><p>${message}</p><p>Your Company Name</p>`
+        };
+        
+        mailer.sendMail(mailOptions);
+
+        return apiResponse.successResponse(res, 'Query sent successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
