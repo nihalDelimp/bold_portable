@@ -35,6 +35,8 @@ const personalOrBusinessSchema = new mongoose.Schema(
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
+        maleWorkers:{ type: Number, default: 0},
+        totalWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
