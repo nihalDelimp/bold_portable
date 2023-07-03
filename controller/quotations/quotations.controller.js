@@ -41,12 +41,13 @@ exports.createConstructionQuotation = async (req, res) => {
             workerTypes,
             femaleWorkers,
             maleWorkers,
-            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -195,13 +196,13 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             workerTypes,
             femaleWorkers,
             maleWorkers,
-            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
 
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -344,12 +345,13 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             workerTypes,
             femaleWorkers,
             maleWorkers,
-            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -489,12 +491,13 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             workerTypes,
             femaleWorkers,
             maleWorkers,
-            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -642,13 +645,14 @@ exports.createEventQuotation = async (req, res) => {
             workerTypes,
             femaleWorkers,
             maleWorkers,
-            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
 
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
