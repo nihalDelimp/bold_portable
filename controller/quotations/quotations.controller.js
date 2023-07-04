@@ -2,17 +2,27 @@ const Construction = require('../../models/construction/construction.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const { server } = require('../../server');
-const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
 const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
+const userHelper = require('../../helpers/user');
+const Subscription = require("../stripe/models/subscription.schema");
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
+        
         const {
             coordinator: { name, email, cellNumber },
             maxWorkers,
@@ -30,11 +40,14 @@ exports.createConstructionQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -80,6 +93,8 @@ exports.createConstructionQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
+            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -108,6 +123,7 @@ exports.createConstructionQuotation = async (req, res) => {
             construction
         );
     } catch (error) {
+        console.log(error);
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
@@ -154,7 +170,14 @@ exports.updateConstructionQuotation = async (req, res) => {
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
+
         const {
             disasterNature,
             coordinator: { name, email, cellNumber },
@@ -172,12 +195,14 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
 
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -223,6 +248,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
+            totalWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -273,7 +300,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
   
       const notification = new Notification({
         user: disasterRelief.user,
-        quote_type: "disaster_relief",
+        quote_type: "disasterRelief",
         quote_id: disasterRelief._id,
         type: "UPDATE_QUOTE",
         status_seen: false
@@ -294,28 +321,37 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
 exports.createPersonalOrBusinessQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             useType,
             coordinator: { name, email, cellNumber },
             maxWorkers,
             weeklyHours,
-            placementDatetime,
-            placement_location,
+            placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
-            nightUse,
-            winterUse,
+            useAtNight,
+            useInWinter,
             special_requirements,
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -346,20 +382,22 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             },
             maxWorkers,
             weeklyHours,
-            placement_datetime: placementDatetime,
-            placement_location,
+            placementDate: placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: nightUse,
-            useInWinter: winterUse,
+            useAtNight: useAtNight,
+            useInWinter: useInWinter,
             special_requirements,
             numUnits,
             serviceFrequency,
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
+            totalWorkers : parseInt(maleWorkers) + parseInt(femaleWorkers),
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -429,35 +467,43 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
 exports.createFarmOrchardWineryQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             useType,
             coordinator: { name, email, cellNumber },
             maxWorkers,
             weeklyHours,
-            placement_datetime,
-            placement_location,
+            placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
-            night_use,
-            winter_use,
+            useAtNight,
+            useInWinter,
             special_requirements,
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
         } = req.body;
 
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
+
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
 
         // Calculate the number of units required
         const numUnits = Math.ceil(totalHours / 400);
-        console.log(numUnits, "Jskjak")
         // Determine the service frequency
         let serviceFrequency = "Once per week";
         if (numUnits > 1) {
@@ -481,20 +527,22 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             },
             maxWorkers,
             weeklyHours,
-            placement_datetime,
-            placement_location,
+            placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: night_use,
-            useInWinter: winter_use,
+            useAtNight: useAtNight,
+            useInWinter: useInWinter,
             special_requirements,
             numUnits,
             serviceFrequency,
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
+            totalWorkers : parseInt(maleWorkers) + parseInt(femaleWorkers),
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -564,19 +612,25 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
 exports.createEventQuotation = async (req, res) => {
     try {
-        const { _id } = req.userData.user;
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+        
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
         const {
             eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
             coordinator: { name, email, cellNumber },
             maxWorkers,
             weeklyHours,
-            placement_datetime,
-            placement_location,
+            placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
-            night_use,
-            winter_use,
+            useAtNight,
+            useInWinter,
             peakUseTimes,
             peakTimeSlot,
             maxAttendees,
@@ -590,12 +644,15 @@ exports.createEventQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse
 
         } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
         // Calculate the total number of hours
         const totalHours = maxWorkers * weeklyHours;
@@ -627,14 +684,14 @@ exports.createEventQuotation = async (req, res) => {
             weeklyHours,
             maxAttendees,
             alcoholServed,
-            placement_datetime,
-            placement_location,
+            placementDate,
+            placementLocation,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
             deliveredPrice,
-            useAtNight: night_use,
-            useInWinter: winter_use,
+            useAtNight: useAtNight,
+            useInWinter: useInWinter,
             special_requirements,
             numUnits,
             serviceFrequency,
@@ -653,6 +710,8 @@ exports.createEventQuotation = async (req, res) => {
             designatedWorkers,
             workerTypes,
             femaleWorkers,
+            maleWorkers,
+            totalWorkers : parseInt(maleWorkers) + parseInt(femaleWorkers),
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
@@ -741,6 +800,7 @@ exports.getAllQuotation = async (req, res) => {
                     ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
                 ];
             });
+            quotations.sort((a, b) => b.createdAt - a.createdAt);
 
             const count = await Event.countDocuments()
                 + await FarmOrchardWinery.countDocuments()
@@ -847,12 +907,15 @@ exports.getAllQuotationForUsers = async (req, res) => {
                 ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
                 ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' }))
             ];
+
+            quotations.sort((a, b) => b.createdAt - a.createdAt);
         } else {
             // Handle other user types if needed
             return apiResponse.ErrorResponse(res, "Invalid user_type");
         }
 
         const count = quotations.length;
+        console.log("quotationsData" , quotations)
 
         return apiResponse.successResponseWithData(
             res,
@@ -884,22 +947,106 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 PersonalOrBusiness.findOne({ _id: quoteId, user: _id }),
                 DisasterRelief.findOne({ _id: quoteId, user: _id }),
                 Construction.findOne({ _id: quoteId, user: _id }),
-            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+            ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
+                    const costDetails = event.costDetails;
+                    
+                    const quotationId = event._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "Event",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                    const costDetails = farmOrchardWinery.costDetails;
+
+                    const quotationId = farmOrchardWinery._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "FarmOrchardWinery",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                    const costDetails = personalOrBusiness.costDetails;
+
+                    const quotationId = personalOrBusiness._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "PersonalOrBusiness",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (disasterRelief) {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                    const costDetails = disasterRelief.costDetails;
+
+                    const quotationId = disasterRelief._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "DisasterRelief",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
+                    const costDetails = construction.costDetails;
+
+                    const quotationId = construction._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "Construction",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 return quotations;
             });
@@ -926,18 +1073,43 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
+                    const costDetails = event.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
+                    const costDetails = farmOrchardWinery.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
+                    const costDetails = personalOrBusiness.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (disasterRelief) {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
+                    const costDetails = disasterRelief.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
+                    const costDetails = construction.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
                 }
                 return quotations;
             });
@@ -954,6 +1126,28 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 }
             );
         }
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.quotatByIdAndType = async (req, res) => {
+    try {
+        const { quotationId, quotationType } = req.query;
+        const quoteModel = require(`../../models/${quotationType}/${quotationType}.schema`);
+        const quotation = await quoteModel.find({
+            _id: quotationId,
+        });
+
+        if (!quotation) {
+            return apiResponse.ErrorResponse(res, "Quotation not found");
+        }
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotation retrieved successfully",
+            quotation
+        );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }

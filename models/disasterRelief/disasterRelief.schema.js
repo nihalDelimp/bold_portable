@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const disasterReliefSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'DISASTER_RELIEF' }, 
+        quotationType:{ type: String, default: 'disaster-relief' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -37,6 +37,8 @@ const disasterReliefSchema = new mongoose.Schema(
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
+        maleWorkers:{ type: Number, default: 0},
+        totalWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
@@ -44,7 +46,7 @@ const disasterReliefSchema = new mongoose.Schema(
         special_requirements: String,
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
         costDetails: { // Cost details for various components

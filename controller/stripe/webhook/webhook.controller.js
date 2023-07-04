@@ -22,6 +22,7 @@ exports.subscription = async (req, res) => {
         type,
         data: { object },
     } = event;
+
     try {
         switch (type) {
             case "invoice.payment_succeeded":

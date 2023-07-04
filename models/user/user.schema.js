@@ -19,6 +19,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        mobile_verified:{
+            type: Boolean,
+            default:false
+        },
+        registrationOTP: {
+            type: String
+        },
         password: {
             type: String,
             required: true
@@ -36,12 +43,17 @@ const userSchema = new mongoose.Schema(
         stripe_customer_id: {
             type: String,
             required: false
+        },
+        address: {
+            type: String,
+            required: false
         }
     },
     {
         timestamps: true
     }
 );
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

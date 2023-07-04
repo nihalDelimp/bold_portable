@@ -6,6 +6,13 @@ const Subscription = require("./models/subscription.schema");
 const Payment = require("./models/payment_succeeded.schema");
 const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
+const Tracking = require('../../models/tracking/tracking.schema');
+const mailer = require("../../helpers/nodemailer");
+const Construction = require('../../models/construction/construction.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -39,8 +46,9 @@ exports.createCheckoutSession = async (req, res) => {
         const user = await User.findOne({ email });
         const { stripe_customer_id } = user;
         if (!stripe_customer_id) {
-            return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
+            return apiResponse.ErrorResponse(res, "Stripe customer does not exist");
         }
+
         const {
             price = 0,
             product_name = "",
@@ -49,9 +57,16 @@ exports.createCheckoutSession = async (req, res) => {
             shipping_amount = 0,
             success_url = "",
             cancel_url = "",
+            quotationId = "",
+            quotationType = "",
         } = req.body;
+
+        const encodedQuotationId = encodeURIComponent(quotationId);
+        const encodedQuotationType = encodeURIComponent(quotationType);
+
         const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            // success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,
             line_items: [
@@ -66,6 +81,13 @@ exports.createCheckoutSession = async (req, res) => {
                         recurring: {
                             interval,
                         },
+                        product_data: {
+                            name: 'knskjk',
+                            metadata: {
+                                quotationId: encodedQuotationId,
+                                quotationType: encodedQuotationType,
+                            }
+                        }
                     },
                     quantity: 1,
                 },
@@ -74,25 +96,43 @@ exports.createCheckoutSession = async (req, res) => {
                         currency: "usd",
                         unit_amount: shipping_amount * 100,
                         product_data: {
-                            name: "Shiping charges",
-                            description: "$1 * distanse",
+                            name: "Shipping charges",
+                            description: "$1 * distance",
                         },
                     },
                     quantity: 1,
                 },
             ],
             mode: PaymentMode.Subscription,
+            metadata: {
+                quotationId: encodedQuotationId,
+                quotationType: encodedQuotationType,
+            },
         });
-        const { id, url, customer } = session;
+
+        const { id, url } = session;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: email,
+            subject: 'QR Code for your Portable Rental',
+            text: `Hi ${user.name},\n\nThank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action. To proceed with the payment, please click on the following link to make a secure payment via Stripe:\n\n${url}\n\nAlternatively, you can copy and paste the following link in your browser:\n\n${url}\n\nIf you have any questions or need further assistance, please feel free to contact our customer support team.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>Thank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action.</p><p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p><p><a href="${url}">Make Payment</a></p><p>Alternatively, you can copy and paste the following link in your browser:</p><p>${url}</p><p>If you have any questions or need further assistance, please feel free to contact our customer support team.</p><p>Thank you</p>`,
+        };
+        
+        mailer.sendMail(mailOptions);
+
         return apiResponse.successResponseWithData(
             res,
-            "Stipe session created successfully",
-            { id, url, customer }
+            "Stripe session created successfully",
+            { id, url, stripe_customer_id }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+  
 
 exports.getSubscriptionList = async (req, res) => {
     try {
@@ -148,6 +188,35 @@ exports.getSubscriptionPaymentList = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+        
+        for (const payment of payments) {
+
+            const quotationType = payment.subscription?.quotationType;
+            const quotationId = payment.subscription?.quotationId.toString();
+
+            let quotation;
+            switch (quotationType) {
+                case 'event':
+                    quotation = await Event.findOne({_id:quotationId});
+                    break;
+                case 'farm-orchard-winery':
+                    quotation = await FarmOrchardWinery.findOne({_id:quotationId});
+                    break;
+                case 'personal-or-business':
+                    quotation = await PersonalOrBusiness.findOne({_id:quotationId});
+                    break;
+                case 'disaster-relief':
+                    quotation = await DisasterRelief.findOne({_id:quotationId});
+                    break;
+                case 'construction':
+                    quotation = await Construction.findOne({_id:quotationId});
+                    break;
+            }
+
+            if(quotation) {
+                payments.push({costDetails: quotation.costDetails});
+            }
+        }
 
         const totalPages = Math.ceil(totalPayment / limit);
 
@@ -189,8 +258,12 @@ exports.endSubscription = async (req, res) => {
         if (!stripe_customer_id) {
             return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
         }
+
+        const encodedQuotationId = encodeURIComponent(subscription.quotationId);
+        const encodedQuotationType = encodeURIComponent(subscription.quotationType);
+
         const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,
             line_items: [
@@ -213,10 +286,78 @@ exports.endSubscription = async (req, res) => {
             mode: PaymentMode.Payment,
         });
         const { id, url, customer } = session;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: email,
+            subject: 'QR Code for your Portable Rental',
+            text: `Hi ${user.name},\n\nWe have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation.The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.\nTo proceed with the payment, please click on the following link to make a secure payment via Stripe:${url}"\nAlternatively, you can copy and paste the following link in your browser:${url}\n\n\Thank you`,
+            html: `<p>Hi ${user.name},</p>
+            <p>We have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation. The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.</p>
+            <p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p>
+            <p><a href="${url}">Make Payment</a></p>
+            <p>Alternatively, you can copy and paste the following link in your browser:</p>
+            <p>${url}</p>
+            <p>Thank you</p>
+            `,
+        };
+        
+        mailer.sendMail(mailOptions);
+
         return apiResponse.successResponseWithData(
             res,
             "Subscription end in-progress",
             { id, url, customer }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.getSubscriptionListForAdmin = async (req, res) => {
+    try {
+        let { limit = 10, page = 1, status } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+        const skip = (page - 1) * limit;
+
+        let query = {};
+        if (status) {
+            query.status = status;
+        }
+
+        const totalSubscription = await Subscription.countDocuments(query);
+        const subscriptions = await Subscription.find(query)
+            .populate({ path: "user", model: "User" })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const subscriptionIds = subscriptions.map(subscription => subscription._id);
+
+        const trackingDetails = await Tracking.find({ subscriptionId: { $in: subscriptionIds } });
+
+        const formattedSubscriptions = subscriptions.map(subscription => {
+            const subscriptionId = subscription._id;
+            const subscriptionTracking = trackingDetails.find(tracking => tracking.subscriptionId.equals(subscriptionId));
+            const trackingId = subscriptionTracking ? subscriptionTracking._id : null;
+            return {
+                ...subscription.toObject(),
+                trackingId,            };
+        });
+
+        const totalPages = Math.ceil(totalSubscription / limit);
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Subscription fetched successfully",
+            {
+                formattedSubscriptions,
+                totalPages,
+                currentPage: page,
+                perPage: limit,
+                totalSubscription,
+            }
         );
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);

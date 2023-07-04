@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const farmOrchardWinerySchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'FARM_ORCHARD_WINERY' }, 
+        quotationType:{ type: String, default: 'farm-orchard-winery' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -16,8 +16,8 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         },
         maxWorkers: Number, // Largest number of workers utilizing the unit
         weeklyHours: Number, // Number of hours per week workers are on site
-        placement_datetime: Date,
-        placement_location: {
+        placementDate: Date,
+        placementLocation: {
             type: { type: String, default: "Point" },
             coordinates: { type: [Number], default: [0, 0] }
         },
@@ -36,6 +36,8 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
+        maleWorkers:{ type: Number, default: 0},
+        totalWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
@@ -117,7 +119,7 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
 

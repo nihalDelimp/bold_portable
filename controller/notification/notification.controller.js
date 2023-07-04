@@ -12,9 +12,9 @@ exports.getUnseenNotifications = async (req, res) => {
         const pageSize = parseInt(req.query.pageSize) || 10;
         console.log(pageNumber, pageSize)
 
-        // Calculate the number of documents to skip based on the page number and page size
+        // Calculate the number of documents to skip based on the page number and page size  
         const documentsToSkip = (pageNumber - 1) * pageSize;
-        const unseenNotifications = await Notification.find({ status_seen: false, $or: [{ type: "CREATE_ORDER" }, { type: "CREATE_QUOTE" }] })
+        const unseenNotifications = await Notification.find({ status_seen: false, $or: [{ type: "CREATE_ORDER" }, { type: "CREATE_QUOTE" }, { type: "SERVICE_REQUEST" }] })
             .populate({
                 path: 'order',
                 model: 'Order'
@@ -82,12 +82,12 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
         const { user_type, _id } = req.userData.user;
         if (user_type === 'ADMIN') {
             // Update all the notifications for the user to set status_seen to true
-            const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE'] } }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE', 'SERVICE_REQUEST'] } }, { $set: { status_seen: true } });
 
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
         } else if (user_type === 'USER') {
-            const notifications = await Notification.find({ user: _id, type: 'ORDER_CANCEL' });
+            const notifications = await Notification.find({ user: _id });
             if (!notifications) {
                 return apiResponse.notFoundResponse(res, 'Notification not found');
             }
@@ -98,7 +98,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
                 return apiResponse.unauthorizedResponse(res, 'Unauthorized');
             }
             // Update the status_seen to true
-            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId), type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId) }, { $set: { status_seen: true } });
 
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
@@ -125,7 +125,7 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
 
         if (user_type === 'ADMIN') {
             // Update the notification if type is CREATE_ORDER or CREATE_QUOTE
-            const updateResult = await Notification.updateOne({ _id: notificationId, type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE'] } }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateOne({ _id: notificationId, type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE' , 'SERVICE_REQUEST'] } }, { $set: { status_seen: true } });
             console.log(updateResult.matchedCount, "Updateddd")
             if (updateResult.matchedCount === 0) {
                 return apiResponse.notFoundResponse(res, 'Notification not found');
@@ -134,10 +134,10 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
             const updatedNotification = await Notification.findById(notificationId);
             return apiResponse.successResponseWithData(res, 'Notification marked as seen', updatedNotification);
         }
-        else if (user_type === 'USER' && notification.type === 'ORDER_CANCEL') {
+        else if (user_type === 'USER') {
             if (notification.user.toString() === _id.toString()) {
                 console.log()
-                const updateResult = await Notification.updateOne({ _id: notificationId, user: _id, type: 'ORDER_CANCEL' }, { $set: { status_seen: true } });
+                const updateResult = await Notification.updateOne({ _id: notificationId, user: _id }, { $set: { status_seen: true } });
                 return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
             }
             else {
@@ -153,7 +153,7 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
 };
 
 // Get Cancel Order Notification for specific user
-exports.getCancelOrderNotifications = async (req, res) => {
+exports.getSpecificUserNotifications = async (req, res) => {
     try {
         const { _id } = req.userData.user;
         // Get the page number and page size from the query parameters
@@ -163,7 +163,7 @@ exports.getCancelOrderNotifications = async (req, res) => {
 
         // Calculate the number of documents to skip based on the page number and page size
         const documentsToSkip = (pageNumber - 1) * pageSize;
-        const cancelOrderNotifications = await Notification.find({ status_seen: false, type: "ORDER_CANCEL", user: _id })
+        const cancelOrderNotifications = await Notification.find({ status_seen: false, user: _id })
             .populate({
                 path: 'order',
                 model: 'Order'

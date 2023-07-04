@@ -1,3 +1,4 @@
+const passport = require('passport');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/user/user.schema');
@@ -5,10 +6,27 @@ const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const fs = require('fs');
 const path = require('path');
+const mailer = require("../../helpers/nodemailer");
+const PasswordVerification = require('../../models/passwordVerification/passwordVerification.schema');
+const sendSms = require("../../helpers/twillioSms.js");
+const PhoneOtpVerification = require('../../models/phoneOtpVerification/phoneOtpVerification.schema');
+
+function generateOTP(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        result += characters.charAt(randomIndex);
+    }
+  
+    return result;
+}
 
 exports.registerUsers = async (req, res) => {
     try {
-        const { name, email, password, mobile, user_type } = req.body;
+        const { name, email, password, mobile, user_type, address } = req.body;
         // Check if the user with the given email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -21,6 +39,7 @@ exports.registerUsers = async (req, res) => {
             password,
             mobile,
             user_type,
+            address,
         });
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -29,7 +48,35 @@ exports.registerUsers = async (req, res) => {
                 newUser
                     .save()
                     .then(user => {
-                        return apiResponse.successResponse(res, user)
+
+                        const mailOptions = {
+                            from: process.env.MAIL_FROM,
+                            to: user.email,
+                            subject: 'Welcome to Bold Portable',
+                            text: `Dear ${user.name},
+                        
+                                Thank you for registering with our platform! We are delighted to have you as a new member of our community.
+                                
+                                At Bold Portable, we strive to provide an exceptional user experience and offer a wide range of services to meet your needs. Whether you are looking for specific services or features, our team is dedicated to ensuring your satisfaction.
+
+                                If you have any questions, concerns, or feedback, please don't hesitate to reach out to us. We are here to assist you and make your experience as smooth as possible.
+                                
+                                Once again, welcome to Bold Portable. We are thrilled to have you on board and look forward to serving you.
+                                
+                                Best regards,
+                                The Bold Portable Team`,
+                            html: `<p>Dear ${user.name},</p>
+                                <p>Thank you for registering with our platform! We are delighted to have you as a new member of our community.</p>
+                                <p>At Bold Portable, we strive to provide an exceptional user experience and offer a wide range of services to meet your needs. Whether you are looking for specific services or features, our team is dedicated to ensuring your satisfaction.</p>
+                                <p>If you have any questions, concerns, or feedback, please don't hesitate to reach out to us. We are here to assist you and make your experience as smooth as possible.</p>
+                                <p>Once again, welcome to Bold Portable. We are thrilled to have you on board and look forward to serving you.</p>
+                                <p>Best regards,</p>
+                                <p>The Bold Portable Team</p>`
+                        };
+                        
+                        mailer.sendMail(mailOptions);
+
+                        return apiResponse.successResponse(res, "Registration successful")
                     })
                     .catch(err => {
                         return apiResponse.ErrorResponse(res, err.message)
@@ -42,41 +89,40 @@ exports.registerUsers = async (req, res) => {
 };
 
 
-
 exports.loginUser = async (req, res) => {
     try {
-        let { email, password } = req.body;
-        //email = email.toLowerCase();
-        if (email && password) {
-            let user = await User.findOne({ email });
-            if (!user) {
-                return apiResponse.ErrorResponse(res, "User is not present")
+        passport.authenticate('local', {session: false}, (err, user, info) => {
+            console.log(err);
+            if (err || !user) {
+
+                return apiResponse.ErrorResponse(res, info ? info.message : 'Login failed',)
             }
-            bcrypt.compare(password, user.password, async (err, result) => {
+    
+            req.login(user, {session: false}, (err) => {
                 if (err) {
-                    return apiResponse.ErrorResponse(res, err)
+                    res.send(err);
                 }
-                if (result) {
-                    console.log(user)
-                    let userData = { user };
-                    const jwtPayload = userData;
-                    const secret = process.env.SECRET_KEY;
-                    const jwtData = {
-                        expiresIn: "1d",
-                    };
-                    userData.token = jwt.sign(jwtPayload, secret, jwtData);
-                    let { _id, name, email, user_type, mobile } = userData.user;
-                    let { token } = userData;
-                    return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type, mobile }, token })
-                }
-                else {
-                    return apiResponse.ErrorResponse(res, "Not a valid password")
-                }
-            })
-        }
+    
+                let userData = { user };
+                // if(!userData.mobile_verified) {
+                //     return apiResponse.ErrorResponse(res, "Please verify your phone number",)
+                // }
+                const jwtPayload = userData;
+                const secret = process.env.SECRET_KEY;
+                const jwtData = {
+                    expiresIn: "1d",
+                };
+                userData.token = jwt.sign(jwtPayload, secret, jwtData);
+                let { _id, name, email, user_type, mobile } = userData.user;
+                let { token } = userData;
+                
+                return apiResponse.successResponseWithData(res, "User Logged in succesfully", { user: { _id, name, email, user_type, mobile }, token })
+            });
+        })
+        (req, res);
+        
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message)
-
     }
 }
 
@@ -177,3 +223,165 @@ exports.updateProfileImage = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 }
+
+exports.sendOtp = async (req, res) => {
+    try {
+
+        const user = await User.findOne({email: req.body.email});
+        if (!user) {
+            return apiResponse.notFoundResponse(res, "User not found");
+        }
+
+        const otp = generateOTP(6);
+
+        const passwordVerification = new PasswordVerification({
+            user: user._id.toString(),
+            otp: otp,
+            expiryOn: new Date().setHours(new Date().getHours() + 48)
+        });
+
+        await passwordVerification.save();
+        
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: req.body.email,
+            subject: 'OTP to reset your password',
+            text: `Hi ${user.name},\n\nThe OTP to reset your password is ${otp} \n\nThanks,\nBold Portable Team`
+        };
+        
+        mailer.sendMail(mailOptions);
+
+        return apiResponse.successResponseWithData(res, 'OTP sent successfully', user);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, otp, password, confirm_password } = req.body;
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return apiResponse.notFoundResponse(res, 'User not found');
+        }
+
+        // Find the corresponding password verification entry
+        const passwordVerification = await PasswordVerification.findOne({
+            user: user._id.toString(),
+            otp,
+            expiryOn: { $gt: new Date() }, // Verify that the OTP is not expired
+            status: 'pending', // Verify that the status is 'pending'
+        });
+        if (!passwordVerification) {
+            return apiResponse.validationErrorWithData(res, 'Invalid OTP');
+        }
+
+        // Verify that the password and confirm_password match
+        if (password !== confirm_password) {
+            return apiResponse.validationErrorWithData(res, "Passwords don't match");
+        }
+
+        // Check if the OTP has expired
+        if (passwordVerification.expiryOn <= new Date()) {
+            // Update the status to 'expired'
+            passwordVerification.status = 'expired';
+            await passwordVerification.save();
+            return apiResponse.validationErrorWithData(res, 'OTP has expired');
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the status to 'verified'
+        passwordVerification.status = 'verified';
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        // Update all other records associated with the user to 'expired'
+        await PasswordVerification.updateMany(
+            {
+                user: user._id.toString(),
+                status: 'pending',
+            },
+            {
+                $set: { status: 'expired' },
+            }
+        );
+
+        // Save the updated password verification entry
+        await passwordVerification.save();
+
+        return apiResponse.successResponse(res, 'Password reset successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.sendPhoneOtp = async (req, res) => {
+    try {
+        const { phone } = req.body;
+
+        // Create a new PhoneOtpVerification instance with the extracted data
+
+        // Set tep fake OTP
+
+        const otp = "0000";
+
+        const newPhoneOtpVerification = new PhoneOtpVerification({
+            phone,
+            otp,
+            expiryOn: new Date().setHours(new Date().getHours() + 48)
+        });
+
+        // Save the new PhoneOtpVerification instance to the database
+        const savedPhoneOtpVerification = await newPhoneOtpVerification.save();
+
+        // Send SMS with the OTP
+        const smsText = `Your OTP for verification: ${otp}`;
+        sendSms.sendSMS(phone, smsText);
+
+        return apiResponse.successResponseWithData(
+            res,
+            'OTP sent successfully.',
+            {}
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+exports.verifyPhoneOtp = async (req, res) => {
+    try {
+        const { phone, otp } = req.body;
+
+        // Find the PhoneOtpVerification entry with the matching phone number and OTP
+        const phoneOtpVerification = await PhoneOtpVerification.findOne({
+            phone,
+            otp
+        });
+
+        if (!phoneOtpVerification) {
+            return apiResponse.ErrorResponse(res, 'Invalid OTP');
+        }
+
+        // Check if the OTP is expired
+        const currentTimestamp = Date.now();
+        if (phoneOtpVerification.expiryOn < currentTimestamp) {
+            return apiResponse.ErrorResponse(res, 'OTP expired');
+        }
+
+        // Update the status of the PhoneOtpVerification entry to 'verified'
+        phoneOtpVerification.status = 'verified';
+        await phoneOtpVerification.save();
+
+        return apiResponse.successResponse(res, 'OTP verified successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+

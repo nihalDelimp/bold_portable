@@ -7,6 +7,8 @@ const multerStorage = multer.diskStorage({
             cb(null, "public/profile");
         } else if (file.fieldname === "product_image") {
             cb(null, "public/products");
+        } else if (file.fieldname === "service_image") {
+            cb(null, "public/services");
         } else {
             cb(new Error("Invalid field name"), false);
         }

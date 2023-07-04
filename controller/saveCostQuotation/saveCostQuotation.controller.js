@@ -2,7 +2,7 @@ const CostManagement = require('../../models/costManagement/costManagement.schem
 const apiResponse = require("../../helpers/apiResponse");
 const logger = require("../../helpers/logger");
 const { server } = require('../../server');
-const DisasterRelief = require('../../models/disaster_relief/disasterRelief.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
@@ -12,7 +12,6 @@ const io = require('socket.io')(server);
 const config = require('../../config/config');
 
 exports.createCostManagement = async (req, res) => {
-    console.log(await config.getQuotationTypesConfig(req.body.quotationType));
     try {
         const costManagement = new CostManagement({
             user: req.userData.user._id,
