@@ -82,7 +82,7 @@ exports.createCheckoutSession = async (req, res) => {
                             interval,
                         },
                         product_data: {
-                            name: 'knskjk',
+                            name: 'test',
                             metadata: {
                                 quotationId: encodedQuotationId,
                                 quotationType: encodedQuotationType,

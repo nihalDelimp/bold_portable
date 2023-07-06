@@ -26,7 +26,7 @@ exports.save = async (req, res) => {
 
 		// Create a new UserServices instance with the extracted data
 		const newUserServices = new UserService({
-			user: req.userData.user,
+			// user: req.userData.user,
 			service,
 			serviceTypes,
 			quotationId,
@@ -44,15 +44,15 @@ exports.save = async (req, res) => {
 		const savedUserServices = await newUserServices.save();
 
 		// Save the new Notification for Admmin panel 
-		const notification = new Notification({
-			user: req.userData.user,
-			quote_type: quotationType,
-			quote_id: quotationId,
-			type: "SERVICE_REQUEST",
-			status_seen: false
-		});
+		// const notification = new Notification({
+		// 	user: req.userData.user,
+		// 	quote_type: quotationType,
+		// 	quote_id: quotationId,
+		// 	type: "SERVICE_REQUEST",
+		// 	status_seen: false
+		// });
 
-		await notification.save();
+		// await notification.save();
 
 		io.emit("user_service_saved", { savedUserServices });
 
