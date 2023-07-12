@@ -59,25 +59,26 @@ exports.saveTracking = async (req, res) => {
 		const data = await tracking.save();
 
 		// Find user from tracking
-		const customer_email = quotation.user.email;
+		
+		// const customer_email = quotation.user.email;
 
-		const mailOptions = {
-			from: process.env.MAIL_FROM,
-			to: customer_email,
-			subject: 'Tracking status updated',
-			text: `Hi,\n\nWe would like to inform you that the tracking status has been updated. The new updated address is:\n\n${address.join('\n')}\n\nDriver's phone number: ${driver_phone_number}\nDriver's name: ${driver_name}\n\nPlease feel free to contact us if you have any questions.\n\nThanks,\nBold Portable Team`,
-			html: `<html>
-			   <body>
-				 <p>Hi ${quotation.user.name},</p> <p>We would like to inform you that the tracking status has been updated. The new updated address is: ${address.join(' ')}</p><p> Driver's phone number: ${driver_phone_number}</p> <p> Driver's name: ${driver_name}</p> <p>Please feel free to contact us if you have any questions.</p><p> Thanks,</p> <p> Bold Portable Team</p>
-			   </body>
-			 </html>`
-		};
+		// const mailOptions = {
+		// 	from: process.env.MAIL_FROM,
+		// 	to: customer_email,
+		// 	subject: 'Tracking status updated',
+		// 	text: `Hi,\n\nWe would like to inform you that the tracking status has been updated. The new updated address is:\n\n${address.join('\n')}\n\nDriver's phone number: ${driver_phone_number}\nDriver's name: ${driver_name}\n\nPlease feel free to contact us if you have any questions.\n\nThanks,\nBold Portable Team`,
+		// 	html: `<html>
+		// 	   <body>
+		// 		 <p>Hi ${quotation.user.name},</p> <p>We would like to inform you that the tracking status has been updated. The new updated address is: ${address.join(' ')}</p><p> Driver's phone number: ${driver_phone_number}</p> <p> Driver's name: ${driver_name}</p> <p>Please feel free to contact us if you have any questions.</p><p> Thanks,</p> <p> Bold Portable Team</p>
+		// 	   </body>
+		// 	 </html>`
+		// };
 
-		mailer.sendMail(mailOptions);
+		// mailer.sendMail(mailOptions);
 
-		const text = `The new updated address is:\n\n${address}`;
+		// const text = `The new updated address is:\n\n${address}`;
 
-		sendSms.sendSMS(quotation.user.mobile, text);
+		// sendSms.sendSMS(quotation.user.mobile, text);
 
 		return apiResponse.successResponseWithData(
 			res,
