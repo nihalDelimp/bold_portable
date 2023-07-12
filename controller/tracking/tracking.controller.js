@@ -77,7 +77,7 @@ exports.saveTracking = async (req, res) => {
 
 		const text = `The new updated address is:\n\n${address}`;
 
-		sendSms.sendSMS(updatedTracking.user.mobile, text);
+		sendSms.sendSMS(quotation.user.mobile, text);
 
 		return apiResponse.successResponseWithData(
 			res,
