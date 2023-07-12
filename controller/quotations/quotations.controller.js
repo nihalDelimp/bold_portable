@@ -11,6 +11,8 @@ const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
 const userHelper = require('../../helpers/user');
 const Subscription = require("../stripe/models/subscription.schema");
+const mailer = require("../../helpers/nodemailer");
+const User = require('../../models/user/user.schema');
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
@@ -155,6 +157,18 @@ exports.updateConstructionQuotation = async (req, res) => {
       });
       await notification.save();
       io.emit("update_quote", { construction });
+
+      const user = await User.findById(construction.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
   
       return apiResponse.successResponseWithData(
         res,
@@ -307,6 +321,18 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
       });
       await notification.save();
       io.emit("update_quote", { disasterRelief });
+
+      const user = await User.findById(construction.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
   
       return apiResponse.successResponseWithData(
         res,
@@ -454,6 +480,18 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
       });
       await notification.save();
       io.emit("update_quote", { personalOrBusiness });
+
+      const user = await User.findById(construction.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
   
       return apiResponse.successResponseWithData(
         res,
@@ -599,6 +637,18 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
       });
       await notification.save();
       io.emit("update_quote", { farmOrchardWinery });
+
+      const user = await User.findById(construction.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
   
       return apiResponse.successResponseWithData(
         res,
@@ -765,6 +815,18 @@ exports.updateEventQuotation = async (req, res) => {
       });
       await notification.save();
       io.emit("update_quote", { event });
+
+      const user = await User.findById(construction.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
   
       return apiResponse.successResponseWithData(
         res,
