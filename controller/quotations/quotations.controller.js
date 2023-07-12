@@ -322,7 +322,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
       await notification.save();
       io.emit("update_quote", { disasterRelief });
 
-      const user = await User.findById(construction.user);
+      const user = await User.findById(disasterRelief.user);
 
       const mailOptions = {
             from: process.env.MAIL_FROM,
@@ -481,7 +481,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
       await notification.save();
       io.emit("update_quote", { personalOrBusiness });
 
-      const user = await User.findById(construction.user);
+      const user = await User.findById(personalOrBusiness.user);
 
       const mailOptions = {
             from: process.env.MAIL_FROM,
@@ -638,7 +638,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
       await notification.save();
       io.emit("update_quote", { farmOrchardWinery });
 
-      const user = await User.findById(construction.user);
+      const user = await User.findById(farmOrchardWinery.user);
 
       const mailOptions = {
             from: process.env.MAIL_FROM,
@@ -816,7 +816,7 @@ exports.updateEventQuotation = async (req, res) => {
       await notification.save();
       io.emit("update_quote", { event });
 
-      const user = await User.findById(construction.user);
+      const user = await User.findById(event.user);
 
       const mailOptions = {
             from: process.env.MAIL_FROM,
