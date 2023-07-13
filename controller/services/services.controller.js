@@ -188,26 +188,22 @@ exports.mailServiceAcknowledgement = async (req, res) => {
 
         service.save();
 
-        // const { name, email } = user; // Extract the username and email from the retrieved user
-        let token;
+        const user = await User.findOne({ email: user_email });
 
-        if(token = req.headers.Authorization || req.headers.authorization) {
+        console.log(user);
 
-            const jwtData = {
-                expiresIn: process.env.EXPIRES_IN,
-            };
-            const user = jwt.verify(token, secretKey, jwtData);
-            console.log('amsjhdj', user._id);
+        if(user) {
+
             const notification = new Notification({
-                user: new mongoose.Types.ObjectId(user._id)                ,
-                quote_type: "user_service",
+                user: user._id.toString(),
+                quote_type: "RESOLVED_SERVICE",
                 quote_id: service._id.toString(),
-                type: "user_service",
+                type: "RESOLVED_SERVICE",
                 status_seen: false
             });
     
             await notification.save();
-            io.emit("resolved_service", { service });
+            io.emit("RESOLVED_SERVICE", { service });
         }
 
         const mailOptions = {
