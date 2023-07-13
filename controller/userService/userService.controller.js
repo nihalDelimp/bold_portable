@@ -6,6 +6,8 @@ const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schem
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Construction = require('../../models/construction/construction.schema');
+const mailer = require("../../helpers/nodemailer");
+
 const io = require('socket.io')(server);
 
 exports.save = async (req, res) => {
@@ -69,9 +71,19 @@ exports.save = async (req, res) => {
 		// Save the new UserServices instance to the database
 		const savedUserServices = await newUserServices.save();
 
+		const user = quotation.user;
+
+		const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Service Request Acknowledgement',
+            text: `Hi ${user.name},\n\nThank you for your service request for ${service}.\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
+        };
+		mailer.sendMail(mailOptions);
+
 	//	Save the new Notification for Admmin panel 
 		const notification = new Notification({
-			user: quotation.user,
+			user,
 			quote_type: quotationType,
 			quote_id: quotationId,
 			type: "SERVICE_REQUEST",
