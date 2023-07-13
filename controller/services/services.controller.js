@@ -5,6 +5,10 @@ const mailer = require("../../helpers/nodemailer");
 const User = require("../../models/user/user.schema");
 const { server } = require('../../server');
 const io = require('socket.io')(server);
+const Notification = require('../../models/notification/notification.schema');
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SECRET_KEY || 'abcdefghijklmnopqrstuvwxyz1234567890';
+const mongoose = require('mongoose');
 
 // exports.save = async (req, res) => {
 //     try {
@@ -185,12 +189,17 @@ exports.mailServiceAcknowledgement = async (req, res) => {
         service.save();
 
         // const { name, email } = user; // Extract the username and email from the retrieved user
+        let token;
 
-        if(req.userData.user) {
-            const user = req.userData.user;
+        if(token = req.headers.Authorization || req.headers.authorization) {
 
+            const jwtData = {
+                expiresIn: process.env.EXPIRES_IN,
+            };
+            const user = jwt.verify(token, secretKey, jwtData);
+            console.log('amsjhdj', user._id);
             const notification = new Notification({
-                user: quotation.user._id.toString(),
+                user: new mongoose.Types.ObjectId(user._id)                ,
                 quote_type: "user_service",
                 quote_id: service._id.toString(),
                 type: "user_service",
@@ -198,7 +207,7 @@ exports.mailServiceAcknowledgement = async (req, res) => {
             });
     
             await notification.save();
-            io.emit("resolved_service", { tracking });
+            io.emit("resolved_service", { service });
         }
 
         const mailOptions = {
