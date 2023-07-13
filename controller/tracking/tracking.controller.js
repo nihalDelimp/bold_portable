@@ -8,6 +8,9 @@ const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schem
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
+const Notification = require('../../models/notification/notification.schema');
+const { server } = require('../../server');
+const io = require('socket.io')(server);
 
 exports.saveTracking = async (req, res) => {
 	try {
@@ -21,24 +24,24 @@ exports.saveTracking = async (req, res) => {
 		let quotation;
 		switch (quotationType) {
 			case 'event':
-				quotation = await Event.findOne({ _id: quotationId });
+				quotation = await Event.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
 			case 'farm-orchard-winery':
-				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+				quotation = await FarmOrchardWinery.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
 			case 'personal-or-business':
-				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+				quotation = await PersonalOrBusiness.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				console.log('djkdjkd', quotation)
 				break;
 			case 'disaster-relief':
-				quotation = await DisasterRelief.findOne({ _id: quotationId });
+				quotation = await DisasterRelief.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 
 				break;
 			case 'construction':
-				quotation = await Construction.findOne({ _id: quotationId });
+				quotation = await Construction.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
 			default:
-				throw new Error(`Quotation type '${quotationType}' not found`);
+				throw new Error(`Quotation type '${quotationType}' not found`).populate({ path: "user", model: "User" });
 		}
 
 		const tracking = new Tracking({
@@ -59,26 +62,36 @@ exports.saveTracking = async (req, res) => {
 		const data = await tracking.save();
 
 		// Find user from tracking
-		
-		// const customer_email = quotation.user.email;
+		const customer_email = quotation.user.email;
 
-		// const mailOptions = {
-		// 	from: process.env.MAIL_FROM,
-		// 	to: customer_email,
-		// 	subject: 'Tracking status updated',
-		// 	text: `Hi,\n\nWe would like to inform you that the tracking status has been updated. The new updated address is:\n\n${address.join('\n')}\n\nDriver's phone number: ${driver_phone_number}\nDriver's name: ${driver_name}\n\nPlease feel free to contact us if you have any questions.\n\nThanks,\nBold Portable Team`,
-		// 	html: `<html>
-		// 	   <body>
-		// 		 <p>Hi ${quotation.user.name},</p> <p>We would like to inform you that the tracking status has been updated. The new updated address is: ${address.join(' ')}</p><p> Driver's phone number: ${driver_phone_number}</p> <p> Driver's name: ${driver_name}</p> <p>Please feel free to contact us if you have any questions.</p><p> Thanks,</p> <p> Bold Portable Team</p>
-		// 	   </body>
-		// 	 </html>`
-		// };
+		const mailOptions = {
+			from: process.env.MAIL_FROM,
+			to: customer_email,
+			subject: 'Tracking status updated',
+			text: `Hi,\n\nWe would like to inform you that the tracking status has been updated. The new updated address is:\n\n${address}\n\nDriver's phone number: ${tracking.driver_phone_number}\nDriver's name: ${tracking.driver_name}\n\nPlease feel free to contact us if you have any questions.\n\nThanks,\nBold Portable Team`,
+			html: `<html>
+			   <body>
+				 <p>Hi ${quotation.user.name},</p> <p>We would like to inform you that the tracking status has been updated. The new updated address is: ${address}<p><p> Driver's phone number: ${tracking.driver_phone_number}</p> <p> Driver's name: ${tracking.driver_name}</p> <p>Please feel free to contact us if you have any questions.</p><p> Thanks,</p> <p> Bold Portable Team</p>
+			   </body>
+			 </html>`
+		};
 
-		// mailer.sendMail(mailOptions);
+		mailer.sendMail(mailOptions);
 
-		// const text = `The new updated address is:\n\n${address}`;
+		const notification = new Notification({
+			user: quotation.user._id.toString(),
+			quote_type: quotationType,
+			quote_id: quotationId,
+			type: "SAVE_TRACKING",
+			status_seen: false
+		  });
 
-		// sendSms.sendSMS(quotation.user.mobile, text);
+		await notification.save();
+		io.emit("save_location", { tracking });
+
+		const text = `The new updated address is:\n\n${address}`;
+
+		sendSms.sendSMS(quotation.user.mobile, text);
 
 		return apiResponse.successResponseWithData(
 			res,
@@ -109,6 +122,17 @@ exports.updateTracking = async (req, res) => {
 		if (!updatedTracking) {
 			return apiResponse.notFoundResponse(res, "Tracking not found.");
 		}
+
+		const notification = new Notification({
+			user: updatedTracking.user._id.toString(),
+			quote_type: updatedTracking.quotationType,
+			quote_id: updatedTracking.quotationId,
+			type: "UPDATE_TRACKING",
+			status_seen: false
+		  });
+
+		await notification.save();
+		io.emit("save_location", { updatedTracking });
 
 		// Find user from tracking
 		const customer_email = updatedTracking.user.email;

@@ -3,6 +3,8 @@ const UserService = require('../../models/userServices/userServices.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const mailer = require("../../helpers/nodemailer");
 const User = require("../../models/user/user.schema");
+const { server } = require('../../server');
+const io = require('socket.io')(server);
 
 // exports.save = async (req, res) => {
 //     try {
@@ -183,6 +185,21 @@ exports.mailServiceAcknowledgement = async (req, res) => {
         service.save();
 
         // const { name, email } = user; // Extract the username and email from the retrieved user
+
+        if(req.userData.user) {
+            const user = req.userData.user;
+
+            const notification = new Notification({
+                user: quotation.user._id.toString(),
+                quote_type: "user_service",
+                quote_id: service._id.toString(),
+                type: "user_service",
+                status_seen: false
+            });
+    
+            await notification.save();
+            io.emit("resolved_service", { tracking });
+        }
 
         const mailOptions = {
             from: process.env.MAIL_FROM,
