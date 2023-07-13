@@ -14,7 +14,7 @@ exports.getUnseenNotifications = async (req, res) => {
 
         // Calculate the number of documents to skip based on the page number and page size   
         const documentsToSkip = (pageNumber - 1) * pageSize;
-        const unseenNotifications = await Notification.find({ status_seen: false, $or: [{ type: "CREATE_ORDER" }, { type: "CREATE_QUOTE" }, { type: "SERVICE_REQUEST" } , { type: "SAVE_TRACKING" } ] })
+        const unseenNotifications = await Notification.find({ status_seen: false, $or: [{ type: "CREATE_ORDER" }, { type: "CREATE_QUOTE" }, { type: "SERVICE_REQUEST" } , { type: "SAVE_TRACKING" } , {type: "RESOLVED_SERVICE"} ] })
             .populate({
                 path: 'order',
                 model: 'Order'
@@ -82,7 +82,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
         const { user_type, _id } = req.userData.user;
         if (user_type === 'ADMIN') {
             // Update all the notifications for the user to set status_seen to true 
-            const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE', 'SERVICE_REQUEST' , 'SAVE_TRACKING'] } }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE', 'SERVICE_REQUEST' , 'SAVE_TRACKING' , 'RESOLVED_SERVICE'] } }, { $set: { status_seen: true } });
 
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked ${updateResult.nModified} notifications as seen`, updateResult);
@@ -125,7 +125,7 @@ exports.markSpecificNotificationsAsSeen = async (req, res) => {
 
         if (user_type === 'ADMIN') {
             // Update the notification if type is CREATE_ORDER or CREATE_QUOTE
-            const updateResult = await Notification.updateOne({ _id: notificationId, type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE' , 'SERVICE_REQUEST' ,'SAVE_TRACKING'] } }, { $set: { status_seen: true } });
+            const updateResult = await Notification.updateOne({ _id: notificationId, type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE' , 'SERVICE_REQUEST' ,'SAVE_TRACKING' , 'RESOLVED_SERVICE'] } }, { $set: { status_seen: true } });
             console.log(updateResult.matchedCount, "Updateddd")
             if (updateResult.matchedCount === 0) {
                 return apiResponse.notFoundResponse(res, 'Notification not found');
