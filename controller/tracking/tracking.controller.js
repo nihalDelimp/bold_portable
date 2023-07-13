@@ -127,7 +127,7 @@ exports.updateTracking = async (req, res) => {
 			user: updatedTracking.user._id.toString(),
 			quote_type: updatedTracking.quotationType,
 			quote_id: updatedTracking.quotationId,
-			type: "UPDATE_TRACKING",
+			type: "SAVE_TRACKING",
 			status_seen: false
 		  });
 
