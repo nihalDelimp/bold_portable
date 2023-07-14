@@ -7,13 +7,7 @@ const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Construction = require('../../models/construction/construction.schema');
 const mailer = require("../../helpers/nodemailer");
-
 const io = require('socket.io')(server);
-const mailer = require("../../helpers/nodemailer");
-const Construction = require('../../models/construction/construction.schema');
-const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
-const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
-const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
 
 exports.save = async (req, res) => {
