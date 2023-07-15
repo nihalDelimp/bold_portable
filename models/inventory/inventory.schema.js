@@ -19,6 +19,10 @@ const inventorySchema = new mongoose.Schema(
             required: true,
             default: 0
         },
+        qrCodeValue: {
+            type: String,
+            required: false
+        },
         qrCode: {
             type: String,
             required: false

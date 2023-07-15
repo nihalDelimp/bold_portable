@@ -10,11 +10,10 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         const savedInventories = [];
 
         for (let i = 0; i < quantity; i++) {
-            const inventoryNumber = i + 1;
             const uniqueId = UUIDV4(); // Generate a unique identifier
 
             const scanningValue = `${productName}-${uniqueId}-${category.join('-')}-${gender}`;
-
+            const formattedValue = scanningValue.replace(/\s/g, '');
             // Create a new inventory instance
             const inventory = new Inventory({
                 productName,
@@ -22,6 +21,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 category: Array.isArray(category) ? category : [category],
                 quantity: 1, // Set quantity as 1 for each inventory
                 gender,
+                qrCodeValue: formattedValue,
                 qrCode: await generateQRCode(scanningValue) // Generate and assign unique QR code
             });
 
@@ -38,8 +38,10 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
 
 async function generateQRCode(scanningValue) {
     // Generate QR code and return the QR code image
-    const qrCodeUrl = scanningValue;
+    const formattedValue = scanningValue.replace(/\s/g, '');
+    const qrCodeUrl = encodeURIComponent(formattedValue);
     const qrCodeImage = await qrcode.toDataURL(qrCodeUrl);
+    console.log(formattedValue)
     return qrCodeImage;
 }
 
@@ -82,22 +84,29 @@ exports.assignQrCodeToQuote = async (req, res) => {
             return apiResponse.notFoundResponse(res, 'Inventories not found');
         }
 
+        // Check if any inventory is already assigned to an active quotation
+        const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
+        if (isAnyActive) {
+            return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
+        }
+
         // Loop through each inventory and update the quote_id, quote_type, and status fields
         for (let i = 0; i < inventories.length; i++) {
             const inventory = inventories[i];
-
-            // Check if the inventory is already assigned to an active quotation
-            if (inventory.status === 'active') {
-                return apiResponse.ErrorResponse(res, 'Inventory is already assigned to an active quotation');
-            }
 
             // Update the quote_id, quote_type, and status fields
             inventory.quote_id = quoteId;
             inventory.quote_type = quoteType;
             inventory.status = 'active';
 
-            // Generate and assign the QR code
-            inventory.qrCode = await generateQRCode(inventory._id.toString());
+            // Append the quoteType and quoteId to the existing qrCodeValue
+            const updatedQrCodeValue = `${inventory.qrCodeValue}-${quoteType}-${quoteId}`;
+
+            // Generate and assign the updated QR code
+            inventory.qrCode = await generateQRCode(updatedQrCodeValue);
+
+            // Update the qrCodeValue field with the updated QR code value
+            inventory.qrCodeValue = updatedQrCodeValue;
 
             // Save the updated inventory
             await inventory.save();
@@ -108,6 +117,10 @@ exports.assignQrCodeToQuote = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+
+
+
 
 
 
@@ -122,20 +135,84 @@ exports.getQrCodesByStatus = async (req, res) => {
         const skip = (pageNumber - 1) * limitNumber;
 
         // Find QR codes with the provided status and apply pagination
-        const qrCodes = await Inventory.find({ status })
-            .skip(skip)
-            .limit(limitNumber)
-            .select('qrCode')
-            .exec();
+        const [qrCodes, totalCount] = await Promise.all([
+            Inventory.find({ status })
+                .skip(skip)
+                .limit(limitNumber)
+                .select('qrCode')
+                .exec(),
+            Inventory.countDocuments({ status })
+        ]);
 
         if (!qrCodes || qrCodes.length === 0) {
             return apiResponse.notFoundResponse(res, 'No QR codes found');
         }
 
-        return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', qrCodes, qrCodes.length);
+        const result = {
+            qrCodes,
+            totalCount
+        };
+
+        return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', result);
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
 
+
+exports.getQrCodesByQuotation = async (req, res) => {
+    try {
+        const { quoteId, quoteType } = req.params;
+        console.log(quoteId, quoteType)
+
+        // Find QR codes with the provided quotation ID and quotation type
+        const qrCodes = await Inventory.find({ quote_id: quoteId, quote_type: quoteType })
+            .select('qrCode')
+            .exec();
+
+        if (!qrCodes || qrCodes.length === 0) {
+            return apiResponse.notFoundResponse(res, 'No QR codes found for the given quotation');
+        }
+
+        return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', qrCodes);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
+exports.revertQrCodeValue = async (req, res) => {
+    try {
+        const { quoteId, quoteType } = req.body;
+
+        // Find the inventories with the provided quoteId and quoteType in the qrCodeValue
+        const inventories = await Inventory.find({ qrCodeValue: { $regex: `${quoteType}-${quoteId}$` } });
+
+        if (!inventories || inventories.length === 0) {
+            return apiResponse.notFoundResponse(res, 'Inventories not found with the provided quoteId and quoteType');
+        }
+
+        // Loop through each inventory and revert the qrCodeValue
+        for (let i = 0; i < inventories.length; i++) {
+            const inventory = inventories[i];
+
+            // Remove the provided quoteId and quoteType from the qrCodeValue
+            const updatedQrCodeValue = inventory.qrCodeValue.replace(`-${quoteType}-${quoteId}`, '');
+
+            // Generate and assign the updated QR code
+            inventory.qrCode = await generateQRCode(updatedQrCodeValue);
+
+            // Update the qrCodeValue field with the updated QR code value
+            inventory.qrCodeValue = updatedQrCodeValue;
+
+            // Save the updated inventory
+            await inventory.save();
+        }
+
+        return apiResponse.successResponse(res, 'QR codes reverted and inventory updated');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
 

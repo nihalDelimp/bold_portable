@@ -6,6 +6,8 @@ const { hasRole } = require('../../middleware/checkRole');
 router.post('/save', checkAuth, hasRole('ADMIN'), inventoryController.saveNewGeneratedQrCOde);
 router.get('/show', inventoryController.getQrCodeDetails);
 router.post('/assign-qrcode-to-quote', checkAuth, hasRole('ADMIN'), inventoryController.assignQrCodeToQuote);
-router.get('/get-qr-code-details-status', checkAuth, hasRole('ADMIN'), inventoryController.getQrCodesByStatus);
+router.get('/get-qr-code-details-status', inventoryController.getQrCodesByStatus);
+router.get('/getQrCodesByQuotation/:quoteId/:quoteType', checkAuth, hasRole('ADMIN'), inventoryController.getQrCodesByQuotation);
+router.post('/revertQrCodeValue', checkAuth, hasRole('ADMIN'), inventoryController.revertQrCodeValue);
 
 module.exports = router;
