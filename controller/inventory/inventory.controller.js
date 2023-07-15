@@ -5,14 +5,14 @@ const qrcode = require('qrcode');
 const { v4: UUIDV4 } = require('uuid');
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
-        const { productName, description, category, quantity, gender } = req.body;
+        const { productName, description, type, category, quantity, gender } = req.body;
 
         const savedInventories = [];
 
         for (let i = 0; i < quantity; i++) {
             const uniqueId = UUIDV4(); // Generate a unique identifier
 
-            const scanningValue = `${productName}-${uniqueId}-${category.join('-')}-${gender}`;
+            const scanningValue = `${productName}-${uniqueId}-${type}-${category.join('-')}-${gender}`;
             const formattedValue = scanningValue.replace(/\s/g, '');
             // Create a new inventory instance
             const inventory = new Inventory({
@@ -21,6 +21,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 category: Array.isArray(category) ? category : [category],
                 quantity: 1, // Set quantity as 1 for each inventory
                 gender,
+                type,
                 qrCodeValue: formattedValue,
                 qrCode: await generateQRCode(scanningValue) // Generate and assign unique QR code
             });
@@ -117,11 +118,6 @@ exports.assignQrCodeToQuote = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
-
-
-
-
-
 
 
 exports.getQrCodesByStatus = async (req, res) => {
