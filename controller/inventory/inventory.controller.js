@@ -202,6 +202,9 @@ exports.revertQrCodeValue = async (req, res) => {
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
 
+            // Set the status of the inventory to "completed"
+            inventory.status = 'completed';
+
             // Save the updated inventory
             await inventory.save();
         }
@@ -212,3 +215,31 @@ exports.revertQrCodeValue = async (req, res) => {
     }
 };
 
+
+exports.changeStatusToPending = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        // Find the inventories with the provided IDs and status "completed"
+        const inventories = await Inventory.find({ _id: { $in: ids }, status: 'completed' });
+
+        if (!inventories || inventories.length === 0) {
+            return apiResponse.notFoundResponse(res, 'No inventories found with the provided IDs and status "completed"');
+        }
+
+        // Loop through each inventory and change the status to "pending"
+        for (let i = 0; i < inventories.length; i++) {
+            const inventory = inventories[i];
+
+            // Update the status to "pending"
+            inventory.status = 'pending';
+
+            // Save the updated inventory
+            await inventory.save();
+        }
+
+        return apiResponse.successResponse(res, 'Status changed to "pending" for the selected inventories');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
