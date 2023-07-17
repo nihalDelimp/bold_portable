@@ -42,6 +42,7 @@ const constructionSchema = new mongoose.Schema(
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
+        productTypes: { type: String, default: null },
         dateTillUse: Date,
         status: {
             type: String,
