@@ -14,6 +14,10 @@ const inventorySchema = new mongoose.Schema(
             type: [String],
             required: true
         },
+        gender: {
+            type: String,
+            required: true
+        },
         quantity: {
             type: Number,
             required: true,
