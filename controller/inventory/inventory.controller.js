@@ -3,6 +3,11 @@ const apiResponse = require("../../helpers/apiResponse");
 const mailer = require("../../helpers/nodemailer");
 const qrcode = require('qrcode');
 const { v4: UUIDV4 } = require('uuid');
+const Event = require('../../models/event/event.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const Construction = require('../../models/construction/construction.schema');
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
         const { productName, description, type, category, quantity, gender } = req.body;
@@ -19,7 +24,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 productName,
                 description,
                 category,
-                quantity, // Set quantity as 1 for each inventory
+                quantity: 1, // Set quantity as 1 for each inventory
                 gender,
                 type,
                 qrCodeValue: formattedValue,
@@ -80,7 +85,6 @@ exports.assignQrCodeToQuote = async (req, res) => {
 
         // Find the inventories by IDs
         const inventories = await Inventory.find({ _id: { $in: _ids } });
-
         if (!inventories || inventories.length === 0) {
             return apiResponse.notFoundResponse(res, 'Inventories not found');
         }
@@ -276,3 +280,87 @@ exports.getFilterDetails = async (req, res) => {
     }
 };
 
+
+exports.autoAssignQrCodeToQuote = async (req, res) => {
+    try {
+        const { quotationId, quotationType } = req.body;
+        let quotation;
+        switch (quotationType) {
+            case 'event':
+                quotation = await Event.findOne({ _id: quotationId });
+                break;
+            case 'farm-orchard-winery':
+                quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+                break;
+            case 'personal-or-business':
+                quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+                console.log('djkdjkd', quotation)
+                break;
+            case 'disaster-relief':
+                quotation = await DisasterRelief.findOne({ _id: quotationId });
+
+                break;
+            case 'construction':
+                quotation = await Construction.findOne({ _id: quotationId });
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
+
+        let required_stuff = replaceWorkerType(quotation.workerTypes);
+
+        function replaceWorkerType(workerTypes) {
+            return workerTypes.includes('both') ? 'other' : workerTypes;
+        }
+
+        // console.log(required_stuff);
+
+        let quantity = quotation.numUnits;
+        const inventories = await Inventory.find();
+        const modifiedProductTypes = quotation.productTypes.replace(/\s/g, "");
+        const searchValues = [required_stuff, modifiedProductTypes];
+
+        const matchingInventories = inventories.filter((inventory) =>
+            inventory.status === 'pending' && searchValues.some((searchValue) => inventory.qrCodeValue.includes(searchValue))
+        );
+        const count = matchingInventories.length;
+        console.log(count)
+        if (count < quantity) {
+            return apiResponse.ErrorResponse(res, 'Inventory does not have the number of product as asked by User');
+        }
+        else {
+            // Extract the IDs from matchingInventories and store them in an array
+            const inventoryIds = matchingInventories.map((inventory) => inventory._id);
+
+            const inventoriesToUpdate = await Inventory.find({ _id: { $in: inventoryIds } });
+
+            if (!inventoriesToUpdate || inventoriesToUpdate.length === 0) {
+                return apiResponse.notFoundResponse(res, 'Inventories not found');
+            }
+
+            // Update only the first 'quantity' number of inventories in the inventoriesToUpdate array
+            for (let i = 0; i < quantity; i++) {
+                const inventory = inventoriesToUpdate[i];
+                inventory.quote_id = quotationId;
+                inventory.quote_type = quotationType;
+                inventory.status = 'active';
+
+                // Append the quoteType and quoteId to the existing qrCodeValue
+                const updatedQrCodeValue = `${inventory.qrCodeValue}-${quotationType}-${quotationId}`;
+
+                // Generate and assign the updated QR code
+                inventory.qrCode = await generateQRCode(updatedQrCodeValue);
+
+                // Update the qrCodeValue field with the updated QR code value
+                inventory.qrCodeValue = updatedQrCodeValue;
+
+                // Save the updated inventory
+                await inventory.save();
+            }
+
+            return apiResponse.successResponse(res, 'QR codes assigned and inventory updated');
+        }
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
