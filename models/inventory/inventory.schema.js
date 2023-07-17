@@ -10,12 +10,8 @@ const inventorySchema = new mongoose.Schema(
             type: String,
             required: false
         },
-        price: {
-            type: Number,
-            required: true
-        },
         category: {
-            type: String,
+            type: [String],
             required: true
         },
         quantity: {
@@ -23,21 +19,27 @@ const inventorySchema = new mongoose.Schema(
             required: true,
             default: 0
         },
-        quote_type: {
+        qrCodeValue: {
             type: String,
-            default: null
+            required: false
         },
-        quote_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            refPath: 'quote_type'
+        type: {
+            type: String,
+            required: false
         },
         qrCode: {
             type: String,
             required: false
-        }
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
     },
     { timestamps: true }
 );
+
 const Inventory = mongoose.model('Inventory', inventorySchema);
 
 module.exports = Inventory;
