@@ -14,6 +14,7 @@ const serviceRouter = require('../controller/services/services.routes')
 const qrCodeRouter = require('../controller/qrCode/qrCode.routes')
 const userServiceRouter = require('../controller/userService/userService.routes')
 const inventoryRouter = require('../controller/inventory/inventory.routes')
+const inventoryCategoryRouter = require('../controller/inventoryCategory/inventoryCategory.routes')
 const app = express();
 
 app.use("/auth", authRouter);
@@ -31,5 +32,6 @@ app.use("/service", serviceRouter);
 app.use("/qr-code", qrCodeRouter);
 app.use("/user-service", userServiceRouter);
 app.use("/inventory", inventoryRouter);
+app.use("/inventory-category", inventoryCategoryRouter);
 
 module.exports = app;
