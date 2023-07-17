@@ -135,7 +135,6 @@ exports.getQrCodesByStatus = async (req, res) => {
             Inventory.find({ status })
                 .skip(skip)
                 .limit(limitNumber)
-                .select('qrCode')
                 .exec(),
             Inventory.countDocuments({ status })
         ]);
