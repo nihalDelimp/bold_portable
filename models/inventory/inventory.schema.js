@@ -11,7 +11,7 @@ const inventorySchema = new mongoose.Schema(
             required: false
         },
         category: {
-            type: [String],
+            type: String,
             required: true
         },
         gender: {
@@ -29,7 +29,7 @@ const inventorySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            required: false
+            required: true
         },
         qrCode: {
             type: String,

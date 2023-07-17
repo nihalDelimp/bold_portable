@@ -12,14 +12,14 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         for (let i = 0; i < quantity; i++) {
             const uniqueId = UUIDV4(); // Generate a unique identifier
 
-            const scanningValue = `${productName}-${uniqueId}-${type}-${category.join('-')}-${gender}`;
+            const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
             const formattedValue = scanningValue.replace(/\s/g, '');
             // Create a new inventory instance
             const inventory = new Inventory({
                 productName,
                 description,
-                category: Array.isArray(category) ? category : [category],
-                quantity: 1, // Set quantity as 1 for each inventory
+                category,
+                quantity, // Set quantity as 1 for each inventory
                 gender,
                 type,
                 qrCodeValue: formattedValue,
@@ -242,3 +242,37 @@ exports.changeStatusToPending = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.getFilterDetails = async (req, res) => {
+    try {
+        const { category, type, gender, page, limit } = req.query;
+
+        // Prepare the filter object based on the provided query parameters
+        const filter = {};
+        if (category) {
+            filter.category = category;
+        }
+        if (type) {
+            filter.type = type;
+        }
+        if (gender) {
+            filter.gender = gender;
+        }
+        console.log(filter)
+        // Convert page and limit parameters to integers (with default values)
+        const pageNo = parseInt(page) || 1;
+        const pageSize = parseInt(limit) || 10; // Default to 10 items per page
+
+        // Calculate the number of items to skip based on the page number and limit
+        const skipItems = (pageNo - 1) * pageSize;
+
+        // Find the matching inventory items based on the filter and apply pagination
+        const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize);
+
+        return apiResponse.successResponseWithData(res, 'Filtered inventory items retrieved successfully', filteredInventory);
+    } catch (error) {
+        console.log(error.message);
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
