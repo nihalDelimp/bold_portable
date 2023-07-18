@@ -31,8 +31,8 @@ async function getTypeDetails(req, res) {
 async function updateTypeDetails(req, res) {
     try {
         const { id } = req.params;
-        const { type } = req.body;
-        const updatedInventoryType = await Inventory_type.findByIdAndUpdate(id, { type }, { new: true });
+        const { types } = req.body;
+        const updatedInventoryType = await Inventory_type.findByIdAndUpdate(id, { types }, { new: true });
         if (!updatedInventoryType) {
             return apiResponse.notFoundResponse(res, 'Inventory type not found');
         }
