@@ -4,12 +4,8 @@ const inventoryManagementSchema = new mongoose.Schema(
     {
 
         category: {
-            type: [String],
-            default: [],
-        },
-        types: {
-            type: [String],
-            default: [],
+            type: String,
+            default: null,
         }
     },
     { timestamps: true }
