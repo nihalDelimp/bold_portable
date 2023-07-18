@@ -42,6 +42,67 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
     }
 };
 
+
+
+exports.editGeneratedQrCOde = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { productName, description, type, category, gender } = req.body;
+
+        const updatedInventory = await Inventory.findById(id);
+
+        if (!updatedInventory) {
+            return apiResponse.notFoundResponse(res, 'Inventory not found');
+        }
+
+        // Generate a new unique identifier
+        const uniqueId = UUIDV4();
+
+        const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
+        const formattedValue = scanningValue.replace(/\s/g, '');
+
+        // Update the inventory properties
+        updatedInventory.productName = productName;
+        updatedInventory.description = description;
+        updatedInventory.type = type;
+        updatedInventory.category = category;
+        updatedInventory.gender = gender;
+        updatedInventory.qrCodeValue = formattedValue;
+
+        // Generate the QR code image
+        const qrCodeImage = await generateQRCode(scanningValue);
+        updatedInventory.qrCode = qrCodeImage;
+
+        // Save the updated inventory
+        const savedInventory = await updatedInventory.save();
+
+        return apiResponse.successResponseWithData(res, 'Inventory updated successfully', savedInventory);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
+exports.deleteNewGeneratedQrCOde = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deletedInventory = await Inventory.findByIdAndRemove(id);
+
+        if (!deletedInventory) {
+            return apiResponse.notFoundResponse(res, 'Inventory not found');
+        }
+
+        return apiResponse.successResponse(res, 'Inventory deleted successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
+
 async function generateQRCode(scanningValue) {
     // Generate QR code and return the QR code image
     const formattedValue = scanningValue.replace(/\s/g, '');

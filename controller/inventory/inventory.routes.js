@@ -3,7 +3,9 @@ const inventoryController = require('./inventory.controller');
 const checkAuth = require('../../middleware/checkAuth');
 const { hasRole } = require('../../middleware/checkRole');
 // save a new service
-router.post('/save', checkAuth, hasRole('ADMIN'), inventoryController.saveNewGeneratedQrCOde);
+router.post('/create-inventory-details', checkAuth, hasRole('ADMIN'), inventoryController.saveNewGeneratedQrCOde);
+router.put('/edit-inventory-details/:id', checkAuth, hasRole('ADMIN'), inventoryController.editGeneratedQrCOde);
+router.delete('/delete-inventory-details/:id', checkAuth, hasRole('ADMIN'), inventoryController.deleteNewGeneratedQrCOde);
 router.get('/show', inventoryController.getQrCodeDetails);
 router.post('/assign-qrcode-to-quote', checkAuth, hasRole('ADMIN'), inventoryController.assignQrCodeToQuote);
 router.get('/get-qr-code-details-status', inventoryController.getQrCodesByStatus);
