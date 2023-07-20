@@ -53,4 +53,7 @@ router.post('/create-quotation-for-recreational-site', quotationsController.crea
 //Update Quotation for recreationalSite.
 router.put('/update-quotation-for-recreational-site/:recreationalSiteId', checkAuth, hasRole('ADMIN'), quotationsController.updateRecreationalSiteQuotation);
 
+//Cancel Quotation
+router.post('/cancel-quotation', checkAuth, hasRole('ADMIN'), quotationsController.cancelQuotation);
+
 module.exports = router;

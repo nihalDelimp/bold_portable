@@ -256,8 +256,8 @@ exports.updateConstructionQuotation = async (req, res) => {
       const { constructionId } = req.params; // Get the construction ID from the request parameters
       const { costDetails } = req.body;
   
-      // Find the existing RecreationalSite document
-      const construction = await RecreationalSite.findById(constructionId);
+      // Find the existing Construction document
+      const construction = await Construction.findById(constructionId);
   
       if (!construction) {
         return apiResponse.ErrorResponse(res, "Construction document not found.");
@@ -1428,6 +1428,47 @@ exports.quotatByIdAndType = async (req, res) => {
             "Quotation retrieved successfully",
             quotation
         );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+exports.cancelQuotation = async (req, res) => {
+    try {
+        const { quotationId, quotationType } = req.body;
+
+        let quotation;
+
+		switch (quotationType) {
+			case 'event':
+				quotation = await Event.findOne({ _id: quotationId });
+				break;
+			case 'farm-orchard-winery':
+				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+				break;
+			case 'personal-or-business':
+				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+				console.log('djkdjkd', quotation)
+				break;
+			case 'disaster-relief':
+				quotation = await DisasterRelief.findOne({ _id: quotationId });
+				break;
+			case 'construction':
+				quotation = await Construction.findOne({ _id: quotationId });
+				break;
+			case 'recreational-site':
+				quotation = await RecreationalSite.findOne({ _id: quotationId });
+				break;
+			default:
+				throw new Error(`Quotation type '${quotationType}' not found`);
+		}
+
+        quotation.status = 'cancelled';
+
+        await quotation.save();
+
+        return apiResponse.successResponse(res, "Quotations canceled");
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
