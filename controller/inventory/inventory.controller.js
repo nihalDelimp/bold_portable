@@ -372,7 +372,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
             default:
                 throw new Error(`Quotation type '${quotationType}' not found`);
         }
-
+        console.log('hhhhhhhhhhhhhhhhhhhhhhh', quotation);
         let required_stuff = replaceWorkerType(quotation.workerTypes);
 
         function replaceWorkerType(workerTypes) {
@@ -430,3 +430,33 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+
+exports.findByQutationTypeAndId = async (req, res) => {
+    try {
+        const { quotationId, quotationType, page = 1, limit = 10 } = req.body;
+        const searchString = quotationType + '-' + quotationId;
+
+        const skip = (page - 1) * limit;
+
+        const inventories = await Inventory.find({ qrCodeValue: { $regex: searchString, $options: "i" } })
+            .skip(skip)
+            .limit(limit);
+
+        const totalItems = await Inventory.countDocuments({ qrCodeValue: { $regex: searchString, $options: "i" } });
+
+        const totalPages = Math.ceil(totalItems / limit);
+
+        const pagination = {
+            currentPage: page,
+            totalPages: totalPages,
+            totalItems: totalItems
+        };
+
+        // Return the response with the inventories and pagination details
+        return apiResponse.successResponseWithData(res, 'Records fetched successfully', { inventories, pagination });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+

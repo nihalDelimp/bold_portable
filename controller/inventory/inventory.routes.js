@@ -14,5 +14,6 @@ router.post('/revert-qr-code-value', checkAuth, hasRole('ADMIN'), inventoryContr
 router.post('/change-status-to-pending', checkAuth, hasRole('ADMIN'), inventoryController.changeStatusToPending);
 router.get('/get-filter-details', checkAuth, hasRole('ADMIN'), inventoryController.getFilterDetails);
 router.post('/auto-assign-qrcode-to-quote', checkAuth, hasRole('ADMIN'), inventoryController.autoAssignQrCodeToQuote);
+router.post('/find-by-qrcodes-quote-type-id', checkAuth, hasRole('ADMIN'), inventoryController.findByQutationTypeAndId);
 
 module.exports = router;
