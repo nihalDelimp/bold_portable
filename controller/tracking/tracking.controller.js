@@ -11,6 +11,7 @@ const Event = require('../../models/event/event.schema');
 const Notification = require('../../models/notification/notification.schema');
 const { server } = require('../../server');
 const io = require('socket.io')(server);
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
 
 exports.saveTracking = async (req, res) => {
 	try {
@@ -40,8 +41,11 @@ exports.saveTracking = async (req, res) => {
 			case 'construction':
 				quotation = await Construction.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
+			case 'recreational-site':
+				quotation = await RecreationalSite.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
+				break;
 			default:
-				throw new Error(`Quotation type '${quotationType}' not found`).populate({ path: "user", model: "User" });
+				throw new Error(`Quotation type '${quotationType}' not found`);
 		}
 
 		const tracking = new Tracking({

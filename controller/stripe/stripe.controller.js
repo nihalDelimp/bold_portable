@@ -13,6 +13,7 @@ const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schem
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -210,6 +211,9 @@ exports.getSubscriptionPaymentList = async (req, res) => {
                     break;
                 case 'construction':
                     quotation = await Construction.findOne({_id:quotationId});
+                    break;
+                case 'recreational-site':
+                    quotation = await RecreationalSite.findOne({_id:quotationId});
                     break;
             }
 

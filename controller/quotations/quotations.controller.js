@@ -13,6 +13,7 @@ const userHelper = require('../../helpers/user');
 const Subscription = require("../stripe/models/subscription.schema");
 const mailer = require("../../helpers/nodemailer");
 const User = require('../../models/user/user.schema');
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
@@ -132,13 +133,131 @@ exports.createConstructionQuotation = async (req, res) => {
     }
 };
 
+exports.createRecreationalSiteQuotation = async (req, res) => {
+    try {
+
+        let {error, user, message} = await userHelper.createUser(req.body.coordinator);
+
+        if(error) {
+            return apiResponse.ErrorResponse(res, message);
+        }
+
+        const _id = user._id.toString();
+        
+        const {
+            coordinator: { name, email, cellNumber },
+            maxWorkers,
+            weeklyHours,
+            placementDate,
+            restrictedAccess,
+            placementLocation,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            useAtNight,
+            useInWinter,
+            deliveredPrice,
+            special_requirements,
+            designatedWorkers,
+            workerTypes,
+            productTypes,
+            femaleWorkers,
+            maleWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
+        } = req.body;
+
+        const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
+
+        // Calculate the total number of hours
+        const totalHours = maxWorkers * weeklyHours;
+
+        // Calculate the number of units required
+        const numUnits = Math.ceil(totalHours / 400);
+
+        // Determine the service frequency
+        let serviceFrequency = "Once per week";
+        if (numUnits > 1) {
+            serviceFrequency = `${numUnits} units serviced once per week`;
+        }
+
+        // Calculate delivered price
+        let updatedDeliveredPrice = deliveredPrice;
+        if (distanceFromKelowna > 10) {
+            const additionalDistance = distanceFromKelowna - 10;
+            updatedDeliveredPrice = deliveredPrice + additionalDistance * serviceCharge;
+        }
+
+        // Construct the quotation object
+        const quotation = {
+            user: _id,
+            coordinator: {
+                name,
+                email,
+                cellNumber,
+            },
+            maxWorkers,
+            weeklyHours,
+            placementDate,
+            restrictedAccess,
+            placementLocation,
+            originPoint,
+            distanceFromKelowna,
+            serviceCharge,
+            deliveredPrice: updatedDeliveredPrice,
+            useAtNight,
+            useInWinter,
+            special_requirements,
+            numUnits,
+            serviceFrequency,
+            designatedWorkers,
+            workerTypes,
+            productTypes,
+            femaleWorkers,
+            maleWorkers,
+            totalWorkers,
+            handwashing,
+            handSanitizerPump,
+            twiceWeeklyService,
+            dateTillUse,
+        };
+
+        // Create a new Construction instance with the quotation object as properties
+        const recreationalSite = new RecreationalSite(quotation);
+
+        // Save the construction instance
+        await recreationalSite.save();
+
+
+        const notification = new Notification({
+            user: quotation.user,
+            quote_type: "recreational-site",
+            quote_id: recreationalSite._id,
+            type: "CREATE_QUOTE",
+            status_seen: false
+        });
+        await notification.save();
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Quotation has been created successfully",
+            recreationalSite
+        );
+    } catch (error) {
+        console.log(error);
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
 exports.updateConstructionQuotation = async (req, res) => {
     try {
       const { constructionId } = req.params; // Get the construction ID from the request parameters
       const { costDetails } = req.body;
   
-      // Find the existing construction document
-      const construction = await Construction.findById(constructionId);
+      // Find the existing RecreationalSite document
+      const construction = await RecreationalSite.findById(constructionId);
   
       if (!construction) {
         return apiResponse.ErrorResponse(res, "Construction document not found.");
@@ -180,9 +299,57 @@ exports.updateConstructionQuotation = async (req, res) => {
     } catch (error) {
       return apiResponse.ErrorResponse(res, error.message);
     }
-  };
+};
+
+exports.updateRecreationalSiteQuotation = async (req, res) => {
+    try {
+      const { recreationalSiteId } = req.params; // Get the recreationalSite ID from the request parameters
+      const { costDetails } = req.body;
   
+      // Find the existing recreationalSite document
+      const recreationalSite = await RecreationalSite.findById(recreationalSiteId);
   
+      if (!recreationalSite) {
+        return apiResponse.ErrorResponse(res, "RecreationalSite document not found.");
+      }
+  
+      // Update the recreationalSite field
+      recreationalSite.costDetails = costDetails;
+  
+      // Save the updated recreationalSite document
+      await recreationalSite.save();
+  
+      const notification = new Notification({
+        user: recreationalSite.user,
+        quote_type: "recreational-site",
+        quote_id: recreationalSite._id,
+        type: "UPDATE_QUOTE",
+        status_seen: false
+      });
+      await notification.save();
+      io.emit("update_quote", { recreationalSite });
+
+      const user = await User.findById(recreationalSite.user);
+
+      const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Invoice Payment Request - Action Required',
+            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
+        };
+        
+      mailer.sendMail(mailOptions);
+  
+      return apiResponse.successResponseWithData(
+        res,
+        "Quotation has been updated successfully",
+        recreationalSite
+      );
+    } catch (error) {
+      return apiResponse.ErrorResponse(res, error.message);
+    }
+};
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
@@ -863,13 +1030,15 @@ exports.getAllQuotation = async (req, res) => {
                 PersonalOrBusiness.find(),
                 DisasterRelief.find(),
                 Construction.find(),
-            ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions]) => {
+                RecreationalSite.find(),
+            ]).then(([events, farmOrchardWineries, personalOrBusinesses, disasterReliefs, constructions, recreationalSite]) => {
                 return [
                     ...events.map(event => ({ ...event.toObject(), type: 'event' })),
                     ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
                     ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
                     ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
                     ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+                    ...recreationalSite.map(recreationalSite => ({ ...recreationalSite.toObject(), type: 'recreational-site' })),
                 ];
             });
             quotations.sort((a, b) => b.createdAt - a.createdAt);
@@ -878,7 +1047,8 @@ exports.getAllQuotation = async (req, res) => {
                 + await FarmOrchardWinery.countDocuments()
                 + await PersonalOrBusiness.countDocuments()
                 + await DisasterRelief.countDocuments()
-                + await Construction.countDocuments();
+                + await Construction.countDocuments()
+                + await RecreationalSite.countDocuments();
 
             return apiResponse.successResponseWithData(
                 res,
@@ -916,6 +1086,11 @@ exports.getAllQuotation = async (req, res) => {
                     break;
                 case 'construction':
                     quotations = await Construction.find()
+                        .skip((page - 1) * limit)
+                        .limit(limit);
+                    break;
+                case 'recreational-site':
+                    quotations = await RecreationalSite.find()
                         .skip((page - 1) * limit)
                         .limit(limit);
                     break;
@@ -963,13 +1138,15 @@ exports.getAllQuotationForUsers = async (req, res) => {
                 farmOrchardWineries,
                 personalOrBusinesses,
                 disasterReliefs,
-                constructions
+                constructions,
+                recreationalSite
             ] = await Promise.all([
                 Event.find({ user: _id }),
                 FarmOrchardWinery.find({ user: _id }),
                 PersonalOrBusiness.find({ user: _id }),
                 DisasterRelief.find({ user: _id }),
-                Construction.find({ user: _id })
+                Construction.find({ user: _id }),
+                RecreationalSite.find(),
             ]);
 
             quotations = [
@@ -977,7 +1154,8 @@ exports.getAllQuotationForUsers = async (req, res) => {
                 ...farmOrchardWineries.map(farmOrchardWinery => ({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' })),
                 ...personalOrBusinesses.map(personalOrBusiness => ({ ...personalOrBusiness.toObject(), type: 'personal-or-business' })),
                 ...disasterReliefs.map(disasterRelief => ({ ...disasterRelief.toObject(), type: 'disaster-relief' })),
-                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' }))
+                ...constructions.map(construction => ({ ...construction.toObject(), type: 'construction' })),
+                ...recreationalSite.map(recreationalSite => ({ ...recreationalSite.toObject(), type: 'recreational-site' }))
             ];
 
             quotations.sort((a, b) => b.createdAt - a.createdAt);
@@ -1019,8 +1197,10 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 PersonalOrBusiness.findOne({ _id: quoteId, user: _id }),
                 DisasterRelief.findOne({ _id: quoteId, user: _id }),
                 Construction.findOne({ _id: quoteId, user: _id }),
-            ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                RecreationalSite.findOne({ _id: quoteId, user: _id }),
+            ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
                 const quotations = [];
+                console.log('mjmsdgfjgsjdgjf', recreationalSite)
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
                     const costDetails = event.costDetails;
@@ -1120,6 +1300,25 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
                 }
+                if (recreationalSite) {
+                    quotations.push({ ...recreationalSite.toObject(), type: 'recreational-site' });
+                    const costDetails = recreationalSite.costDetails;
+
+                    const quotationId = recreationalSite._id.toString();
+                    const subscription = await Subscription.findOne({
+                        quotationId : quotationId,
+                        quotationType : "RecreationalSite",
+                        user : _id
+                    });
+                    if(subscription) {
+                        quotations[0].subscription = subscription._id.toString();
+                        quotations[0].subscriptionStatus = subscription.status;
+                    }
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
+                }
                 return quotations;
             });
 
@@ -1141,7 +1340,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 PersonalOrBusiness.findOne({ _id: quoteId }),
                 DisasterRelief.findOne({ _id: quoteId }),
                 Construction.findOne({ _id: quoteId }),
-            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                RecreationalSite.findOne({ _id: quoteId }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
@@ -1178,6 +1378,14 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
                     const costDetails = construction.costDetails;
+                    if(costDetails){
+                        const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
+                        quotations[0].costDetailsSum = costDetailsSum;
+                    }
+                }
+                if (recreationalSite) {
+                    quotations.push({ ...recreationalSite.toObject(), type: 'recreational-site' });
+                    const costDetails = recreationalSite.costDetails;
                     if(costDetails){
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;

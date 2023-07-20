@@ -8,6 +8,8 @@ const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard
 const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
 const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
 const Construction = require('../../models/construction/construction.schema');
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
         const { productName, description, type, category, quantity, gender } = req.body;
@@ -363,6 +365,9 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
                 break;
             case 'construction':
                 quotation = await Construction.findOne({ _id: quotationId });
+                break;
+            case 'recreational-site':
+                quotation = await RecreationalSite.findOne({_id:quotationId});
                 break;
             default:
                 throw new Error(`Quotation type '${quotationType}' not found`);

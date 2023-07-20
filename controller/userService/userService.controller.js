@@ -9,6 +9,7 @@ const Construction = require('../../models/construction/construction.schema');
 const mailer = require("../../helpers/nodemailer");
 const io = require('socket.io')(server);
 const Event = require('../../models/event/event.schema');
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
 
 exports.save = async (req, res) => {
 	try {
@@ -47,6 +48,9 @@ exports.save = async (req, res) => {
 				break;
 			case 'construction':
 				quotation = await Construction.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
+				break;
+			case 'recreational-site':
+				quotation = await RecreationalSite.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
 			default:
 				throw new Error(`Quotation type '${quotationType}' not found`).populate({ path: "user", model: "User" });
