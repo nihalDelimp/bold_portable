@@ -282,12 +282,13 @@ exports.updateConstructionQuotation = async (req, res) => {
       const user = await User.findById(construction.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
+      
         
       mailer.sendMail(mailOptions);
   
@@ -332,12 +333,12 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
       const user = await User.findById(recreationalSite.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
         
       mailer.sendMail(mailOptions);
   
@@ -496,12 +497,12 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
       const user = await User.findById(disasterRelief.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
         
       mailer.sendMail(mailOptions);
   
@@ -657,12 +658,12 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
       const user = await User.findById(personalOrBusiness.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
         
       mailer.sendMail(mailOptions);
   
@@ -816,12 +817,12 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
       const user = await User.findById(farmOrchardWinery.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
         
       mailer.sendMail(mailOptions);
   
@@ -996,12 +997,12 @@ exports.updateEventQuotation = async (req, res) => {
       const user = await User.findById(event.user);
 
       const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Invoice Payment Request - Action Required',
-            text: `Hi ${user.name},\n\nWe wanted to inform you that an invoice has been generated for your recent transaction with us.\nTo proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future.\n\nThank you`,
-            html: `<p>Hi ${user.name},</p><p>We wanted to inform you that an invoice has been generated for your recent transaction with us.</p><p>To proceed with the payment, please log in to your account dashboard on our website. You can access your dashboard by visiting [Website URL] and logging in using your credentials. Once you are logged in, navigate to the "Invoices" section, where you will find the invoice awaiting payment. Thank you for your prompt attention to this matter. We appreciate your business and look forward to serving you again in the future..</p><p>Thank you,</p><p>Your Company Name</p>`
-        };
+        from: process.env.MAIL_FROM,
+        to: user.email,
+        subject: 'Quotation Update - Action Required',
+        text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+        html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
+      };
         
       mailer.sendMail(mailOptions);
   

@@ -14,7 +14,7 @@ const subscriptionsSchema = new mongoose.Schema(
         quotationType: {
             type: String,
             required: true,
-            enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event']
+            enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event', 'recreational-site']
         },
         subscription: {
             type: String,
