@@ -353,7 +353,7 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
                 trackingId,         };
         });
 
-        for (const subscription of subscriptions) {
+        for (const subscription of formattedSubscriptions) {
 
             const searchString = subscription.quotationType + '-' + subscription.quotationId;
             const inventories = await Inventory.find({
@@ -364,11 +364,7 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
         
             const assignedInventoriesCount = inventories.length || 0;
             subscription.assignedInventoriesCount = assignedInventoriesCount;
-        
-            formattedSubscriptions.push({
-                ...subscription.toObject(),
-                assignedInventoriesCount,
-            });
+    
         }        
 
         const totalPages = Math.ceil(totalSubscription / limit);
