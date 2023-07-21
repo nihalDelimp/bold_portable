@@ -14,6 +14,7 @@ const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_
 const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../models/event/event.schema');
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const Inventory = require('../../models/inventory/inventory.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -336,6 +337,7 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+              
 
         const subscriptionIds = subscriptions.map(subscription => subscription._id);
 
@@ -345,16 +347,24 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             const subscriptionId = subscription._id;
             const subscriptionTracking = trackingDetails.find(tracking => tracking.subscriptionId.equals(subscriptionId));
             const trackingId = subscriptionTracking ? subscriptionTracking._id : null;
+
+            let searchString = subscription.quotationType + '-' + subscription.quotationId;
+            const inventories = Inventory.find({
+                qrCodeValue: { $regex: searchString, $options: "i" }
+            });
+            
+            const assignedInventoriesCount = inventories.length || 0;
+
             return {
                 ...subscription.toObject(),
-                trackingId,            };
+                trackingId,   assignedInventoriesCount         };
         });
 
         const totalPages = Math.ceil(totalSubscription / limit);
 
         return apiResponse.successResponseWithData(
             res,
-            "Subscription fetched successfully",
+            "Subscription fetched successfullyfff",
             {
                 formattedSubscriptions,
                 totalPages,
