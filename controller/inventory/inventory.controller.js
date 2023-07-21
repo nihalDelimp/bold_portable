@@ -372,7 +372,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
             default:
                 throw new Error(`Quotation type '${quotationType}' not found`);
         }
-        console.log('hhhhhhhhhhhhhhhhhhhhhhh', quotation);
+
         let required_stuff = replaceWorkerType(quotation.workerTypes);
 
         function replaceWorkerType(workerTypes) {

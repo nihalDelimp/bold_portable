@@ -105,7 +105,7 @@ exports.paymentSucceeded = async (object) => {
             from: process.env.MAIL_FROM,
             to: customer_email,
             subject: 'QR Code for your Portable Rental',
-            text: `Hi,\n\nThank you for your payment. Please find the atached QR code to scan and redirect to the service page.\n The link for the invoice is:\n\n${payment.hosted_invoice_url}  \n\nThanks,\nBold Portable Team`,
+            text: `Hi,\n\nThank you for your payment. Please find the atached QR code to scan and redirect to the service page.\n The link for the invoice is:\n\n${object.hosted_invoice_url}  \n\nThanks,\nBold Portable Team`,
             attachments: [
                 {
                     filename: 'qrcode.png',
