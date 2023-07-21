@@ -265,7 +265,6 @@ exports.updateConstructionQuotation = async (req, res) => {
 
         // Update the costDetails field
         construction.costDetails = costDetails;
-        construction.status = "modified";
 
 
         // Save the updated construction document
@@ -318,7 +317,6 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
 
         // Update the recreationalSite field
         recreationalSite.costDetails = costDetails;
-        recreationalSite.status = "modified";
 
         // Save the updated recreationalSite document
         await recreationalSite.save();
@@ -483,7 +481,6 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
         // Update the costDetails field
         disasterRelief.costDetails = costDetails;
-        disasterRelief.status = "modified";
 
         // Save the updated disasterRelief document
         await disasterRelief.save();
@@ -645,7 +642,6 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
         // Update the costDetails field
         personalOrBusiness.costDetails = costDetails;
-        personalOrBusiness.status = "modified";
 
         // Save the updated disasterRelief document
         await personalOrBusiness.save();
@@ -805,7 +801,6 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
         // Update the costDetails field
         farmOrchardWinery.costDetails = costDetails;
-        farmOrchardWinery.status = "modified";
 
         // Save the updated disasterRelief document
         await farmOrchardWinery.save();
@@ -986,7 +981,6 @@ exports.updateEventQuotation = async (req, res) => {
 
         // Update the costDetails field
         event.costDetails = costDetails;
-        event.status = "modified";
 
         // Save the updated disasterRelief document
         await event.save();
