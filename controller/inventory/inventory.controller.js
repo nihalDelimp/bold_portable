@@ -197,9 +197,10 @@ exports.getQrCodesByStatus = async (req, res) => {
         // Calculate the number of documents to skip
         const skip = (pageNumber - 1) * limitNumber;
 
-        // Find QR codes with the provided status and apply pagination
+        // Find QR codes with the provided status, sort by updatedAt, and apply pagination
         const [qrCodes, totalCount] = await Promise.all([
             Inventory.find({ status })
+                .sort({ updatedAt: -1 }) // Sort in descending order (latest first)
                 .skip(skip)
                 .limit(limitNumber)
                 .exec(),
@@ -220,6 +221,7 @@ exports.getQrCodesByStatus = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 exports.getQrCodesByQuotation = async (req, res) => {
@@ -313,7 +315,7 @@ exports.changeStatusToPending = async (req, res) => {
 exports.getFilterDetails = async (req, res) => {
     try {
         const { category, type, gender, page, limit } = req.query;
-    
+
         // Prepare the filter object based on the provided query parameters
         const filter = {};
         if (category) {
@@ -326,17 +328,17 @@ exports.getFilterDetails = async (req, res) => {
             filter.gender = gender;
         }
         filter.status = 'pending'; // Add this line to filter by 'status' property with 'pending' value
-    
+
         // Convert page and limit parameters to integers (with default values)
         const pageNo = parseInt(page) || 1;
         const pageSize = parseInt(limit) || 10; // Default to 10 items per page
-    
+
         // Calculate the number of items to skip based on the page number and limit
         const skipItems = (pageNo - 1) * pageSize;
-    
+
         // Find the matching inventory items based on the filter and apply pagination
         const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize);
-    
+
         return apiResponse.successResponseWithData(res, 'Filtered inventory items retrieved successfully', filteredInventory);
     } catch (error) {
         console.log(error.message);
@@ -368,7 +370,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
                 quotation = await Construction.findOne({ _id: quotationId });
                 break;
             case 'recreational-site':
-                quotation = await RecreationalSite.findOne({_id:quotationId});
+                quotation = await RecreationalSite.findOne({ _id: quotationId });
                 break;
             default:
                 throw new Error(`Quotation type '${quotationType}' not found`);
@@ -439,29 +441,29 @@ exports.findByQutationTypeAndId = async (req, res) => {
         const searchString = quotationType + '-' + quotationId;
 
         let quotation;
-		switch (quotationType) {
-			case 'event':
-				quotation = await Event.findOne({ _id: quotationId });
-				break;
-			case 'farm-orchard-winery':
-				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
-				break;
-			case 'personal-or-business':
-				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
-				break;
-			case 'disaster-relief':
-				quotation = await DisasterRelief.findOne({ _id: quotationId });
+        switch (quotationType) {
+            case 'event':
+                quotation = await Event.findOne({ _id: quotationId });
+                break;
+            case 'farm-orchard-winery':
+                quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+                break;
+            case 'personal-or-business':
+                quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+                break;
+            case 'disaster-relief':
+                quotation = await DisasterRelief.findOne({ _id: quotationId });
 
-				break;
-			case 'construction':
-				quotation = await Construction.findOne({ _id: quotationId });
-				break;
-			case 'recreational-site':
-				quotation = await RecreationalSite.findOne({ _id: quotationId });
-				break;
-			default:
-				throw new Error(`Quotation type '${quotationType}' not found`);
-		}
+                break;
+            case 'construction':
+                quotation = await Construction.findOne({ _id: quotationId });
+                break;
+            case 'recreational-site':
+                quotation = await RecreationalSite.findOne({ _id: quotationId });
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
 
         const skip = (page - 1) * limit;
 
