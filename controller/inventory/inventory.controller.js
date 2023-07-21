@@ -437,6 +437,31 @@ exports.findByQutationTypeAndId = async (req, res) => {
         const { quotationId, quotationType, page = 1, limit = 10 } = req.body;
         const searchString = quotationType + '-' + quotationId;
 
+        let quotation;
+		switch (quotationType) {
+			case 'event':
+				quotation = await Event.findOne({ _id: quotationId });
+				break;
+			case 'farm-orchard-winery':
+				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+				break;
+			case 'personal-or-business':
+				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+				break;
+			case 'disaster-relief':
+				quotation = await DisasterRelief.findOne({ _id: quotationId });
+
+				break;
+			case 'construction':
+				quotation = await Construction.findOne({ _id: quotationId });
+				break;
+			case 'recreational-site':
+				quotation = await RecreationalSite.findOne({ _id: quotationId });
+				break;
+			default:
+				throw new Error(`Quotation type '${quotationType}' not found`);
+		}
+
         const skip = (page - 1) * limit;
 
         const inventories = await Inventory.find({ qrCodeValue: { $regex: searchString, $options: "i" } })
@@ -454,7 +479,7 @@ exports.findByQutationTypeAndId = async (req, res) => {
         };
 
         // Return the response with the inventories and pagination details
-        return apiResponse.successResponseWithData(res, 'Records fetched successfully', { inventories, pagination });
+        return apiResponse.successResponseWithData(res, 'Records fetched successfully', { inventories, quotation, pagination });
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
