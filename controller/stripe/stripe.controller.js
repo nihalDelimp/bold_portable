@@ -348,23 +348,34 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             const subscriptionTracking = trackingDetails.find(tracking => tracking.subscriptionId.equals(subscriptionId));
             const trackingId = subscriptionTracking ? subscriptionTracking._id : null;
 
-            let searchString = subscription.quotationType + '-' + subscription.quotationId;
-            const inventories = Inventory.find({
-                qrCodeValue: { $regex: searchString, $options: "i" }
-            });
-            
-            const assignedInventoriesCount = inventories.length || 0;
-
             return {
                 ...subscription.toObject(),
-                trackingId,   assignedInventoriesCount         };
+                trackingId,         };
         });
+
+        for (const subscription of subscriptions) {
+
+            const searchString = subscription.quotationType + '-' + subscription.quotationId;
+            const inventories = await Inventory.find({
+                qrCodeValue: { $regex: searchString, $options: "i" }
+            });
+        
+            console.log("Number of inventories:", inventories.length);
+        
+            const assignedInventoriesCount = inventories.length || 0;
+            subscription.assignedInventoriesCount = assignedInventoriesCount;
+        
+            formattedSubscriptions.push({
+                ...subscription.toObject(),
+                assignedInventoriesCount,
+            });
+        }        
 
         const totalPages = Math.ceil(totalSubscription / limit);
 
         return apiResponse.successResponseWithData(
             res,
-            "Subscription fetched successfullyfff",
+            "Subscription fetched successfully",
             {
                 formattedSubscriptions,
                 totalPages,
