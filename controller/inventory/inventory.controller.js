@@ -313,7 +313,7 @@ exports.changeStatusToPending = async (req, res) => {
 exports.getFilterDetails = async (req, res) => {
     try {
         const { category, type, gender, page, limit } = req.query;
-
+    
         // Prepare the filter object based on the provided query parameters
         const filter = {};
         if (category) {
@@ -325,17 +325,18 @@ exports.getFilterDetails = async (req, res) => {
         if (gender) {
             filter.gender = gender;
         }
-        console.log(filter)
+        filter.status = 'pending'; // Add this line to filter by 'status' property with 'pending' value
+    
         // Convert page and limit parameters to integers (with default values)
         const pageNo = parseInt(page) || 1;
         const pageSize = parseInt(limit) || 10; // Default to 10 items per page
-
+    
         // Calculate the number of items to skip based on the page number and limit
         const skipItems = (pageNo - 1) * pageSize;
-
+    
         // Find the matching inventory items based on the filter and apply pagination
         const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize);
-
+    
         return apiResponse.successResponseWithData(res, 'Filtered inventory items retrieved successfully', filteredInventory);
     } catch (error) {
         console.log(error.message);
