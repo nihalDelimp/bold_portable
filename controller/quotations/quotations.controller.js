@@ -1024,7 +1024,6 @@ exports.getAllQuotation = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
-
         if (quotationType == 'all') {
             const quotations = await Promise.all([
                 Event.find(),
@@ -1045,18 +1044,15 @@ exports.getAllQuotation = async (req, res) => {
             });
             quotations.sort((a, b) => b.createdAt - a.createdAt);
 
-            const count = await Event.countDocuments()
-                + await FarmOrchardWinery.countDocuments()
-                + await PersonalOrBusiness.countDocuments()
-                + await DisasterRelief.countDocuments()
-                + await Construction.countDocuments()
-                + await RecreationalSite.countDocuments();
+            // Filtering quotations with pending and cancelled status only
+            const filteredQuotations = quotations.filter(quotation => quotation.status === 'pending' || quotation.status === 'cancelled');
+            const count = filteredQuotations.length;
 
             return apiResponse.successResponseWithData(
                 res,
                 "Quotations retrieved successfully",
                 {
-                    quotations: quotations.slice((page - 1) * limit, page * limit),
+                    quotations: filteredQuotations.slice((page - 1) * limit, page * limit),
                     page: page,
                     pages: Math.ceil(count / limit),
                     total: count
@@ -1065,6 +1061,7 @@ exports.getAllQuotation = async (req, res) => {
         }
         else {
             let quotations;
+
             switch (quotationType) {
                 case 'event':
                     quotations = await Event.find()
@@ -1100,6 +1097,10 @@ exports.getAllQuotation = async (req, res) => {
                     throw new Error(`Quotation type '${quotationType}' not found`);
             }
 
+            // Filtering quotations with pending and cancelled status only
+            const filteredQuotations = quotations.filter(quotation => quotation.status === 'pending' || quotation.status === 'cancelled');
+            const count = filteredQuotations.length;
+
             const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -1107,12 +1108,11 @@ exports.getAllQuotation = async (req, res) => {
 
             const QuotationModel = mongoose.model(quotationTypeFormatted);
 
-            const count = await QuotationModel.countDocuments();
             return apiResponse.successResponseWithData(
                 res,
                 "Quotations retrieved successfully",
                 {
-                    quotations: quotations,
+                    quotations: filteredQuotations,
                     page: page,
                     pages: Math.ceil(count / limit),
                     total: count
@@ -1123,6 +1123,7 @@ exports.getAllQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 exports.getAllQuotationForUsers = async (req, res) => {
