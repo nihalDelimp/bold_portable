@@ -12,7 +12,7 @@ const RecreationalSite = require('../../models/recreationalSite/recreationalSite
 
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
-        const { productName, description, type, category, quantity, gender } = req.body;
+        const { productName, description, type, category, quantity, gender, intial_value } = req.body;
 
         const savedInventories = [];
 
@@ -30,6 +30,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 gender,
                 type,
                 qrCodeValue: formattedValue,
+                intial_value: formattedValue,
                 qrCode: await generateQRCode(scanningValue) // Generate and assign unique QR code
             });
 
@@ -107,11 +108,15 @@ exports.deleteNewGeneratedQrCOde = async (req, res) => {
 
 async function generateQRCode(scanningValue) {
     // Generate QR code and return the QR code image
-    const formattedValue = scanningValue.replace(/\s/g, '');
-    const qrCodeUrl = encodeURIComponent(formattedValue);
-    const qrCodeImage = await qrcode.toDataURL(qrCodeUrl);
-    console.log(formattedValue)
-    return qrCodeImage;
+    try {
+        // Generate QR code and return the QR code image
+        const formattedValue = scanningValue.replace(/\s/g, '');
+        const qrCodeImage = await qrcode.toDataURL(formattedValue);
+        return qrCodeImage;
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+        throw error;
+    }
 }
 
 
@@ -153,26 +158,22 @@ exports.assignQrCodeToQuote = async (req, res) => {
         }
 
         // Check if any inventory is already assigned to an active quotation
-        const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
-        if (isAnyActive) {
-            return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
-        }
+        // const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
+        // if (isAnyActive) {
+        //     return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
+        // }
 
         // Loop through each inventory and update the quote_id, quote_type, and status fields
         for (let i = 0; i < inventories.length; i++) {
             const inventory = inventories[i];
-
             // Update the quote_id, quote_type, and status fields
             inventory.quote_id = quoteId;
             inventory.quote_type = quoteType;
             inventory.status = 'active';
 
             // Append the quoteType and quoteId to the existing qrCodeValue
-            const updatedQrCodeValue = `${inventory.qrCodeValue}-${quoteType}-${quoteId}`;
-
-            // Generate and assign the updated QR code
-            inventory.qrCode = await generateQRCode(updatedQrCodeValue);
-
+            const updatedQrCodeValue = `${process.env.APP_URL}/services?quotationId=${quoteId}&quotationType=${quoteType}&qrId=${inventory._id}`;
+            inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
 

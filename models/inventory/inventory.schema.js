@@ -35,6 +35,10 @@ const inventorySchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        intial_value: {
+            type: String,
+            required: false
+        },
         status: {
             type: String,
             enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
