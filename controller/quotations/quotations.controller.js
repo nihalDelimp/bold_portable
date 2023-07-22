@@ -339,8 +339,6 @@ const addQuotationDetails = (pdfDoc, quotationData) => {
     pdfDoc.text('');
 
     pdfDoc.text('Cost Details:');
-    pdfDoc.text(`Hand Washing: $${quotationData.costDetails.handWashing}`);
-    pdfDoc.text(`Hand Sanitizer Pump: $${quotationData.costDetails.handSanitizerPump}`);
     pdfDoc.text(`Twice Weekly Servicing: $${quotationData.costDetails.twiceWeeklyServicing}`);
     pdfDoc.text(`Use At Night Cost: $${quotationData.costDetails.useAtNightCost}`);
     pdfDoc.text(`Use In Winter Cost: $${quotationData.costDetails.useInWinterCost}`);
