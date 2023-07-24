@@ -32,6 +32,7 @@ exports.save = async (req, res) => {
         }
 
 		let quotation;
+		console.log('jashdjgdj', quotation)
 		switch (quotationType) {
 			case 'event':
 				quotation = await Event.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
@@ -53,7 +54,7 @@ exports.save = async (req, res) => {
 				quotation = await RecreationalSite.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
 				break;
 			default:
-				throw new Error(`Quotation type '${quotationType}' not found`).populate({ path: "user", model: "User" });
+				throw new Error(`Quotation type '${quotationType}' not found`);
 		}
 
 		// Create a new UserServices instance with the extracted data
