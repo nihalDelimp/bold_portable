@@ -32,7 +32,6 @@ exports.save = async (req, res) => {
         }
 
 		let quotation;
-		console.log('jashdjgdj', quotation)
 		switch (quotationType) {
 			case 'event':
 				quotation = await Event.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
@@ -45,7 +44,6 @@ exports.save = async (req, res) => {
 				break;
 			case 'disaster-relief':
 				quotation = await DisasterRelief.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
-
 				break;
 			case 'construction':
 				quotation = await Construction.findOne({ _id: quotationId }).populate({ path: "user", model: "User" });
@@ -80,7 +78,7 @@ exports.save = async (req, res) => {
 
 		const mailOptions = {
             from: process.env.MAIL_FROM,
-            to: user.email,
+            to: email,
             subject: 'Service Request Acknowledgement',
             text: `Hi ${user.name},\n\nThank you for your service request for ${service}.\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
         };
