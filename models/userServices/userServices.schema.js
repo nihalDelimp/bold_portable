@@ -37,19 +37,11 @@ const userServicesSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        address: {
-            type: String,
-            required: true
-        },
-        coordinates: {
-            type: { type: String, default: 'Point' },
-            coordinates: { type: [Number], default: [0, 0] }
-        },
         status: {
             type: String,
             required: true,
             enum: ['pending', 'processing', 'resolved'],
-            default:'pending'
+            default: 'pending'
         },
         images: {
             type: Array,
@@ -60,7 +52,7 @@ const userServicesSchema = new mongoose.Schema(
                 message: 'Maximum of 3 images allowed.'
             }
         }
-    },      
+    },
     {
         timestamps: true
     }
