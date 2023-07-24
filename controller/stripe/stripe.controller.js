@@ -337,7 +337,7 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
-              
+
 
         const subscriptionIds = subscriptions.map(subscription => subscription._id);
 
@@ -350,22 +350,22 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
 
             return {
                 ...subscription.toObject(),
-                trackingId,         };
+                trackingId,
+            };
         });
 
         for (const subscription of formattedSubscriptions) {
-
             const searchString = subscription.quotationType + '-' + subscription.quotationId;
+            console.log(searchString)
             const inventories = await Inventory.find({
                 qrCodeValue: { $regex: searchString, $options: "i" }
             });
-        
+
             console.log("Number of inventories:", inventories.length);
-        
+
             const assignedInventoriesCount = inventories.length || 0;
             subscription.assignedInventoriesCount = assignedInventoriesCount;
-    
-        }        
+        }
 
         const totalPages = Math.ceil(totalSubscription / limit);
 

@@ -14,6 +14,7 @@ const Subscription = require("../stripe/models/subscription.schema");
 const mailer = require("../../helpers/nodemailer");
 const User = require('../../models/user/user.schema');
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const PDFDocument = require('pdfkit');
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
@@ -254,7 +255,7 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
 exports.updateConstructionQuotation = async (req, res) => {
     try {
         const { constructionId } = req.params; // Get the construction ID from the request parameters
-        const { costDetails } = req.body;
+        const { costDetails, type = "" } = req.body;
 
         // Find the existing Construction document
         const construction = await Construction.findById(constructionId);
@@ -265,34 +266,55 @@ exports.updateConstructionQuotation = async (req, res) => {
 
         // Update the costDetails field
         construction.costDetails = costDetails;
-        construction.status = "modified";
 
 
         // Save the updated construction document
         await construction.save();
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: construction.user,
+                quote_type: 'recreational-site',
+                quote_id: construction._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { construction });
 
-        const notification = new Notification({
-            user: construction.user,
-            quote_type: "construction",
-            quote_id: construction._id,
-            type: "UPDATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
-        io.emit("update_quote", { construction });
+            const user = await User.findById(construction.user);
 
-        const user = await User.findById(construction.user);
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                console.log(user.email)
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${construction}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, construction);
 
-        mailer.sendMail(mailOptions);
+            // End the document
+            pdfDoc.end();
+        }
 
         return apiResponse.successResponseWithData(
             res,
@@ -303,53 +325,105 @@ exports.updateConstructionQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+const addQuotationDetails = (pdfDoc, quotationData) => {
+    pdfDoc.text("Here's the complete Quotation");
+    pdfDoc.text(`Hi ${quotationData.coordinator.name},`);
+    pdfDoc.text('We have updated your quotation with the requisite price and details.');
+    pdfDoc.text('');
+
+    pdfDoc.text(`Quotation ID: ${quotationData._id}`);
+    pdfDoc.text(`Quotation Type: ${quotationData.quotationType}`);
+    pdfDoc.text(`Max Workers: ${quotationData.maxWorkers}`);
+    pdfDoc.text(`Weekly Hours: ${quotationData.weeklyHours}`);
+    // Add more quotation details as needed
+    pdfDoc.text('');
+
+    pdfDoc.text('Cost Details:');
+    pdfDoc.text(`Twice Weekly Servicing: $${quotationData.costDetails.twiceWeeklyServicing}`);
+    pdfDoc.text(`Use At Night Cost: $${quotationData.costDetails.useAtNightCost}`);
+    pdfDoc.text(`Use In Winter Cost: $${quotationData.costDetails.useInWinterCost}`);
+    pdfDoc.text(`Number of Units Cost: $${quotationData.costDetails.numberOfUnitsCost}`);
+    pdfDoc.text(`Delivery Price: $${quotationData.costDetails.deliveryPrice}`);
+    pdfDoc.text(`Workers Cost: $${quotationData.costDetails.workersCost}`);
+    pdfDoc.text(`Hand Washing Cost: $${quotationData.costDetails.handWashingCost}`);
+    pdfDoc.text(`Hand Sanitizer Pump Cost: $${quotationData.costDetails.handSanitizerPumpCost}`);
+    pdfDoc.text(`Special Requirements Cost: $${quotationData.costDetails.specialRequirementsCost}`);
+    pdfDoc.text(`Service Frequency Cost: $${quotationData.costDetails.serviceFrequencyCost}`);
+    pdfDoc.text(`Weekly Hours Cost: $${quotationData.costDetails.weeklyHoursCost}`);
+    // Add more cost details as needed
+
+    pdfDoc.text(`Placement Date: ${new Date(quotationData.placementDate).toLocaleDateString()}`);
+    pdfDoc.text(`Distance From Kelowna: ${quotationData.distanceFromKelowna} km`);
+    pdfDoc.text(`Service Charge: $${quotationData.serviceCharge}`);
+    pdfDoc.text(`Delivered Price: $${quotationData.deliveredPrice}`);
+    pdfDoc.text(`Use At Night: ${quotationData.useAtNight ? 'Yes' : 'No'}`);
+    pdfDoc.text(`Use In Winter: ${quotationData.useInWinter ? 'Yes' : 'No'}`);
+
+    // Add more content to the PDF as needed
+};
 
 exports.updateRecreationalSiteQuotation = async (req, res) => {
     try {
         const { recreationalSiteId } = req.params; // Get the recreationalSite ID from the request parameters
-        const { costDetails } = req.body;
-
+        const { costDetails, type = '' } = req.body;
         // Find the existing recreationalSite document
         const recreationalSite = await RecreationalSite.findById(recreationalSiteId);
 
         if (!recreationalSite) {
-            return apiResponse.ErrorResponse(res, "RecreationalSite document not found.");
+            return apiResponse.ErrorResponse(res, 'RecreationalSite document not found.');
         }
 
         // Update the recreationalSite field
         recreationalSite.costDetails = costDetails;
-        recreationalSite.status = "modified";
 
         // Save the updated recreationalSite document
         await recreationalSite.save();
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: recreationalSite.user,
+                quote_type: 'recreational-site',
+                quote_id: recreationalSite._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { recreationalSite });
 
-        const notification = new Notification({
-            user: recreationalSite.user,
-            quote_type: "recreational-site",
-            quote_id: recreationalSite._id,
-            type: "UPDATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
-        io.emit("update_quote", { recreationalSite });
+            const user = await User.findById(recreationalSite.user);
 
-        const user = await User.findById(recreationalSite.user);
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${recreationalSiteId}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
-        mailer.sendMail(mailOptions);
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, recreationalSite);
 
-        return apiResponse.successResponseWithData(
-            res,
-            "Quotation has been updated successfully",
-            recreationalSite
-        );
+            // End the document
+            pdfDoc.end();
+        }
+
+        return apiResponse.successResponseWithData(res, 'Quotation has been updated successfully', recreationalSite);
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
@@ -472,7 +546,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 exports.updateDisasterReliefQuotation = async (req, res) => {
     try {
         const { disasterReliefId } = req.params; // Get the construction ID from the request parameters
-        const { costDetails } = req.body;
+        const { costDetails, type = "" } = req.body;
 
         // Find the existing construction document
         const disasterRelief = await DisasterRelief.findById(disasterReliefId);
@@ -483,33 +557,53 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
         // Update the costDetails field
         disasterRelief.costDetails = costDetails;
-        disasterRelief.status = "modified";
 
         // Save the updated disasterRelief document
         await disasterRelief.save();
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: disasterRelief.user,
+                quote_type: 'recreational-site',
+                quote_id: disasterRelief._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { disasterRelief });
 
-        const notification = new Notification({
-            user: disasterRelief.user,
-            quote_type: "disasterRelief",
-            quote_id: disasterRelief._id,
-            type: "UPDATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
-        io.emit("update_quote", { disasterRelief });
+            const user = await User.findById(disasterRelief.user);
 
-        const user = await User.findById(disasterRelief.user);
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${disasterRelief}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
-        mailer.sendMail(mailOptions);
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, disasterRelief);
 
+            // End the document
+            pdfDoc.end();
+        }
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -634,7 +728,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
 exports.updatePersonalOrBusinessQuotation = async (req, res) => {
     try {
         const { personalOrBusinessId } = req.params; // Get the construction ID from the request parameters
-        const { costDetails } = req.body;
+        const { costDetails, type = "" } = req.body;
 
         // Find the existing construction document
         const personalOrBusiness = await PersonalOrBusiness.findById(personalOrBusinessId);
@@ -645,33 +739,53 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
         // Update the costDetails field
         personalOrBusiness.costDetails = costDetails;
-        personalOrBusiness.status = "modified";
 
         // Save the updated disasterRelief document
         await personalOrBusiness.save();
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: personalOrBusiness.user,
+                quote_type: 'recreational-site',
+                quote_id: personalOrBusiness._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { personalOrBusiness });
 
-        const notification = new Notification({
-            user: personalOrBusiness.user,
-            quote_type: "personal-or-business",
-            quote_id: personalOrBusiness._id,
-            type: "UPDATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
-        io.emit("update_quote", { personalOrBusiness });
+            const user = await User.findById(personalOrBusiness.user);
 
-        const user = await User.findById(personalOrBusiness.user);
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${personalOrBusiness}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
-        mailer.sendMail(mailOptions);
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, personalOrBusiness);
 
+            // End the document
+            pdfDoc.end();
+        }
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -794,7 +908,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 exports.updateFarmOrchardWineryQuotation = async (req, res) => {
     try {
         const { farmOrchardWineryId } = req.params; // Get the construction ID from the request parameters
-        const { costDetails } = req.body;
+        const { costDetails, type = "" } = req.body;
 
         // Find the existing construction document
         const farmOrchardWinery = await FarmOrchardWinery.findById(farmOrchardWineryId);
@@ -805,33 +919,53 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
         // Update the costDetails field
         farmOrchardWinery.costDetails = costDetails;
-        farmOrchardWinery.status = "modified";
 
         // Save the updated disasterRelief document
         await farmOrchardWinery.save();
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: farmOrchardWinery.user,
+                quote_type: 'recreational-site',
+                quote_id: farmOrchardWinery._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { farmOrchardWinery });
 
-        const notification = new Notification({
-            user: farmOrchardWinery.user,
-            quote_type: "farm-orchard-winery",
-            quote_id: farmOrchardWinery._id,
-            type: "UPDATE_QUOTE",
-            status_seen: false
-        });
-        await notification.save();
-        io.emit("update_quote", { farmOrchardWinery });
+            const user = await User.findById(farmOrchardWinery.user);
 
-        const user = await User.findById(farmOrchardWinery.user);
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${farmOrchardWinery}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
-        mailer.sendMail(mailOptions);
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, farmOrchardWinery);
 
+            // End the document
+            pdfDoc.end();
+        }
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -975,7 +1109,7 @@ exports.createEventQuotation = async (req, res) => {
 exports.updateEventQuotation = async (req, res) => {
     try {
         const { eventId } = req.params; // Get the construction ID from the request parameters
-        const { costDetails } = req.body;
+        const { costDetails, type = "" } = req.body;
 
         // Find the existing construction document
         const event = await Event.findById(eventId);
@@ -986,7 +1120,6 @@ exports.updateEventQuotation = async (req, res) => {
 
         // Update the costDetails field
         event.costDetails = costDetails;
-        event.status = "modified";
 
         // Save the updated disasterRelief document
         await event.save();
@@ -999,20 +1132,50 @@ exports.updateEventQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
-        io.emit("update_quote", { event });
+        if (type !== 'save') {
+            const notification = new Notification({
+                user: event.user,
+                quote_type: 'recreational-site',
+                quote_id: event._id,
+                type: 'UPDATE_QUOTE',
+                status_seen: false,
+            });
+            await notification.save();
+            io.emit('update_quote', { event });
 
-        const user = await User.findById(event.user);
+            const user = await User.findById(event.user);
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Quotation Update - Action Required',
-            text: `Hi ${user.name},\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
-            html: `<p>Hi ${user.name},</p><p>We have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.</p><p>To make the payment and subscribe, please follow these steps:</p><ol><li>Log in to your account on our website dashboard.</li><li>Navigate to the "Quotations" section.</li><li>Review the updated quotation with the final price and details.</li><li>Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.</li></ol><p>If you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.</p><p>Thank you for choosing Bold Portable.</p><p>Best regards,<br>Bold Portable Team</p>`
-        };
+            // Generate the PDF content
+            const pdfDoc = new PDFDocument();
 
-        mailer.sendMail(mailOptions);
+            // Create a buffer to store the PDF data
+            let pdfBuffer = Buffer.alloc(0);
+            pdfDoc.on('data', (chunk) => {
+                pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
+            });
+            pdfDoc.on('end', () => {
+                // Send the email with the PDF attachment
+                const mailOptions = {
+                    from: process.env.MAIL_FROM,
+                    to: user.email,
+                    subject: 'Quotation Update - Action Required',
+                    text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
+                    attachments: [
+                        {
+                            filename: `quotation_update-${event}.pdf`,
+                            content: pdfBuffer,
+                        },
+                    ],
+                };
+                mailer.sendMail(mailOptions);
+            });
 
+            // Add quotation details to the PDF
+            addQuotationDetails(pdfDoc, event);
+
+            // End the document
+            pdfDoc.end();
+        }
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -1029,7 +1192,6 @@ exports.getAllQuotation = async (req, res) => {
         console.log(quotationType)
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-
 
         if (quotationType == 'all') {
             const quotations = await Promise.all([
@@ -1051,18 +1213,15 @@ exports.getAllQuotation = async (req, res) => {
             });
             quotations.sort((a, b) => b.createdAt - a.createdAt);
 
-            const count = await Event.countDocuments()
-                + await FarmOrchardWinery.countDocuments()
-                + await PersonalOrBusiness.countDocuments()
-                + await DisasterRelief.countDocuments()
-                + await Construction.countDocuments()
-                + await RecreationalSite.countDocuments();
+            // Filtering quotations with pending and cancelled status only
+            const filteredQuotations = quotations.filter(quotation => quotation.status === 'pending' || quotation.status === 'cancelled');
+            const count = filteredQuotations.length;
 
             return apiResponse.successResponseWithData(
                 res,
                 "Quotations retrieved successfully",
                 {
-                    quotations: quotations.slice((page - 1) * limit, page * limit),
+                    quotations: filteredQuotations.slice((page - 1) * limit, page * limit),
                     page: page,
                     pages: Math.ceil(count / limit),
                     total: count
@@ -1071,6 +1230,7 @@ exports.getAllQuotation = async (req, res) => {
         }
         else {
             let quotations;
+
             switch (quotationType) {
                 case 'event':
                     quotations = await Event.find()
@@ -1106,6 +1266,10 @@ exports.getAllQuotation = async (req, res) => {
                     throw new Error(`Quotation type '${quotationType}' not found`);
             }
 
+            // Filtering quotations with pending and cancelled status only
+            const filteredQuotations = quotations.filter(quotation => quotation.status === 'pending' || quotation.status === 'cancelled');
+            const count = filteredQuotations.length;
+
             const quotationTypeFormatted = quotationType.replace(/-/g, ' ')
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -1113,12 +1277,11 @@ exports.getAllQuotation = async (req, res) => {
 
             const QuotationModel = mongoose.model(quotationTypeFormatted);
 
-            const count = await QuotationModel.countDocuments();
             return apiResponse.successResponseWithData(
                 res,
                 "Quotations retrieved successfully",
                 {
-                    quotations: quotations,
+                    quotations: filteredQuotations,
                     page: page,
                     pages: Math.ceil(count / limit),
                     total: count
@@ -1129,6 +1292,7 @@ exports.getAllQuotation = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 exports.getAllQuotationForUsers = async (req, res) => {

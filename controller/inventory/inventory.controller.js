@@ -12,7 +12,7 @@ const RecreationalSite = require('../../models/recreationalSite/recreationalSite
 
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
-        const { productName, description, type, category, quantity, gender } = req.body;
+        const { productName, description, type, category, quantity, gender, intial_value } = req.body;
 
         const savedInventories = [];
 
@@ -30,6 +30,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 gender,
                 type,
                 qrCodeValue: formattedValue,
+                intial_value: formattedValue,
                 qrCode: await generateQRCode(scanningValue) // Generate and assign unique QR code
             });
 
@@ -107,11 +108,15 @@ exports.deleteNewGeneratedQrCOde = async (req, res) => {
 
 async function generateQRCode(scanningValue) {
     // Generate QR code and return the QR code image
-    const formattedValue = scanningValue.replace(/\s/g, '');
-    const qrCodeUrl = encodeURIComponent(formattedValue);
-    const qrCodeImage = await qrcode.toDataURL(qrCodeUrl);
-    console.log(formattedValue)
-    return qrCodeImage;
+    try {
+        // Generate QR code and return the QR code image
+        const formattedValue = scanningValue.replace(/\s/g, '');
+        const qrCodeImage = await qrcode.toDataURL(formattedValue);
+        return qrCodeImage;
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+        throw error;
+    }
 }
 
 
@@ -153,26 +158,22 @@ exports.assignQrCodeToQuote = async (req, res) => {
         }
 
         // Check if any inventory is already assigned to an active quotation
-        const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
-        if (isAnyActive) {
-            return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
-        }
+        // const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
+        // if (isAnyActive) {
+        //     return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
+        // }
 
         // Loop through each inventory and update the quote_id, quote_type, and status fields
         for (let i = 0; i < inventories.length; i++) {
             const inventory = inventories[i];
-
             // Update the quote_id, quote_type, and status fields
             inventory.quote_id = quoteId;
             inventory.quote_type = quoteType;
             inventory.status = 'active';
 
             // Append the quoteType and quoteId to the existing qrCodeValue
-            const updatedQrCodeValue = `${inventory.qrCodeValue}-${quoteType}-${quoteId}`;
-
-            // Generate and assign the updated QR code
-            inventory.qrCode = await generateQRCode(updatedQrCodeValue);
-
+            const updatedQrCodeValue = `${process.env.APP_URL}/services?quotationId=${quoteId}&quotationType=${quoteType}&qrId=${inventory._id}`;
+            inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
 
@@ -197,9 +198,10 @@ exports.getQrCodesByStatus = async (req, res) => {
         // Calculate the number of documents to skip
         const skip = (pageNumber - 1) * limitNumber;
 
-        // Find QR codes with the provided status and apply pagination
+        // Find QR codes with the provided status, sort by updatedAt, and apply pagination
         const [qrCodes, totalCount] = await Promise.all([
             Inventory.find({ status })
+                .sort({ updatedAt: -1 }) // Sort in descending order (latest first)
                 .skip(skip)
                 .limit(limitNumber)
                 .exec(),
@@ -220,6 +222,7 @@ exports.getQrCodesByStatus = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 exports.getQrCodesByQuotation = async (req, res) => {
@@ -313,7 +316,7 @@ exports.changeStatusToPending = async (req, res) => {
 exports.getFilterDetails = async (req, res) => {
     try {
         const { category, type, gender, page, limit } = req.query;
-    
+
         // Prepare the filter object based on the provided query parameters
         const filter = {};
         if (category) {
@@ -326,17 +329,17 @@ exports.getFilterDetails = async (req, res) => {
             filter.gender = gender;
         }
         filter.status = 'pending'; // Add this line to filter by 'status' property with 'pending' value
-    
+
         // Convert page and limit parameters to integers (with default values)
         const pageNo = parseInt(page) || 1;
         const pageSize = parseInt(limit) || 10; // Default to 10 items per page
-    
+
         // Calculate the number of items to skip based on the page number and limit
         const skipItems = (pageNo - 1) * pageSize;
-    
+
         // Find the matching inventory items based on the filter and apply pagination
         const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize);
-    
+
         return apiResponse.successResponseWithData(res, 'Filtered inventory items retrieved successfully', filteredInventory);
     } catch (error) {
         console.log(error.message);
@@ -368,7 +371,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
                 quotation = await Construction.findOne({ _id: quotationId });
                 break;
             case 'recreational-site':
-                quotation = await RecreationalSite.findOne({_id:quotationId});
+                quotation = await RecreationalSite.findOne({ _id: quotationId });
                 break;
             default:
                 throw new Error(`Quotation type '${quotationType}' not found`);
@@ -439,29 +442,29 @@ exports.findByQutationTypeAndId = async (req, res) => {
         const searchString = quotationType + '-' + quotationId;
 
         let quotation;
-		switch (quotationType) {
-			case 'event':
-				quotation = await Event.findOne({ _id: quotationId });
-				break;
-			case 'farm-orchard-winery':
-				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
-				break;
-			case 'personal-or-business':
-				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
-				break;
-			case 'disaster-relief':
-				quotation = await DisasterRelief.findOne({ _id: quotationId });
+        switch (quotationType) {
+            case 'event':
+                quotation = await Event.findOne({ _id: quotationId });
+                break;
+            case 'farm-orchard-winery':
+                quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+                break;
+            case 'personal-or-business':
+                quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+                break;
+            case 'disaster-relief':
+                quotation = await DisasterRelief.findOne({ _id: quotationId });
 
-				break;
-			case 'construction':
-				quotation = await Construction.findOne({ _id: quotationId });
-				break;
-			case 'recreational-site':
-				quotation = await RecreationalSite.findOne({ _id: quotationId });
-				break;
-			default:
-				throw new Error(`Quotation type '${quotationType}' not found`);
-		}
+                break;
+            case 'construction':
+                quotation = await Construction.findOne({ _id: quotationId });
+                break;
+            case 'recreational-site':
+                quotation = await RecreationalSite.findOne({ _id: quotationId });
+                break;
+            default:
+                throw new Error(`Quotation type '${quotationType}' not found`);
+        }
 
         const skip = (page - 1) * limit;
 
@@ -481,6 +484,28 @@ exports.findByQutationTypeAndId = async (req, res) => {
 
         // Return the response with the inventories and pagination details
         return apiResponse.successResponseWithData(res, 'Records fetched successfully', { inventories, quotation, pagination });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+exports.reinitializeQrCodeValue = async (req, res) => {
+    try {
+        const { inventory_id } = req.body;
+
+        const inventory = await Inventory.findOne({ _id: inventory_id });
+
+        if (!inventory) {
+            return apiResponse.notFoundResponse(res, 'Inventory not found');
+        }
+
+        inventory.qrCodeValue = inventory.intial_value;
+
+        await inventory.save();
+
+        return apiResponse.successResponse(res, 'QR code value reverted to intial value');
+
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
