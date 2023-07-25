@@ -501,6 +501,7 @@ exports.reinitializeQrCodeValue = async (req, res) => {
         }
 
         inventory.qrCodeValue = inventory.intial_value;
+        inventory.status = "pending";
 
         await inventory.save();
 
