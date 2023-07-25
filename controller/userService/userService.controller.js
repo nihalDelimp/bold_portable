@@ -177,7 +177,7 @@ exports.serviceDetail = async (req, res) => {
 				throw new Error(`Quotation type '${quotationType}' not found`);
 		}
 
-		return apiResponse.successResponse(res, "Data retrieved Succesfully!", {
+		return apiResponse.successResponseWithData(res, "Data retrieved Succesfully!", {
 			userService,
 			quotation,
 			inventory
