@@ -45,6 +45,8 @@ const disasterReliefSchema = new mongoose.Schema(
         productTypes: { type: String, default: null },
         dateTillUse: Date,
         special_requirements: String,
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
         status: {
             type: String,
             enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],

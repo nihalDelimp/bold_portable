@@ -33,6 +33,7 @@ exports.createConstructionQuotation = async (req, res) => {
             weeklyHours,
             placementDate,
             restrictedAccess,
+            restrictedAccessDescription,
             placementLocation,
             originPoint,
             distanceFromKelowna,
@@ -85,6 +86,7 @@ exports.createConstructionQuotation = async (req, res) => {
             weeklyHours,
             placementDate,
             restrictedAccess,
+            restrictedAccessDescription,
             placementLocation,
             originPoint,
             distanceFromKelowna,
@@ -151,7 +153,7 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             weeklyHours,
             placementDate,
             restrictedAccess,
-            placementLocation,
+            restrictedAccessDescription,
             originPoint,
             distanceFromKelowna,
             serviceCharge,
@@ -203,6 +205,7 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             weeklyHours,
             placementDate,
             restrictedAccess,
+            restrictedAccessDescription,
             placementLocation,
             originPoint,
             distanceFromKelowna,
@@ -462,6 +465,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             handSanitizerPump,
             twiceWeeklyService,
             dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         } = req.body;
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
@@ -516,7 +521,9 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         };
 
         // Create a new DisasterRelief instance with the quotation object as properties
@@ -645,7 +652,9 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         } = req.body;
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
@@ -699,7 +708,9 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         });
 
         // Save the PersonalOrBusiness instance
@@ -826,7 +837,9 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         } = req.body;
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
@@ -879,7 +892,9 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         });
 
         // Save the FarmOrchardWinery instance
@@ -1015,8 +1030,9 @@ exports.createEventQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
-
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         } = req.body;
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
@@ -1083,7 +1099,9 @@ exports.createEventQuotation = async (req, res) => {
             handwashing,
             handSanitizerPump,
             twiceWeeklyService,
-            dateTillUse
+            dateTillUse,
+            restrictedAccess,
+            restrictedAccessDescription
         });
 
         // Save the Event instance

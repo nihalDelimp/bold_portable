@@ -43,6 +43,8 @@ const personalOrBusinessSchema = new mongoose.Schema(
         dateTillUse: Date,
         productTypes: { type: String, default: null },
         special_requirements: String,
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,
