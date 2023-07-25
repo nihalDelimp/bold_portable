@@ -14,22 +14,22 @@ const RecreationalSite = require('../../models/recreationalSite/recreationalSite
 exports.save = async (req, res) => {
 	try {
 
-		const { service, serviceTypes, quotationId, quotationType, email, phone, name, address, coordinates, status } = req.body;
+		const { service, serviceTypes, quotationId, quotationType, qrId, email, phone, name, address, coordinates, status } = req.body;
 		let images = [];
 
 		if (req.files) {
-            // multiple files uploaded
-            images = req.files.map(file => ({
-                image_path: file.path,
-                image_type: file.mimetype
-            }));
-        } else {
-            // single file uploaded
-            images.push({
-                image_path: req.file.path,
-                image_type: req.file.mimetype
-            });
-        }
+			// multiple files uploaded
+			images = req.files.map(file => ({
+				image_path: file.path,
+				image_type: file.mimetype
+			}));
+		} else {
+			// single file uploaded
+			images.push({
+				image_path: req.file.path,
+				image_type: req.file.mimetype
+			});
+		}
 
 		let quotation;
 		switch (quotationType) {
@@ -57,13 +57,14 @@ exports.save = async (req, res) => {
 
 		// Create a new UserServices instance with the extracted data
 		const newUserServices = new UserService({
-			 user: quotation.user,
+			user: quotation.user,
 			service,
 			serviceTypes,
 			quotationId,
 			quotationType,
 			email,
 			phone,
+			qrId,
 			name,
 			address,
 			coordinates,
@@ -77,14 +78,14 @@ exports.save = async (req, res) => {
 		const user = quotation.user;
 
 		const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: email,
-            subject: 'Service Request Acknowledgement',
-            text: `Hi ${user.name},\n\nThank you for your service request for ${service}.\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
-        };
+			from: process.env.MAIL_FROM,
+			to: email,
+			subject: 'Service Request Acknowledgement',
+			text: `Hi ${user.name},\n\nThank you for your service request for ${service}.\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
+		};
 		mailer.sendMail(mailOptions);
 
-	//	Save the new Notification for Admmin panel 
+		//	Save the new Notification for Admmin panel 
 		const notification = new Notification({
 			user,
 			quote_type: quotationType,
@@ -109,7 +110,7 @@ exports.save = async (req, res) => {
 
 exports.getAllUserServices = async (req, res) => {
 	try {
-		const page = parseInt(req.query.page) || 1; 
+		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
 
 		const startIndex = (page - 1) * limit;
@@ -137,5 +138,4 @@ exports.getAllUserServices = async (req, res) => {
 		return apiResponse.ErrorResponse(res, error.message);
 	}
 };
-  
-  
+

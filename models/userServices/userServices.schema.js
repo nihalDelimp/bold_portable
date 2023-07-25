@@ -25,6 +25,10 @@ const userServicesSchema = new mongoose.Schema(
             required: true,
             enum: ['construction', 'disaster-relief', 'personal-or-business', 'farm-orchard-winery', 'event', 'recreational-site']
         },
+        qrId: {
+            type: String,
+            required: true
+        },
         email: {
             type: String,
             required: true
