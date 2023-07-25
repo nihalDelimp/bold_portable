@@ -149,9 +149,9 @@ exports.serviceDetail = async (req, res) => {
 		const quotationType = userService.quotationType;
 		const quotationId = userService.quotationId;
 
-		console.log("sjahdjhdj", user_service_id);
+		console.log("sjahdjhdj", userService.qrId);
 
-		const inventory = await Inventory.findOne(userService.qrId);
+		const inventory = await Inventory.findOne({_id: userService.qrId});
 
 		let quotation;
 		switch (quotationType) {
