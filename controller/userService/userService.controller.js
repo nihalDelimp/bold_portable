@@ -10,6 +10,7 @@ const mailer = require("../../helpers/nodemailer");
 const io = require('socket.io')(server);
 const Event = require('../../models/event/event.schema');
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const Inventory = require('../../models/inventory/inventory.schema');
 
 exports.save = async (req, res) => {
 	try {
@@ -137,5 +138,50 @@ exports.getAllUserServices = async (req, res) => {
 	} catch (error) {
 		return apiResponse.ErrorResponse(res, error.message);
 	}
+};
+
+exports.serviceDetail = async (req, res) => {
+    try {
+        const { user_service_id } = req.body;
+
+		const userService = await UserService.findOne(user_service_id);
+
+		const quotationType = userService.quotationType;
+		const quotationId = userService.quotationId;
+
+		const inventory = await Inventory.findOne(userService.qrId);
+
+		let quotation;
+		switch (quotationType) {
+			case 'event':
+				quotation = await Event.findOne({ _id: quotationId });
+				break;
+			case 'farm-orchard-winery':
+				quotation = await FarmOrchardWinery.findOne({ _id: quotationId });
+				break;
+			case 'personal-or-business':
+				quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
+				break;
+			case 'disaster-relief':
+				quotation = await DisasterRelief.findOne({ _id: quotationId });
+				break;
+			case 'construction':
+				quotation = await Construction.findOne({ _id: quotationId });
+				break;
+			case 'recreational-site':
+				quotation = await RecreationalSite.findOne({ _id: quotationId });
+				break;
+			default:
+				throw new Error(`Quotation type '${quotationType}' not found`);
+		}
+
+        return apiResponse.successResponse(res, {
+			userService,
+			quotation,
+			inventory
+		});
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
 };
 
