@@ -142,12 +142,14 @@ exports.getAllUserServices = async (req, res) => {
 
 exports.serviceDetail = async (req, res) => {
     try {
-        const { user_service_id } = req.body;
+        const { user_service_id } = req.params;
 
-		const userService = await UserService.findOne(user_service_id);
+		const userService = await UserService.findOne({_id: user_service_id});
 
 		const quotationType = userService.quotationType;
 		const quotationId = userService.quotationId;
+
+		console.log("sjahdjhdj", user_service_id);
 
 		const inventory = await Inventory.findOne(userService.qrId);
 
