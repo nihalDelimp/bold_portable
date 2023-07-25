@@ -141,17 +141,17 @@ exports.getAllUserServices = async (req, res) => {
 };
 
 exports.serviceDetail = async (req, res) => {
-    try {
-        const { user_service_id } = req.params;
+	try {
+		const { user_service_id } = req.params;
 
-		const userService = await UserService.findOne({_id: user_service_id});
+		const userService = await UserService.findOne({ _id: user_service_id });
 
 		const quotationType = userService.quotationType;
 		const quotationId = userService.quotationId;
 
 		console.log("sjahdjhdj", userService.qrId);
 
-		const inventory = await Inventory.findOne({_id: userService.qrId});
+		const inventory = await Inventory.findOne({ _id: userService.qrId });
 
 		let quotation;
 		switch (quotationType) {
@@ -177,13 +177,13 @@ exports.serviceDetail = async (req, res) => {
 				throw new Error(`Quotation type '${quotationType}' not found`);
 		}
 
-        return apiResponse.successResponse(res, {
+		return apiResponse.successResponse(res, "Data retrieved Succesfully!", {
 			userService,
 			quotation,
 			inventory
 		});
-    } catch (error) {
-        return apiResponse.ErrorResponse(res, error.message);
-    }
+	} catch (error) {
+		return apiResponse.ErrorResponse(res, error.message);
+	}
 };
 
