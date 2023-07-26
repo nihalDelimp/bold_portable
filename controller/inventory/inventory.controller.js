@@ -188,40 +188,44 @@ exports.assignQrCodeToQuote = async (req, res) => {
 };
 
 
-exports.getQrCodesByStatus = async (req, res) => {
+exports.getQrCodesByStatus = async ({ query }, res) => {
     try {
-        const { status, page, limit } = req.query;
-
-        const pageNumber = parseInt(page) || 1; // Current page number
-        const limitNumber = parseInt(limit) || 10; // Number of items per page
-
-        // Calculate the number of documents to skip
+        let { status, page, limit } = query;
+        const pageNumber = parseInt(page, 10) || 1;
+        const limitNumber = parseInt(limit, 10) || 10;
         const skip = (pageNumber - 1) * limitNumber;
 
-        // Find QR codes with the provided status, sort by updatedAt, and apply pagination
-        const [qrCodes, totalCount] = await Promise.all([
-            Inventory.find({ status })
-                .sort({ updatedAt: -1 }) // Sort in descending order (latest first)
-                .skip(skip)
-                .limit(limitNumber)
-                .exec(),
-            Inventory.countDocuments({ status })
+        const matchStage = status ? { status } : {};
+
+        // Use aggregate to combine find and count operations
+        const [result] = await Inventory.aggregate([
+            { $match: matchStage },
+            { $sort: { updatedAt: -1 } },
+            { $skip: skip },
+            { $limit: limitNumber },
+            {
+                $facet: {
+                    qrCodes: [{ $project: { _id: 0, __v: 0 } }],
+                    totalCount: [{ $count: "count" }],
+                },
+            },
         ]);
+
+        const { qrCodes, totalCount } = result;
 
         if (!qrCodes || qrCodes.length === 0) {
             return apiResponse.notFoundResponse(res, 'No QR codes found');
         }
 
-        const result = {
+        return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', {
             qrCodes,
-            totalCount
-        };
-
-        return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', result);
+            totalCount: totalCount[0]?.count || 0,
+        });
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
 
 
 
