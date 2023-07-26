@@ -355,7 +355,7 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
         });
 
         for (const subscription of formattedSubscriptions) {
-            const searchString = subscription.quotationType + '-' + subscription.quotationId;
+            const searchString= "quotationId="+subscription.quotationId+"&quotationType="+subscription.quotationType
             console.log(searchString)
             const inventories = await Inventory.find({
                 qrCodeValue: { $regex: searchString, $options: "i" }

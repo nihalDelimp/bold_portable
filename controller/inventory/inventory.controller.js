@@ -443,7 +443,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
 exports.findByQutationTypeAndId = async (req, res) => {
     try {
         const { quotationId, quotationType, page = 1, limit = 10 } = req.body;
-        const searchString = quotationType + '-' + quotationId;
+        const searchString= "quotationId="+quotationId+"&quotationType="+quotationType
 
         let quotation;
         switch (quotationType) {
