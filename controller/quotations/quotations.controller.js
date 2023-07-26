@@ -152,6 +152,7 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             maxWorkers,
             weeklyHours,
             placementDate,
+            placementLocation,
             restrictedAccess,
             restrictedAccessDescription,
             originPoint,
