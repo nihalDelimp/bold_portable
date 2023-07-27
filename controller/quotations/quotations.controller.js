@@ -1337,7 +1337,7 @@ exports.getAllQuotationForUsers = async (req, res) => {
                 PersonalOrBusiness.find({ user: _id }),
                 DisasterRelief.find({ user: _id }),
                 Construction.find({ user: _id }),
-                RecreationalSite.find(),
+                RecreationalSite.find({ user: _id }),
             ]);
 
             quotations = [
