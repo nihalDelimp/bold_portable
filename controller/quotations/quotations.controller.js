@@ -387,7 +387,6 @@ const addQuotationDetails = (pdfDoc, quotationData) => {
     pdfDoc.moveDown();
     const costDetailsData = [
         ['Cost Details:', ''],
-        ['Twice Weekly Servicing:', `$${quotationData.costDetails.twiceWeeklyServicing}`],
         ['Use At Night Cost:', `$${quotationData.costDetails.useAtNightCost}`],
         ['Use In Winter Cost:', `$${quotationData.costDetails.useInWinterCost}`],
         ['Number of Units Cost:', `$${quotationData.costDetails.numberOfUnitsCost}`],
@@ -400,11 +399,16 @@ const addQuotationDetails = (pdfDoc, quotationData) => {
         ['Weekly Hours Cost:', `$${quotationData.costDetails.weeklyHoursCost}`],
     ];
 
-    for (let i = 0; i < costDetailsData.length; i++) {
-        drawTableRow(costDetailsData[i], i, yOffset);
+    const filteredCostDetailsData = costDetailsData.filter((item) => {
+        // Check if the item contains quotationData.costDetails and its value is not 0
+        return !item[1].includes('$0');
+    });
+
+    for (let i = 0; i < filteredCostDetailsData.length; i++) {
+        drawTableRow(filteredCostDetailsData[i], i, yOffset);
     }
 
-    yOffset += (costDetailsData.length + 1) * tableOptions.rowHeight;
+    yOffset += (filteredCostDetailsData.length + 1) * tableOptions.rowHeight;
 
     pdfDoc.moveDown();
     pdfDoc.moveDown();
