@@ -195,23 +195,15 @@ exports.getQrCodesByStatus = async ({ query }, res) => {
         const limitNumber = parseInt(limit, 10) || 10;
         const skip = (pageNumber - 1) * limitNumber;
 
-        const matchStage = status ? { status } : {};
+        const findQuery = status ? { status } : {};
 
-        // Use aggregate to combine find and count operations
-        const [result] = await Inventory.aggregate([
-            { $match: matchStage },
-            { $sort: { updatedAt: -1 } },
-            { $skip: skip },
-            { $limit: limitNumber },
-            {
-                $facet: {
-                    qrCodes: [{ $project: { _id: 1, __v: 0 } }],
-                    totalCount: [{ $count: "count" }],
-                },
-            },
-        ]);
+        // Fetch the data without aggregation, using find(), skip(), and limit()
+        const qrCodes = await Inventory.find(findQuery)
+            .sort({ updatedAt: -1 })
+            .skip(skip)
+            .limit(limitNumber)
 
-        const { qrCodes, totalCount } = result;
+        const totalCount = await Inventory.countDocuments(findQuery);
 
         if (!qrCodes || qrCodes.length === 0) {
             return apiResponse.notFoundResponse(res, 'No QR codes found');
@@ -219,7 +211,7 @@ exports.getQrCodesByStatus = async ({ query }, res) => {
 
         return apiResponse.successResponseWithData(res, 'QR codes fetched successfully', {
             qrCodes,
-            totalCount: totalCount[0]?.count || 0,
+            totalCount,
         });
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
