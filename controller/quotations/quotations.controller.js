@@ -330,40 +330,114 @@ exports.updateConstructionQuotation = async (req, res) => {
     }
 };
 const addQuotationDetails = (pdfDoc, quotationData) => {
-    pdfDoc.text("Here's the complete Quotation");
-    pdfDoc.text(`Hi ${quotationData.coordinator.name},`);
+    pdfDoc.fontSize(16).text("Here's the complete Quotation", { align: 'center' });
+    pdfDoc.moveDown();
+    pdfDoc.fontSize(12).text(`Hi ${quotationData.coordinator.name},`);
     pdfDoc.text('We have updated your quotation with the requisite price and details.');
     pdfDoc.text('');
 
-    pdfDoc.text(`Quotation ID: ${quotationData._id}`);
-    pdfDoc.text(`Quotation Type: ${quotationData.quotationType}`);
-    pdfDoc.text(`Max Workers: ${quotationData.maxWorkers}`);
-    pdfDoc.text(`Weekly Hours: ${quotationData.weeklyHours}`);
-    // Add more quotation details as needed
-    pdfDoc.text('');
+    const tableOptions = {
+        x: 50,
+        y: pdfDoc.y,
+        width: 500,
+        rowHeight: 20,
+        columnGap: 15,
+    };
 
-    pdfDoc.text('Cost Details:');
-    pdfDoc.text(`Twice Weekly Servicing: $${quotationData.costDetails.twiceWeeklyServicing}`);
-    pdfDoc.text(`Use At Night Cost: $${quotationData.costDetails.useAtNightCost}`);
-    pdfDoc.text(`Use In Winter Cost: $${quotationData.costDetails.useInWinterCost}`);
-    pdfDoc.text(`Number of Units Cost: $${quotationData.costDetails.numberOfUnitsCost}`);
-    pdfDoc.text(`Delivery Price: $${quotationData.costDetails.deliveryPrice}`);
-    pdfDoc.text(`Workers Cost: $${quotationData.costDetails.workersCost}`);
-    pdfDoc.text(`Hand Washing Cost: $${quotationData.costDetails.handWashingCost}`);
-    pdfDoc.text(`Hand Sanitizer Pump Cost: $${quotationData.costDetails.handSanitizerPumpCost}`);
-    pdfDoc.text(`Special Requirements Cost: $${quotationData.costDetails.specialRequirementsCost}`);
-    pdfDoc.text(`Service Frequency Cost: $${quotationData.costDetails.serviceFrequencyCost}`);
-    pdfDoc.text(`Weekly Hours Cost: $${quotationData.costDetails.weeklyHoursCost}`);
-    // Add more cost details as needed
+    // Helper function to draw a table cell with borders
+    const drawTableCell = (text, x, y, width, height) => {
+        pdfDoc
+            .rect(x, y, width, height)
+            .stroke()
+            .text(text, x + 5, y + 5, { width: width - 10, align: 'left' });
+    };
 
-    pdfDoc.text(`Placement Date: ${new Date(quotationData.placementDate).toLocaleDateString()}`);
-    pdfDoc.text(`Distance From Kelowna: ${quotationData.distanceFromKelowna} km`);
-    pdfDoc.text(`Service Charge: $${quotationData.serviceCharge}`);
-    pdfDoc.text(`Delivered Price: $${quotationData.deliveredPrice}`);
-    pdfDoc.text(`Use At Night: ${quotationData.useAtNight ? 'Yes' : 'No'}`);
-    pdfDoc.text(`Use In Winter: ${quotationData.useInWinter ? 'Yes' : 'No'}`);
+    // Helper function to draw a table row
+    const drawTableRow = (row, rowIndex, yOffset) => {
+        const y = yOffset + tableOptions.rowHeight * rowIndex;
+        let x = tableOptions.x;
+
+        row.forEach((cell, cellIndex) => {
+            const width = tableOptions.width / row.length;
+            const height = tableOptions.rowHeight;
+
+            drawTableCell(cell, x, y, width, height);
+
+            x += width;
+        });
+    };
+
+    let yOffset = pdfDoc.y; // Initial y coordinate for the first table
+    pdfDoc.moveDown();
+    const quotationDetailsData = [
+        ['Quotation Details:', ''],
+        ['Quotation ID:', quotationData._id],
+        ['Quotation Type:', quotationData.quotationType],
+        ['Max Workers:', quotationData.maxWorkers.toString()],
+        ['Weekly Hours:', quotationData.weeklyHours.toString()],
+    ];
+
+    for (let i = 0; i < quotationDetailsData.length; i++) {
+        drawTableRow(quotationDetailsData[i], i, yOffset);
+    }
+
+    yOffset += (quotationDetailsData.length + 1) * tableOptions.rowHeight;
+
+    pdfDoc.moveDown();
+    pdfDoc.moveDown();
+    const costDetailsData = [
+        ['Cost Details:', ''],
+        ['Twice Weekly Servicing:', `$${quotationData.costDetails.twiceWeeklyServicing}`],
+        ['Use At Night Cost:', `$${quotationData.costDetails.useAtNightCost}`],
+        ['Use In Winter Cost:', `$${quotationData.costDetails.useInWinterCost}`],
+        ['Number of Units Cost:', `$${quotationData.costDetails.numberOfUnitsCost}`],
+        ['Delivery Price:', `$${quotationData.costDetails.deliveryPrice}`],
+        ['Workers Cost:', `$${quotationData.costDetails.workersCost}`],
+        ['Hand Washing Cost:', `$${quotationData.costDetails.handWashingCost}`],
+        ['Hand Sanitizer Pump Cost:', `$${quotationData.costDetails.handSanitizerPumpCost}`],
+        ['Special Requirements Cost:', `$${quotationData.costDetails.specialRequirementsCost}`],
+        ['Service Frequency Cost:', `$${quotationData.costDetails.serviceFrequencyCost}`],
+        ['Weekly Hours Cost:', `$${quotationData.costDetails.weeklyHoursCost}`],
+    ];
+
+    for (let i = 0; i < costDetailsData.length; i++) {
+        drawTableRow(costDetailsData[i], i, yOffset);
+    }
+
+    yOffset += (costDetailsData.length + 1) * tableOptions.rowHeight;
+
+    pdfDoc.moveDown();
+    pdfDoc.moveDown();
+    const otherDetailsData = [
+        ['Other Details:', ''],
+        ['Placement Date:', new Date(quotationData.placementDate).toLocaleDateString('en-US')],
+        ['Distance From Kelowna:', `${quotationData.distanceFromKelowna} km`],
+        ['Service Charge:', `$${quotationData.serviceCharge}`],
+        ['Delivered Price:', `$${quotationData.deliveredPrice}`],
+        ['Use At Night:', quotationData.useAtNight ? 'Yes' : 'No'],
+        ['Use In Winter:', quotationData.useInWinter ? 'Yes' : 'No'],
+    ];
+
+    for (let i = 0; i < otherDetailsData.length; i++) {
+        drawTableRow(otherDetailsData[i], i, yOffset);
+    }
+
+    yOffset += (otherDetailsData.length + 1) * tableOptions.rowHeight;
+
+    // Calculate the total cost
+    const totalCost = quotationData.costDetails.useAtNightCost + quotationData.costDetails.useInWinterCost + quotationData.costDetails.numberOfUnitsCost + quotationData.costDetails.deliveryPrice + quotationData.costDetails.workersCost + quotationData.costDetails.handWashingCost + quotationData.costDetails.handSanitizerPumpCost + quotationData.costDetails.specialRequirementsCost + quotationData.costDetails.serviceFrequencyCost + quotationData.costDetails.weeklyHoursCost + quotationData.serviceCharge + quotationData.deliveredPrice;
+
+    pdfDoc.moveDown();
+    pdfDoc.moveDown();
+
+    // Draw the Total row
+    drawTableRow(['Total:', `$${totalCost}`], 0, yOffset);
 
     // Add more content to the PDF as needed
+
+
+
+
 };
 
 exports.updateRecreationalSiteQuotation = async (req, res) => {

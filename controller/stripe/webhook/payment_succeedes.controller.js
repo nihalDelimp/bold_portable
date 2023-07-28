@@ -104,8 +104,8 @@ exports.paymentSucceeded = async (object) => {
         const mailOptions = {
             from: process.env.MAIL_FROM,
             to: customer_email,
-            subject: 'QR Code for your Portable Rental',
-            text: `Hi,\n\nThank you for your payment. Please find the atached QR code to scan and redirect to the service page.\n The link for the invoice is:\n\n${object.hosted_invoice_url}  \n\nThanks,\nBold Portable Team`,
+            subject: 'Payment confirmatation',
+            text: `Hi,\n\nThank you for your payment.\n The link for the invoice is:\n\n${object.hosted_invoice_url}  \n\nThanks,\nBold Portable Team`,
         };
         
         mailer.sendMail(mailOptions);
