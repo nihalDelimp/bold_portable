@@ -302,7 +302,7 @@ exports.updateConstructionQuotation = async (req, res) => {
                     text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
                     attachments: [
                         {
-                            filename: `quotation_update-${construction}.pdf`,
+                            filename: `quotation_update-${constructionId}.pdf`,
                             content: pdfBuffer,
                         },
                     ],
@@ -683,7 +683,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
                     text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
                     attachments: [
                         {
-                            filename: `quotation_update-${disasterRelief}.pdf`,
+                            filename: `quotation_update-${disasterReliefId}.pdf`,
                             content: pdfBuffer,
                         },
                     ],
@@ -869,7 +869,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
                     text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
                     attachments: [
                         {
-                            filename: `quotation_update-${personalOrBusiness}.pdf`,
+                            filename: `quotation_update-${personalOrBusinessId}.pdf`,
                             content: pdfBuffer,
                         },
                     ],
@@ -1053,7 +1053,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
                     text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
                     attachments: [
                         {
-                            filename: `quotation_update-${farmOrchardWinery}.pdf`,
+                            filename: `quotation_update-${farmOrchardWineryId}.pdf`,
                             content: pdfBuffer,
                         },
                     ],
