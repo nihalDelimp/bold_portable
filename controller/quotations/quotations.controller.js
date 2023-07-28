@@ -131,7 +131,6 @@ exports.createConstructionQuotation = async (req, res) => {
             construction
         );
     } catch (error) {
-        console.log(error);
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
@@ -251,7 +250,6 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             recreationalSite
         );
     } catch (error) {
-        console.log(error);
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
@@ -296,7 +294,6 @@ exports.updateConstructionQuotation = async (req, res) => {
                 pdfBuffer = Buffer.concat([pdfBuffer, chunk]);
             });
             pdfDoc.on('end', () => {
-                console.log(user.email)
                 // Send the email with the PDF attachment
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
@@ -398,6 +395,16 @@ const addQuotationDetails = (pdfDoc, quotationData) => {
         ['Service Frequency Cost:', `$${quotationData.costDetails.serviceFrequencyCost}`],
         ['Weekly Hours Cost:', `$${quotationData.costDetails.weeklyHoursCost}`],
     ];
+
+    if(quotationData.quotationType == "event") {
+        costDetailsData.push(
+            ['Pick Up Price:', `$${quotationData.costDetails.pickUpPrice}`],
+            ['Pay Per Use:', `$${quotationData.costDetails.payPerUse}`],
+            ['Fenced Off:', `$${quotationData.costDetails.fencedOff}`],
+            ['Actively Cleaned:', `$${quotationData.costDetails.activelyCleaned}`],
+            ['Alcohol Served:', `$${quotationData.costDetails.alcoholServed}`],
+        );
+    }
 
     const filteredCostDetailsData = costDetailsData.filter((item) => {
         // Check if the item contains quotationData.costDetails and its value is not 0
@@ -1259,7 +1266,7 @@ exports.updateEventQuotation = async (req, res) => {
                     text: `Hi,\n\nWe have updated your quotation with the requisite price and details. You can now proceed to make the payment and subscribe by logging into your dashboard.\n\nTo make the payment and subscribe, please follow these steps:\n1. Log in to your account on our website dashboard.\n2. Navigate to the "Quotations" section.\n3. Review the updated quotation with the final price and details.\n4. Click on the "Make Payment" or "Subscribe" button to proceed with the payment process.\n\nIf you encounter any issues or have any questions, please don't hesitate to contact our support team. We are here to assist you every step of the way.\n\nThank you for choosing Bold Portable.\n\nBest regards,\nBold Portable Team`,
                     attachments: [
                         {
-                            filename: `quotation_update-${event}.pdf`,
+                            filename: `quotation_update-${eventId}.pdf`,
                             content: pdfBuffer,
                         },
                     ],
@@ -1286,7 +1293,6 @@ exports.updateEventQuotation = async (req, res) => {
 exports.getAllQuotation = async (req, res) => {
     try {
         const { quotationType } = req.params;
-        console.log(quotationType)
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
@@ -1395,7 +1401,6 @@ exports.getAllQuotation = async (req, res) => {
 exports.getAllQuotationForUsers = async (req, res) => {
     try {
         const { user_type, _id } = req.userData.user;
-        console.log(user_type, _id);
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
@@ -1434,7 +1439,6 @@ exports.getAllQuotationForUsers = async (req, res) => {
         }
 
         const count = quotations.length;
-        console.log("quotationsData", quotations)
 
         return apiResponse.successResponseWithData(
             res,
@@ -1456,7 +1460,6 @@ exports.getAllQuotationForUsers = async (req, res) => {
 exports.getSpefcificQuotationQuoteId = async (req, res) => {
     try {
         const { user_type, _id } = req.userData.user;
-        console.log(user_type, _id);
         const quoteId = req.body.quote_id;
 
         if (user_type === 'USER') {
@@ -1469,7 +1472,6 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 RecreationalSite.findOne({ _id: quoteId, user: _id }),
             ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
                 const quotations = [];
-                console.log('mjmsdgfjgsjdgjf', recreationalSite)
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
                     const costDetails = event.costDetails;
@@ -1718,7 +1720,6 @@ exports.cancelQuotation = async (req, res) => {
                 break;
             case 'personal-or-business':
                 quotation = await PersonalOrBusiness.findOne({ _id: quotationId });
-                console.log('djkdjkd', quotation)
                 break;
             case 'disaster-relief':
                 quotation = await DisasterRelief.findOne({ _id: quotationId });
