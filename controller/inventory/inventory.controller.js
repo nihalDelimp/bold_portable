@@ -205,7 +205,7 @@ exports.getQrCodesByStatus = async ({ query }, res) => {
             { $limit: limitNumber },
             {
                 $facet: {
-                    qrCodes: [{ $project: { _id: 0, __v: 0 } }],
+                    qrCodes: [{ $project: { _id: 1, __v: 0 } }],
                     totalCount: [{ $count: "count" }],
                 },
             },
