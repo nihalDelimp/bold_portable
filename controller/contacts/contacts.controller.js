@@ -46,7 +46,7 @@ exports.queryMail = async (req, res) => {
         
         mailer.sendMail(mailOptions);
 
-        return apiResponse.successResponse(res, 'Query sent successfully');
+        return apiResponse.successResponse(res, 'Message sent successfully');
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
