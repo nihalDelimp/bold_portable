@@ -120,7 +120,7 @@ exports.findUsersByQuery = async (req, res) => {
             return apiResponse.ErrorResponse(res, 'No users found');
         }
 
-        return apiResponse.successResponseWithData(res, foundUsers);
+        return apiResponse.successResponseWithData(res,"Data Retreived Successfully", foundUsers, foundUsers.length);
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
     }
