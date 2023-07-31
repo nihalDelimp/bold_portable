@@ -173,7 +173,8 @@ exports.assignQrCodeToQuote = async (req, res) => {
 
             // Append the quoteType and quoteId to the existing qrCodeValue
             const updatedQrCodeValue = `${process.env.APP_URL}/services?quotationId=${quoteId}&quotationType=${quoteType}&qrId=${inventory._id}`;
-            // inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
+            //Assinged QR code needs to be Modified
+            inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
 
@@ -435,7 +436,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
 exports.findByQutationTypeAndId = async (req, res) => {
     try {
         const { quotationId, quotationType, page = 1, limit = 10 } = req.body;
-        const searchString= "quotationId="+quotationId+"&quotationType="+quotationType
+        const searchString = "quotationId=" + quotationId + "&quotationType=" + quotationType
 
         let quotation;
         switch (quotationType) {
