@@ -158,10 +158,10 @@ exports.assignQrCodeToQuote = async (req, res) => {
         }
 
         // Check if any inventory is already assigned to an active quotation
-        // const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
-        // if (isAnyActive) {
-        //     return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
-        // }
+        const isAnyActive = inventories.some((inventory) => inventory.status === 'active');
+        if (isAnyActive) {
+            return apiResponse.ErrorResponse(res, 'One or more inventories are already assigned to an active quotation');
+        }
 
         // Loop through each inventory and update the quote_id, quote_type, and status fields
         for (let i = 0; i < inventories.length; i++) {

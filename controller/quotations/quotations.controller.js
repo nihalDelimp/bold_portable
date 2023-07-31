@@ -24,20 +24,20 @@ exports.createConstructionQuotation = async (req, res) => {
             // Rest of the properties
         } = req.body;
 
-        // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await Construction.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // // Check if a user with the provided email and cellNumber already exists
+        // const existingUser = await Construction.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
@@ -163,19 +163,19 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
         } = req.body;
 
         // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await RecreationalSite.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // const existingUser = await RecreationalSite.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
@@ -566,19 +566,19 @@ exports.createDisasterReliefQuotation = async (req, res) => {
         } = req.body;
 
         // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await DisasterRelief.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // const existingUser = await DisasterRelief.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -701,11 +701,11 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
         const { costDetails, type = "" } = req.body;
 
         // Find the existing construction document
-        const disasterRelief = await DisasterRelief.findById(disasterReliefId);
+        // const disasterRelief = await DisasterRelief.findById(disasterReliefId);
 
-        if (!disasterRelief) {
-            return apiResponse.ErrorResponse(res, "Disaster Relief Quotation not found.");
-        }
+        // if (!disasterRelief) {
+        //     return apiResponse.ErrorResponse(res, "Disaster Relief Quotation not found.");
+        // }
 
         // Update the costDetails field
         disasterRelief.costDetails = costDetails;
@@ -775,19 +775,19 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
         } = req.body;
 
         // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await PersonalOrBusiness.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // const existingUser = await PersonalOrBusiness.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
@@ -980,20 +980,20 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
         } = req.body;
 
         // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await FarmOrchardWinery.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // const existingUser = await FarmOrchardWinery.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
@@ -1186,19 +1186,19 @@ exports.createEventQuotation = async (req, res) => {
         } = req.body;
 
         // Check if a user with the provided email and cellNumber already exists
-        const existingUser = await Event.findOne({
-            $and: [
-                { 'coordinator.email': email },
-                { 'coordinator.cellNumber': cellNumber }
-            ]
-        });
+        // const existingUser = await Event.findOne({
+        //     $and: [
+        //         { 'coordinator.email': email },
+        //         { 'coordinator.cellNumber': cellNumber }
+        //     ]
+        // });
 
-        if (existingUser) {
-            return apiResponse.ErrorResponse(
-                res,
-                "User with provided email and cell number already exists"
-            );
-        }
+        // if (existingUser) {
+        //     return apiResponse.ErrorResponse(
+        //         res,
+        //         "User with provided email and cell number already exists"
+        //     );
+        // }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
