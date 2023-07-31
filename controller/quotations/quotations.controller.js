@@ -19,6 +19,26 @@ const PDFDocument = require('pdfkit');
 exports.createConstructionQuotation = async (req, res) => {
     try {
 
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await Construction.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
+
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -28,7 +48,7 @@ exports.createConstructionQuotation = async (req, res) => {
         const _id = user._id.toString();
 
         const {
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,
@@ -137,6 +157,25 @@ exports.createConstructionQuotation = async (req, res) => {
 
 exports.createRecreationalSiteQuotation = async (req, res) => {
     try {
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await RecreationalSite.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
 
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
@@ -147,7 +186,7 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
         const _id = user._id.toString();
 
         const {
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,
@@ -520,6 +559,26 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
 
 exports.createDisasterReliefQuotation = async (req, res) => {
     try {
+
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await DisasterRelief.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -530,7 +589,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 
         const {
             disasterNature,
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,
@@ -710,6 +769,26 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
 exports.createPersonalOrBusinessQuotation = async (req, res) => {
     try {
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await PersonalOrBusiness.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
+
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -719,7 +798,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
         const _id = user._id.toString();
         const {
             useType,
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,
@@ -895,6 +974,27 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
 exports.createFarmOrchardWineryQuotation = async (req, res) => {
     try {
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await FarmOrchardWinery.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
+
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -904,7 +1004,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
         const _id = user._id.toString();
         const {
             useType,
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,
@@ -1079,6 +1179,27 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
 exports.createEventQuotation = async (req, res) => {
     try {
+
+        const {
+            coordinator: { email, cellNumber },
+            // Rest of the properties
+        } = req.body;
+
+        // Check if a user with the provided email and cellNumber already exists
+        const existingUser = await Event.findOne({
+            $and: [
+                { 'coordinator.email': email },
+                { 'coordinator.cellNumber': cellNumber }
+            ]
+        });
+
+        if (existingUser) {
+            return apiResponse.ErrorResponse(
+                res,
+                "User with provided email and cell number already exists"
+            );
+        }
+
         let { error, user, message } = await userHelper.createUser(req.body.coordinator);
 
         if (error) {
@@ -1088,7 +1209,7 @@ exports.createEventQuotation = async (req, res) => {
         const _id = user._id.toString();
         const {
             eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
-            coordinator: { name, email, cellNumber },
+            coordinator: { name },
             maxWorkers,
             weeklyHours,
             placementDate,

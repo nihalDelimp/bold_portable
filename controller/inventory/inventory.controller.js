@@ -173,7 +173,7 @@ exports.assignQrCodeToQuote = async (req, res) => {
 
             // Append the quoteType and quoteId to the existing qrCodeValue
             const updatedQrCodeValue = `${process.env.APP_URL}/services?quotationId=${quoteId}&quotationType=${quoteType}&qrId=${inventory._id}`;
-            inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
+            // inventory.qrCode = await generateQRCode(decodeURIComponent(updatedQrCodeValue));
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
 
@@ -262,7 +262,7 @@ exports.revertQrCodeValue = async (req, res) => {
             const updatedQrCodeValue = inventory.qrCodeValue.replace(`-${quoteType}-${quoteId}`, '');
 
             // Generate and assign the updated QR code
-            inventory.qrCode = await generateQRCode(updatedQrCodeValue);
+            // inventory.qrCode = await generateQRCode(updatedQrCodeValue);
 
             // Update the qrCodeValue field with the updated QR code value
             inventory.qrCodeValue = updatedQrCodeValue;
@@ -415,7 +415,7 @@ exports.autoAssignQrCodeToQuote = async (req, res) => {
                 const updatedQrCodeValue = `${inventory.qrCodeValue}-${quotationType}-${quotationId}`;
 
                 // Generate and assign the updated QR code
-                inventory.qrCode = await generateQRCode(updatedQrCodeValue);
+                // inventory.qrCode = await generateQRCode(updatedQrCodeValue);
 
                 // Update the qrCodeValue field with the updated QR code value
                 inventory.qrCodeValue = updatedQrCodeValue;
