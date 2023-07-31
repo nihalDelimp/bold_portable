@@ -106,6 +106,42 @@ exports.sendMailToMultipleUser = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+exports.findUsersByQuery = async (req, res) => {
+    try {
+        const query = req.query.query; // Access the query parameter from the request URL
+
+        if (!query) {
+            return apiResponse.ErrorResponse(res, 'Query parameter is missing');
+        }
+
+        const foundUsers = await findUsersByNameEmailOrMobile(query);
+
+        if (foundUsers.length === 0) {
+            return apiResponse.ErrorResponse(res, 'No users found');
+        }
+
+        return apiResponse.successResponseWithData(res, foundUsers);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+// Function to find users based on name, email, or mobile
+const findUsersByNameEmailOrMobile = async (query) => {
+    const searchQuery = query.toLowerCase();
+
+    const foundUsers = await User.find({
+        $or: [
+            { name: { $regex: searchQuery, $options: 'i' } },
+            { email: { $regex: searchQuery, $options: 'i' } },
+            { mobile: { $regex: searchQuery, $options: 'i' } }
+        ]
+    });
+
+    return foundUsers;
+};
+
+
 
 
 

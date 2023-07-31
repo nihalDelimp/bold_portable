@@ -38,7 +38,7 @@ exports.queryMail = async (req, res) => {
 
         const mailOptions = {
             from: process.env.MAIL_FROM,
-            to: process.env.ADMIN_MAIL,
+            to: process.env.ADMIN_MAIL, //to be update in future
             subject: 'Thankyou for contacting us',
             text: `Hi,\n\nYou have a query mail with following message from email: ${email}\n${message}.\n\nThank you`,
             html: `<p>Hi,</p><p>You have a query mail with following message from email: ${email}</p><p>${message}</p><p>Your Company Name</p>`
