@@ -334,7 +334,7 @@ exports.getFilterDetails = async (req, res) => {
         const skipItems = (pageNo - 1) * pageSize;
 
         // Find the matching inventory items based on the filter and apply pagination
-        const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize);
+        const filteredInventory = await Inventory.find(filter).skip(skipItems).limit(pageSize).sort({ updatedAt: -1 });
 
         return apiResponse.successResponseWithData(res, 'Filtered inventory items retrieved successfully', filteredInventory);
     } catch (error) {
