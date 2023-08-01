@@ -15,6 +15,11 @@ const mailer = require("../../helpers/nodemailer");
 const User = require('../../models/user/user.schema');
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
 const PDFDocument = require('pdfkit');
+const moment = require('moment');
+
+const isValidDate = (dateString) => {
+    return moment(dateString, 'YYYY-MM-DD', true).isValid();
+};
 
 exports.createConstructionQuotation = async (req, res) => {
     try {
@@ -72,6 +77,16 @@ exports.createConstructionQuotation = async (req, res) => {
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
+
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
@@ -210,6 +225,15 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             twiceWeeklyService,
             dateTillUse,
         } = req.body;
+
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
@@ -671,6 +695,15 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             restrictedAccessDescription
         };
 
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
         // Create a new DisasterRelief instance with the quotation object as properties
         const disasterRelief = new DisasterRelief(quotation);
 
@@ -821,6 +854,15 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             restrictedAccess,
             restrictedAccessDescription
         } = req.body;
+
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
@@ -1027,6 +1069,15 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             restrictedAccess,
             restrictedAccessDescription
         } = req.body;
+
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
@@ -1241,6 +1292,15 @@ exports.createEventQuotation = async (req, res) => {
             restrictedAccess,
             restrictedAccessDescription
         } = req.body;
+
+        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)  || !isValidDate(eventDetails.eventDate)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
+
+        // Check if the year is more than 4 digits
+        if (placementDate.length > 10 || dateTillUse.length > 10  || !isValidDate(eventDetails.eventDate)) {
+            return apiResponse.ErrorResponse(res, 'Invalid date format');
+        }
 
         const totalWorkers = parseInt(femaleWorkers) + parseInt(maleWorkers);
 
