@@ -1,50 +1,40 @@
 const mongoose = require('mongoose');
 
-const eventSchema = new mongoose.Schema(
+const recreationalSiteSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'event' }, 
+        quotationType:{ type: String, default: 'recreational-site' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
-        },
-        eventDetails: {
-            eventName: String, //Name of the event
-            eventDate: Date, // Date of the event
-            eventType: String, // Type of event
-            eventLocation: String, // Location of the event
-            eventMapLocation: {
-                type: { type: String, default: "Point" },
-                coordinates: { type: [Number], default: [0, 0] }
-            }
         },
         coordinator: {
             name: String, // Name of the main contact for the event
             email: String, // Email of the main contact for the event
             cellNumber: String // Cell number of the main contact for the event
         },
+        maxWorkers: Number, // Largest number of workers utilizing the unit
+        weeklyHours: Number, // Number of hours per week workers are on site
+        placementDate: Date, // Date and time the unit will be placed
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
+        placementLocation: { // Where the unit will be placed
+            type: { type: String, default: 'Point' }, // Default value of 'Point' for GeoJSON point location
+            coordinates: { type: [Number], default: [0, 0] } // Default value of [0, 0] for coordinates
+        },
         originPoint: { // Where the Origin Point
-            type: { type: String, default: "Point" }, // Default value of "Point" for GeoJSON point location
+            type: { type: String, default: 'Point' }, // Default value of 'Point' for GeoJSON point location
             coordinates: { type: [Number], default: [0, 0] } // Default value of [0, 0] for coordinates
         },
         distanceFromKelowna: Number, // Distance from the center of Kelowna in kilometers
         serviceCharge: Number, // Service charge per km beyond a certain distance
         deliveredPrice: { type: Number, default: 0 }, // Price for delivering the unit, default value of 0
-        maxWorkers: Number, // Largest number of workers utilizing the unit
-        weeklyHours: Number, // Number of hours per week workers are on site
-        peakUseTimes: { type: Boolean, default: false }, // Peak times of use, if any
-        peakTimeSlot: { type: String, default: null },
-        maxAttendees: Number,
-        alcoholServed: { type: Boolean, default: false }, // Whether alcohol will be served at the event
         useAtNight: Boolean, // Whether the unit will be used at night
         useInWinter: Boolean, // Whether the unit will be used in the winter
-        vipSection: {
-            payPerUse: { type: Boolean, default: false }, // Whether there will be pay per use VIP units on site
-            fencedOff: { type: Boolean, default: false }, // Whether the VIP units will be fenced off
-            activelyCleaned: { type: Boolean, default: false } // Whether the VIP units will be actively cleaned
-        },
-        numUnits: Number, // Number of units required for the construction site
+        specialRequirements: String, // Any other special requirements
+        numUnits: Number, // Number of units required for the job
         serviceFrequency: String, // How often the service is required
+        special_requirements: String,
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
@@ -55,9 +45,11 @@ const eventSchema = new mongoose.Schema(
         twiceWeeklyService: { type: Boolean, default: false },
         productTypes: { type: String, default: null },
         dateTillUse: Date,
-        special_requirements: String,
-        restrictedAccess: Boolean, // Whether there is restricted access to the site
-        restrictedAccessDescription: String,
+        status: {
+            type: String,
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
+            default: 'pending'
+        },
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,
@@ -131,15 +123,13 @@ const eventSchema = new mongoose.Schema(
                 type: Number,
                 default: 0
             }
-        },
-        status: {
-            type: String,
-            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
-            default: 'pending'
-        },
+        }
+        
+
     },
     { timestamps: true }
 );
-const Event = mongoose.model('Event', eventSchema);
 
-module.exports = Event;
+const RecreationalSite = mongoose.model('RecreationalSite', recreationalSiteSchema);
+
+module.exports = RecreationalSite;

@@ -10,6 +10,7 @@ const mailer = require("../../helpers/nodemailer");
 const PasswordVerification = require('../../models/passwordVerification/passwordVerification.schema');
 const sendSms = require("../../helpers/twillioSms.js");
 const PhoneOtpVerification = require('../../models/phoneOtpVerification/phoneOtpVerification.schema');
+const gravatar = require('gravatar');    
 
 function generateOTP(length) {
     let result = '';
@@ -130,6 +131,13 @@ exports.specificUserDetails = async (req, res) => {
     try {
         const _id = req.params.id;
         User.findOne({ _id }).then(data => {
+
+            // if (!data.profile_picture) {
+            //     // If profile_picture is not present, generate the Gravatar URL using gravatar package
+            //     const gravatarImageUrl = gravatar.url(data.email, { s: '200', d: 'identicon', protocol: 'http' });;
+            //     data.profile_picture = gravatarImageUrl;
+            //     data.save(); // Save the updated user with the Gravatar profile picture
+            // }
             return apiResponse.successResponseWithData(res, "data", data)
         })
             .catch(err => {
@@ -155,6 +163,16 @@ exports.getListAllUsers = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
+        // Add Gravatar profile picture if not present in each user
+        for (const user of users) {
+            // if (!user.profile_picture) {
+            //     // If profile_picture is not present, generate the Gravatar URL using gravatar package
+            //     const gravatarImageUrl = gravatar.url(user.email, { s: '200', d: 'identicon' });
+            //     user.profile_picture = gravatarImageUrl;
+            //     await user.save(); // Save the updated user with the Gravatar profile picture
+            // }
+        }
+
         return apiResponse.successResponseWithData(res, "Data retrieved successfully", { users, totalPages, total, currentPage: page });
     } catch (error) {
         return apiResponse.ErrorResponse(res, error.message);
@@ -173,6 +191,13 @@ exports.updateProfile = async (req, res) => {
 
         await User.findOneAndUpdate(filter, update, options)
             .then(updatedUser => {
+
+                // if (!updatedUser.profile_picture) {
+                //     // If profile_picture is not present, generate the Gravatar URL using gravatar package
+                //     const gravatarImageUrl = gravatar.url(updatedUser.email, { s: '200', d: 'identicon' });
+                //     updatedUser.profile_picture = gravatarImageUrl;
+                //     updatedUser.save(); // Save the updated user with the Gravatar profile picture
+                // }
                 // Handle the updated user object here
                 return apiResponse.successResponseWithData(res, "Data updated", updatedUser)
             })

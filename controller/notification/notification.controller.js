@@ -12,7 +12,7 @@ exports.getUnseenNotifications = async (req, res) => {
         const pageSize = parseInt(req.query.pageSize) || 10;
         console.log(pageNumber, pageSize)
 
-        // Calculate the number of documents to skip based on the page number and page size  
+        // Calculate the number of documents to skip based on the page number and page size   
         const documentsToSkip = (pageNumber - 1) * pageSize;
         const unseenNotifications = await Notification.find({ status_seen: false, $or: [{ type: "CREATE_ORDER" }, { type: "CREATE_QUOTE" }, { type: "SERVICE_REQUEST" }] })
             .populate({
@@ -81,7 +81,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
     try {
         const { user_type, _id } = req.userData.user;
         if (user_type === 'ADMIN') {
-            // Update all the notifications for the user to set status_seen to true
+            // Update all the notifications for the user to set status_seen to true 
             const updateResult = await Notification.updateMany({ type: { $in: ['CREATE_ORDER', 'CREATE_QUOTE', 'SERVICE_REQUEST'] } }, { $set: { status_seen: true } });
 
             // Return a success response with the number of updated documents
@@ -98,8 +98,7 @@ exports.markAllNotificationsAsSeen = async (req, res) => {
                 return apiResponse.unauthorizedResponse(res, 'Unauthorized');
             }
             // Update the status_seen to true
-            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId) }, { $set: { status_seen: true } });
-
+            const updateResult = await Notification.updateMany({ user: new ObjectId(firstNotificationUserId) , type: { $in: ["UPDATE_QUOTE" , "SAVE_TRACKING" ,"RESOLVED_SERVICE"] } }, { $set: { status_seen: true } });
             // Return a success response with the number of updated documents
             return apiResponse.successResponseWithData(res, `Marked notifications as seen`, updateResult);
 
@@ -163,7 +162,7 @@ exports.getSpecificUserNotifications = async (req, res) => {
 
         // Calculate the number of documents to skip based on the page number and page size
         const documentsToSkip = (pageNumber - 1) * pageSize;
-        const cancelOrderNotifications = await Notification.find({ status_seen: false, user: _id })
+        const cancelOrderNotifications = await Notification.find({ status_seen: false, user: _id ,  type: { $in: ["UPDATE_QUOTE" , "SAVE_TRACKING" ,"RESOLVED_SERVICE"] } })
             .populate({
                 path: 'order',
                 model: 'Order'

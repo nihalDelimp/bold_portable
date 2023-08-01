@@ -10,7 +10,7 @@ const trackingSchema = new mongoose.Schema(
     quotationType: {
       type: String,
       required: true,
-      enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event']
+      enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event', 'recreational-site']
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

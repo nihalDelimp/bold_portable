@@ -47,4 +47,13 @@ router.post('/get-specific-quotation-from-all-collection', checkAuth,  hasMultip
 
 router.get('/quotation-by-id-and-type', quotationsController.quotatByIdAndType);
 
+//Create Quotation for recreationalSite.
+router.post('/create-quotation-for-recreational-site', quotationsController.createRecreationalSiteQuotation);
+
+//Update Quotation for recreationalSite.
+router.put('/update-quotation-for-recreational-site/:recreationalSiteId', checkAuth, hasRole('ADMIN'), quotationsController.updateRecreationalSiteQuotation);
+
+//Cancel Quotation
+router.post('/cancel-quotation', checkAuth, hasRole('ADMIN'), quotationsController.cancelQuotation);
+
 module.exports = router;

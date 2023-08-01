@@ -3,6 +3,12 @@ const UserService = require('../../models/userServices/userServices.schema');
 const apiResponse = require("../../helpers/apiResponse");
 const mailer = require("../../helpers/nodemailer");
 const User = require("../../models/user/user.schema");
+const { server } = require('../../server');
+const io = require('socket.io')(server);
+const Notification = require('../../models/notification/notification.schema');
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SECRET_KEY || 'abcdefghijklmnopqrstuvwxyz1234567890';
+const mongoose = require('mongoose');
 
 // exports.save = async (req, res) => {
 //     try {
@@ -162,7 +168,7 @@ exports.getServiceByName = async (req, res) => {
 
 exports.mailServiceAcknowledgement = async (req, res) => {
     try {
-        const { user_id, service_id } = req.body; // Extract the necessary details from the request body
+        const { user_email, user_name, service_id } = req.body; // Extract the necessary details from the request body
 
         // Retrieve the service details from the Service model based on the service ID
         const service = await UserService.findById(service_id);
@@ -172,23 +178,39 @@ exports.mailServiceAcknowledgement = async (req, res) => {
         }
 
         // Retrieve the user details from the User model based on the user ID
-        const user = await User.findById(user_id);
+        // const user = await User.findById(user_id);
 
-        if (!user) {
-            return apiResponse.notFoundResponse(res, 'User not found');
-        }
+        // if (!user) {
+        //     return apiResponse.notFoundResponse(res, 'User not found');
+        // }
 
         service.status = "resolved";
 
         service.save();
 
-        const { name, email } = user; // Extract the username and email from the retrieved user
+        const user = await User.findOne({ email: user_email });
+
+        console.log(user);
+
+        if(user) {
+
+            const notification = new Notification({
+                user: user._id.toString(),
+                quote_type: "RESOLVED_SERVICE",
+                quote_id: service._id.toString(),
+                type: "RESOLVED_SERVICE",
+                status_seen: false
+            });
+    
+            await notification.save();
+            io.emit("RESOLVED_SERVICE", { service });
+        }
 
         const mailOptions = {
             from: process.env.MAIL_FROM,
-            to: email,
+            to: user_email,
             subject: 'Service Request Acknowledgement',
-            text: `Hi ${name},\n\nThank you for your service request for ${service.service} (ID: ${service_id}).\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
+            text: `Hi ${user_name},\n\nThank you for your service request for ${service.service} (ID: ${service_id}).\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
         };
 
         // Send the email using the mailer module or service of your choice

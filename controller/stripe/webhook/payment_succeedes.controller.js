@@ -12,6 +12,7 @@ const DisasterRelief = require('../../../models/disasterRelief/disasterRelief.sc
 const PersonalOrBusiness = require('../../../models/personalOrBusiness/personal_or_business_site.schema');
 const FarmOrchardWinery = require('../../../models/farm_orchard_winery/farm_orchard_winery.schema');
 const Event = require('../../../models/event/event.schema');
+const RecreationalSite = require('../../../models/recreationalSite/recreationalSite.schema');
 
 exports.paymentSucceeded = async (object) => {
 
@@ -61,7 +62,8 @@ exports.paymentSucceeded = async (object) => {
                 PersonalOrBusiness.findOne({ _id: quotationId }),
                 DisasterRelief.findOne({ _id: quotationId }),
                 Construction.findOne({ _id: quotationId }),
-            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction]) => {
+                RecreationalSite.findOne({ _id: quotationId }),
+            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
                 let quotation;
 
                 if (event) {
@@ -74,6 +76,8 @@ exports.paymentSucceeded = async (object) => {
                     quotation = disasterRelief;
                 } else if (construction) {
                     quotation = construction;
+                } else if (recreationalSite) {
+                    quotation = recreationalSite;
                 }
 
                 if (quotation) {
@@ -90,18 +94,18 @@ exports.paymentSucceeded = async (object) => {
             });
         }
 
+        const payment = new Payment({
+            subscription: sub._id,
+            payment: object,
+        });
+
+        await payment.save()
+
         const mailOptions = {
             from: process.env.MAIL_FROM,
             to: customer_email,
-            subject: 'QR Code for your Portable Rental',
-            text: `Hi,\n\nPlease find the atached QR code to scan and redirect to the service page  \n\nThanks,\nBold Portable Team`,
-            attachments: [
-                {
-                    filename: 'qrcode.png',
-                    content: dataURL.split(';base64,').pop(),
-                    encoding: 'base64'
-                }
-            ]
+            subject: 'Payment confirmatation',
+            text: `Hi,\n\nThank you for your payment.\n The link for the invoice is:\n\n${object.hosted_invoice_url}  \n\nThanks,\nBold Portable Team`,
         };
         
         mailer.sendMail(mailOptions);
@@ -110,12 +114,7 @@ exports.paymentSucceeded = async (object) => {
 
         sendSms.sendSMS(user.mobile, text);
 
-        const payment = new Payment({
-            subscription: sub._id,
-            payment: object,
-        });
-        
-        return await payment.save();
+        return;
         
     } catch (error) {
         console.log(error);

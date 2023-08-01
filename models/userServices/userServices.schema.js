@@ -5,7 +5,7 @@ const userServicesSchema = new mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true
+            required: false
         },
         service: {
             type: String,
@@ -23,7 +23,11 @@ const userServicesSchema = new mongoose.Schema(
         quotationType: {
             type: String,
             required: true,
-            enum: ['construction', 'disaster-relief', 'personal-or-business', 'farm-orchard-winery', 'event']
+            enum: ['construction', 'disaster-relief', 'personal-or-business', 'farm-orchard-winery', 'event', 'recreational-site']
+        },
+        qrId: {
+            type: String,
+            required: true
         },
         email: {
             type: String,
@@ -37,19 +41,11 @@ const userServicesSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        address: {
-            type: String,
-            required: true
-        },
-        coordinates: {
-            type: { type: String, default: 'Point' },
-            coordinates: { type: [Number], default: [0, 0] }
-        },
         status: {
             type: String,
             required: true,
             enum: ['pending', 'processing', 'resolved'],
-            default:'pending'
+            default: 'pending'
         },
         images: {
             type: Array,
@@ -60,7 +56,7 @@ const userServicesSchema = new mongoose.Schema(
                 message: 'Maximum of 3 images allowed.'
             }
         }
-    },      
+    },
     {
         timestamps: true
     }

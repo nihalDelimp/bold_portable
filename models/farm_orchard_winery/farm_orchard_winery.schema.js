@@ -41,6 +41,9 @@ const farmOrchardWinerySchema = new mongoose.Schema(
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
+        productTypes: { type: String, default: null },
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
         dateTillUse: Date,
         special_requirements: String,
         costDetails: { // Cost details for various components
