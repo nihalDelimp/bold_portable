@@ -10,7 +10,7 @@ const trackingSchema = new mongoose.Schema(
     quotationType: {
       type: String,
       required: true,
-      enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
+      enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event', 'recreational-site']
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,7 +23,14 @@ const trackingSchema = new mongoose.Schema(
       required: false
     },
     address: [{
-      type: String,
+      address: {
+        type: String,
+        required: true
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
     }],
     driver_name: {
       type: String,

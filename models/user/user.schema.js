@@ -19,6 +19,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        mobile_verified:{
+            type: Boolean,
+            default:false
+        },
+        registrationOTP: {
+            type: String
+        },
         password: {
             type: String,
             required: true
@@ -34,6 +41,10 @@ const userSchema = new mongoose.Schema(
             required: false
         },
         stripe_customer_id: {
+            type: String,
+            required: false
+        },
+        address: {
             type: String,
             required: false
         }

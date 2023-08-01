@@ -8,8 +8,8 @@ const userValidationRules = () => {
       .not()
       .isEmpty()
       .withMessage('Name cannot be empty')
-      .isLength({ min: 5 })
-      .withMessage('Name must be at least 5 chars long'),
+      .isLength({ min: 1 })
+      .withMessage('Name must be at least 1 chars long'),
 
     body('email')
       .trim()

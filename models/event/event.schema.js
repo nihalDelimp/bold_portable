@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'EVENT' }, 
+        quotationType:{ type: String, default: 'event' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -48,11 +48,16 @@ const eventSchema = new mongoose.Schema(
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
+        maleWorkers:{ type: Number, default: 0},
+        totalWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
+        productTypes: { type: String, default: null },
         dateTillUse: Date,
         special_requirements: String,
+        restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
         costDetails: { // Cost details for various components
             handWashing: {
                 type: Number,
@@ -129,7 +134,7 @@ const eventSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
     },

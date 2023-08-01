@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const constructionSchema = new mongoose.Schema(
     {
-        quotationType:{ type: String, default: 'CONSTRUCTION' }, 
+        quotationType:{ type: String, default: 'construction' }, 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -17,6 +17,7 @@ const constructionSchema = new mongoose.Schema(
         weeklyHours: Number, // Number of hours per week workers are on site
         placementDate: Date, // Date and time the unit will be placed
         restrictedAccess: Boolean, // Whether there is restricted access to the site
+        restrictedAccessDescription: String,
         placementLocation: { // Where the unit will be placed
             type: { type: String, default: 'Point' }, // Default value of 'Point' for GeoJSON point location
             coordinates: { type: [Number], default: [0, 0] } // Default value of [0, 0] for coordinates
@@ -37,13 +38,16 @@ const constructionSchema = new mongoose.Schema(
         designatedWorkers: { type: Boolean, default: false },
         workerTypes: { type: String, default: 'male' },
         femaleWorkers:{ type: Number, default: 0},
+        maleWorkers:{ type: Number, default: 0},
+        totalWorkers:{ type: Number, default: 0},
         handwashing: { type: Boolean, default: true },
         handSanitizerPump: { type: Boolean, default: false },
         twiceWeeklyService: { type: Boolean, default: false },
+        productTypes: { type: String, default: null },
         dateTillUse: Date,
         status: {
             type: String,
-            enum: ['pending', 'completed', 'modified', 'cancelled'],
+            enum: ['pending', 'active', 'completed', 'modified', 'cancelled'],
             default: 'pending'
         },
         costDetails: { // Cost details for various components

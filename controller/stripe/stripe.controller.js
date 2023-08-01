@@ -6,6 +6,15 @@ const Subscription = require("./models/subscription.schema");
 const Payment = require("./models/payment_succeeded.schema");
 const { Status } = require("../../constants/status.constant");
 const { PaymentMode } = require("../../constants/payment_mode.constant");
+const Tracking = require('../../models/tracking/tracking.schema');
+const mailer = require("../../helpers/nodemailer");
+const Construction = require('../../models/construction/construction.schema');
+const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
+const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_business_site.schema');
+const FarmOrchardWinery = require('../../models/farm_orchard_winery/farm_orchard_winery.schema');
+const Event = require('../../models/event/event.schema');
+const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const Inventory = require('../../models/inventory/inventory.schema');
 
 exports.createCustomer = async (req, res) => {
     try {
@@ -74,6 +83,13 @@ exports.createCheckoutSession = async (req, res) => {
                         recurring: {
                             interval,
                         },
+                        product_data: {
+                            name: 'test',
+                            metadata: {
+                                quotationId: encodedQuotationId,
+                                quotationType: encodedQuotationType,
+                            }
+                        }
                     },
                     quantity: 1,
                 },
@@ -97,6 +113,16 @@ exports.createCheckoutSession = async (req, res) => {
         });
 
         const { id, url } = session;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: email,
+            subject: 'Action Required: Payment Confirmation for Service Request',
+            text: `Hi ${user.name},\n\nThank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action. To proceed with the payment, please click on the following link to make a secure payment via Stripe:\n\n${url}\n\nAlternatively, you can copy and paste the following link in your browser:\n\n${url}\n\nIf you have any questions or need further assistance, please feel free to contact our customer support team.\n\nThank you`,
+            html: `<p>Hi ${user.name},</p><p>Thank you for your service request. We are pleased to inform you that we have received your request and are in the process of taking action.</p><p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p><p><a href="${url}">Make Payment</a></p><p>Alternatively, you can copy and paste the following link in your browser:</p><p>${url}</p><p>If you have any questions or need further assistance, please feel free to contact our customer support team.</p><p>Thank you</p>`,
+        };
+        
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
@@ -164,6 +190,38 @@ exports.getSubscriptionPaymentList = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+        
+        for (const payment of payments) {
+
+            const quotationType = payment.subscription?.quotationType;
+            const quotationId = payment.subscription?.quotationId.toString();
+
+            let quotation;
+            switch (quotationType) {
+                case 'event':
+                    quotation = await Event.findOne({_id:quotationId});
+                    break;
+                case 'farm-orchard-winery':
+                    quotation = await FarmOrchardWinery.findOne({_id:quotationId});
+                    break;
+                case 'personal-or-business':
+                    quotation = await PersonalOrBusiness.findOne({_id:quotationId});
+                    break;
+                case 'disaster-relief':
+                    quotation = await DisasterRelief.findOne({_id:quotationId});
+                    break;
+                case 'construction':
+                    quotation = await Construction.findOne({_id:quotationId});
+                    break;
+                case 'recreational-site':
+                    quotation = await RecreationalSite.findOne({_id:quotationId});
+                    break;
+            }
+
+            if(quotation) {
+                payments.push({costDetails: quotation.costDetails});
+            }
+        }
 
         const totalPages = Math.ceil(totalPayment / limit);
 
@@ -205,8 +263,12 @@ exports.endSubscription = async (req, res) => {
         if (!stripe_customer_id) {
             return apiResponse.ErrorResponse(res, "Stipe costomer not exist");
         }
+
+        const encodedQuotationId = encodeURIComponent(subscription.quotationId);
+        const encodedQuotationType = encodeURIComponent(subscription.quotationType);
+
         const session = await stripe.checkout.sessions.create({
-            success_url: !!success_url ? success_url : process.env.SUCCESS_URL,
+            success_url: success_url + "?quotationId=" + encodedQuotationId + "&quotationType=" + encodedQuotationType,
             cancel_url: !!cancel_url ? cancel_url : process.env.CANCEL_URL,
             customer: stripe_customer_id,
             line_items: [
@@ -229,6 +291,24 @@ exports.endSubscription = async (req, res) => {
             mode: PaymentMode.Payment,
         });
         const { id, url, customer } = session;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: email,
+            subject: 'QR Code for your Portable Rental',
+            text: `Hi ${user.name},\n\nWe have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation.The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.\nTo proceed with the payment, please click on the following link to make a secure payment via Stripe:${url}"\nAlternatively, you can copy and paste the following link in your browser:${url}\n\n\Thank you`,
+            html: `<p>Hi ${user.name},</p>
+            <p>We have received your request to end your subscription with us. Please note that there will be a transportation charge associated with the subscription cancellation. The transportation charge is applicable due to the logistics involved in collecting the rented items from your location.</p>
+            <p>To proceed with the payment, please click on the following link to make a secure payment via Stripe:</p>
+            <p><a href="${url}">Make Payment</a></p>
+            <p>Alternatively, you can copy and paste the following link in your browser:</p>
+            <p>${url}</p>
+            <p>Thank you</p>
+            `,
+        };
+        
+        mailer.sendMail(mailOptions);
+
         return apiResponse.successResponseWithData(
             res,
             "Subscription end in-progress",
@@ -258,13 +338,42 @@ exports.getSubscriptionListForAdmin = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
+
+        const subscriptionIds = subscriptions.map(subscription => subscription._id);
+
+        const trackingDetails = await Tracking.find({ subscriptionId: { $in: subscriptionIds } });
+
+        const formattedSubscriptions = subscriptions.map(subscription => {
+            const subscriptionId = subscription._id;
+            const subscriptionTracking = trackingDetails.find(tracking => tracking.subscriptionId.equals(subscriptionId));
+            const trackingId = subscriptionTracking ? subscriptionTracking._id : null;
+
+            return {
+                ...subscription.toObject(),
+                trackingId,
+            };
+        });
+
+        for (const subscription of formattedSubscriptions) {
+            const searchString= "quotationId="+subscription.quotationId+"&quotationType="+subscription.quotationType
+            console.log(searchString)
+            const inventories = await Inventory.find({
+                qrCodeValue: { $regex: searchString, $options: "i" }
+            });
+
+            console.log("Number of inventories:", inventories.length);
+
+            const assignedInventoriesCount = inventories.length || 0;
+            subscription.assignedInventoriesCount = assignedInventoriesCount;
+        }
+
         const totalPages = Math.ceil(totalSubscription / limit);
 
         return apiResponse.successResponseWithData(
             res,
             "Subscription fetched successfully",
             {
-                subscriptions,
+                formattedSubscriptions,
                 totalPages,
                 currentPage: page,
                 perPage: limit,

@@ -14,7 +14,7 @@ const subscriptionsSchema = new mongoose.Schema(
         quotationType: {
             type: String,
             required: true,
-            enum: ['Construction', 'DisasterRelief', 'FarmOrchardWinery', 'PersonalOrBusiness', 'Event']
+            enum: ['construction', 'disaster-relief', 'farm-orchard-winery', 'personal-or-business', 'event', 'recreational-site']
         },
         subscription: {
             type: String,
@@ -28,6 +28,10 @@ const subscriptionsSchema = new mongoose.Schema(
             type: String,
             enum: ['ACTIVE', 'INACTIVE'],
             default: 'ACTIVE'
+        },
+        qrCode: {
+            type: String,
+            required: false,
         }
     },
     { timestamps: true }

@@ -3,13 +3,14 @@ const apiResponse = require("../../helpers/apiResponse");
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const mailer = require("../../helpers/nodemailer");
 
 exports.updateProfile = async (req, res) => {
     try {
         const { _id } = req.userData.user;
-        const { name, mobile, password } = req.body;
+        const { name, mobile, address, password } = req.body;
 
-        let update = { name, mobile };
+        let update = { name, mobile, address };
 
         // Hash the new password if it exists
         if (password) {
@@ -71,3 +72,92 @@ exports.updateProfileImage = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.sendMailToMultipleUser = async (req, res) => {
+    try {
+        const { emailList, subject, message } = req.body;
+
+        // Check if emailList is provided and is an array
+        if (!Array.isArray(emailList) || emailList.length === 0) {
+            return apiResponse.ErrorResponse(res, 'Invalid emailList');
+        }
+
+        // Find users based on the provided email addresses
+        // const users = await User.find({ email: { $in: emailList } });
+
+        // if (!users || users.length === 0) {
+        //     return apiResponse.notFoundResponse(res, 'Users not found');
+        // }
+
+        // Loop through each email address and send mail
+        for (const userEmail of emailList) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: userEmail,
+                subject,
+                text: message
+            };
+
+            await mailer.sendMail(mailOptions);
+        }
+
+        return apiResponse.successResponseWithData(res, 'Emails sent successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+exports.findUsersByQuery = async (req, res) => {
+    try {
+        const query = req.query.query; // Access the query parameter from the request URL
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        // Check if query parameter is empty or not provided
+        if (!query || query.trim() === '') {
+            // Return the whole list of users
+            const allUsers = await User.find({ user_type: { $ne: 'ADMIN' } })
+                .sort({ createdAt: 1 })
+                .skip(skip)
+                .limit(limit);
+
+            return apiResponse.successResponseWithData(res, "All Users", allUsers, allUsers.length);
+        }
+
+        const foundUsers = await findUsersByNameEmailOrMobile(query);
+
+        if (foundUsers.length === 0) {
+            return apiResponse.ErrorResponse(res, 'No users found');
+        }
+
+        return apiResponse.successResponseWithData(res, "Data Retrieved Successfully", foundUsers, foundUsers.length);
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+// Function to find users based on name, email, or mobile
+const findUsersByNameEmailOrMobile = async (query) => {
+    const searchQuery = query.toLowerCase();
+
+    const foundUsers = await User.find({
+        $and: [
+            {
+                $or: [
+                    { name: { $regex: searchQuery, $options: 'i' } },
+                    { email: { $regex: searchQuery, $options: 'i' } },
+                    { mobile: { $regex: searchQuery, $options: 'i' } }
+                ]
+            },
+            { user_type: { $ne: 'ADMIN' } }
+        ]
+    });
+
+    return foundUsers;
+};
+
+
+
+
+
