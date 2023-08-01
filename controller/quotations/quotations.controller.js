@@ -18,7 +18,11 @@ const PDFDocument = require('pdfkit');
 const moment = require('moment');
 
 const isValidDate = (dateString) => {
-    return moment(dateString, 'YYYY-MM-DD', true).isValid();
+    const currentDate = moment().format('YYYY-MM-DD');
+    const inputDate = moment(dateString, 'YYYY-MM-DD', true);
+
+    // Check if the input date is valid and not in the past
+    return inputDate.isValid() && inputDate.isSameOrAfter(currentDate, 'day');
 };
 
 exports.createConstructionQuotation = async (req, res) => {
