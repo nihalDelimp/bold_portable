@@ -463,7 +463,7 @@ const addQuotationDetails = (pdfDoc, quotationData) => {
         ['Weekly Hours Cost:', `$${quotationData.costDetails.weeklyHoursCost}`],
     ];
 
-    if(quotationData.quotationType == "event") {
+    if (quotationData.quotationType == "event") {
         costDetailsData.push(
             ['Pick Up Price:', `$${quotationData.costDetails.pickUpPrice}`],
             ['Pay Per Use:', `$${quotationData.costDetails.payPerUse}`],
@@ -1263,11 +1263,16 @@ exports.createEventQuotation = async (req, res) => {
 
         const _id = user._id.toString();
         const {
-            eventDetails: { eventName, eventDate, eventType, eventLocation, eventMapLocation },
+            eventDetails: {
+                eventName,
+                eventDate,
+                eventType,
+                eventLocation,
+                eventMapLocation
+            },
             coordinator: { name },
             maxWorkers,
             weeklyHours,
-            placementDate,
             placementLocation,
             originPoint,
             distanceFromKelowna,
@@ -1296,13 +1301,12 @@ exports.createEventQuotation = async (req, res) => {
             restrictedAccess,
             restrictedAccessDescription
         } = req.body;
-
-        if (!isValidDate(placementDate) || !isValidDate(dateTillUse)  || !isValidDate(eventDetails.eventDate)) {
+        if (!isValidDate(dateTillUse) || !isValidDate(req.body.eventDetails.eventDate)) {
             return apiResponse.ErrorResponse(res, 'Invalid date format');
         }
 
         // Check if the year is more than 4 digits
-        if (placementDate.length > 10 || dateTillUse.length > 10  || !isValidDate(eventDetails.eventDate)) {
+        if (dateTillUse.length > 10) {
             return apiResponse.ErrorResponse(res, 'Invalid date format');
         }
 
@@ -1338,7 +1342,6 @@ exports.createEventQuotation = async (req, res) => {
             weeklyHours,
             maxAttendees,
             alcoholServed,
-            placementDate,
             placementLocation,
             originPoint,
             distanceFromKelowna,

@@ -35,6 +35,21 @@ const inventorySchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        quote_id: {
+            type: String,
+            required: false,
+            default: null
+        },
+        quote_type: {
+            type: String,
+            required: false,
+            default: null
+        },
+        created_value: {
+            type: String,
+            required: false,
+            default: null
+        },
         intial_value: {
             type: String,
             required: false
