@@ -51,3 +51,23 @@ exports.queryMail = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+exports.sendCustomMail = async (req, res) => {
+    try {
+        const { email, subject, body } = req.body;
+
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: email,
+            subject: subject,
+            text:  body,
+            html: body
+        };
+        
+        mailer.sendMail(mailOptions);
+
+        return apiResponse.successResponse(res, 'Message sent successfully');
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
