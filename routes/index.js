@@ -16,6 +16,7 @@ const userServiceRouter = require('../controller/userService/userService.routes'
 const inventoryRouter = require('../controller/inventory/inventory.routes')
 const inventoryCategoryRouter = require('../controller/inventoryCategory/inventoryCategory.routes')
 const serviceCategoryRouter = require('../controller/serviceCategory/serviceCategory.routes')
+const adminEmailRouter = require('../controller/adminEmail/adminEmail.routes')
 const app = express();
 
 app.use("/auth", authRouter);
@@ -35,5 +36,6 @@ app.use("/user-service", userServiceRouter);
 app.use("/inventory", inventoryRouter);
 app.use("/inventory-category", inventoryCategoryRouter);
 app.use("/service-category", serviceCategoryRouter);
+app.use("/admin-email", adminEmailRouter);
 
 module.exports = app;
