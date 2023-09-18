@@ -132,12 +132,13 @@ exports.getInventoryByQRCodeValue = async (req, res) => {
 
 
 async function generateQRCode(scanningValue) {
-    // Generate QR code and return the QR code image
     try {
-        // Generate QR code and return the QR code image
         const formattedValue = scanningValue.replace(/\s/g, '');
-        const qrCodeImage = await qrcode.toDataURL(formattedValue);
-        return qrCodeImage;
+
+        // Generate QR code in SVG format
+        const qrCodeSVG = await qrcode.toString(formattedValue, { type: 'svg' });
+
+        return `data:image/svg+xml;utf8,${qrCodeSVG}`;
     } catch (error) {
         console.error('Error generating QR code:', error);
         throw error;
