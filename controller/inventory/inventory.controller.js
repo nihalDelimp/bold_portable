@@ -29,6 +29,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 quantity: 1, // Set quantity as 1 for each inventory
                 gender,
                 type,
+                qrId: uniqueId,
                 qrCodeValue: formattedValue,
                 intial_value: formattedValue,
                 created_value: scanningValue,
@@ -533,4 +534,42 @@ exports.reinitializeQrCodeValue = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
+
+
+exports.findByQrId = async (req, res) => {
+    try {
+        const { qrId, productName, gender, type, status, category, page = 1, limit = 10 } = req.query;
+
+        let query = {};
+
+        if (qrId) query.qrId = qrId;
+        if (productName) query.productName = productName;
+        if (gender) query.gender = gender;
+        if (type) query.type = type;
+        if (status) query.status = status;
+        if (category) query.category = category;
+
+        const skip = (page - 1) * limit;
+
+        const inventories = await Inventory.find(query)
+            .skip(skip)
+            .limit(limit);
+
+        const totalItems = await Inventory.countDocuments(query);
+        const totalPages = Math.ceil(totalItems / limit);
+
+        const pagination = {
+            currentPage: page,
+            totalPages: totalPages,
+            totalItems: totalItems
+        };
+
+        return apiResponse.successResponseWithData(res, 'Records fetched successfully', { inventories, pagination });
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
+
 

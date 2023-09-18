@@ -17,5 +17,6 @@ router.get('/get-filter-details', checkAuth, hasRole('ADMIN'), inventoryControll
 router.post('/auto-assign-qrcode-to-quote', checkAuth, hasRole('ADMIN'), inventoryController.autoAssignQrCodeToQuote);
 router.post('/find-by-qrcodes-quote-type-id', checkAuth, hasRole('ADMIN'), inventoryController.findByQutationTypeAndId);
 router.post('/reinitialize-qr-code-value', checkAuth, hasRole('ADMIN'), inventoryController.reinitializeQrCodeValue);
+router.get('/list-by-qr-id', checkAuth, hasRole('ADMIN'), inventoryController.findByQrId);
 
 module.exports = router;
