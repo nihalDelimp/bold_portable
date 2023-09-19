@@ -9,6 +9,7 @@ const Notification = require('../../models/notification/notification.schema');
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.SECRET_KEY || 'abcdefghijklmnopqrstuvwxyz1234567890';
 const mongoose = require('mongoose');
+const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
 
 // exports.save = async (req, res) => {
 //     try {
@@ -206,15 +207,17 @@ exports.mailServiceAcknowledgement = async (req, res) => {
             io.emit("RESOLVED_SERVICE", { service });
         }
 
-        const mailOptions = {
-            from: process.env.MAIL_FROM,
-            to: user_email,
-            subject: 'Service Request Acknowledgement',
-            text: `Hi ${user_name},\n\nThank you for your service request for ${service.service} (ID: ${service_id}).\nWe have received your service request and are currently taking action. Our team is working diligently to address your needs and provide a prompt resolution.\nWe appreciate your patience and will keep you updated on the progress.\n\nThanks,\nBold Portable Team`
-        };
+        const emailModel = await AdminEmail.findOne({ slug: "service-request-acknowledgement" });
 
-        // Send the email using the mailer module or service of your choice
-        mailer.sendMail(mailOptions);
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: user_email,
+                subject: emailModel.header,
+                text: `Hi ${user_name},\n\nThank you for your service request for ${service.service} (ID: ${service_id})`+ emailModel.body
+            };
+            mailer.sendMail(mailOptions);
+        }
 
         return apiResponse.successResponse(res, 'Service request acknowledgement email sent successfully');
     } catch (error) {

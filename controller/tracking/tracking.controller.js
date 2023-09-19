@@ -93,6 +93,18 @@ exports.saveTracking = async (req, res) => {
 		await notification.save();
 		io.emit("save_location", { tracking });
 
+		const emailModel = await AdminEmail.findOne({ slug: "tracking-saved" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: user_email,
+                subject: emailModel.header,
+                text: emailModel.body
+            };
+            mailer.sendMail(mailOptions);
+        }
+
 		const text = `The new updated address is:\n\n${address}`;
 
 		sendSms.sendSMS(quotation.user.mobile, text);
@@ -137,6 +149,18 @@ exports.updateTracking = async (req, res) => {
 
 		await notification.save();
 		io.emit("save_location", { updatedTracking });
+
+		const emailModel = await AdminEmail.findOne({ slug: "tracking-saved" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: user_email,
+                subject: emailModel.header,
+                text: emailModel.body
+            };
+            mailer.sendMail(mailOptions);
+        }
 
 		// Find user from tracking
 		const customer_email = updatedTracking.user.email;

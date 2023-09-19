@@ -10,6 +10,8 @@ const { default: mongoose } = require('mongoose');
 const Notification = require('../../models/notification/notification.schema');
 const io = require('socket.io')(server);
 const config = require('../../config/config');
+const mailer = require("../../helpers/nodemailer");
+const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
 
 exports.createCostManagement = async (req, res) => {
     try {
@@ -35,6 +37,20 @@ exports.createCostManagement = async (req, res) => {
 
         io.emit("cost_management", { costManagement, savedCostManagement });
 
+        const emailModel = await AdminEmail.findOne({ slug: "cost-management-saved" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+    
+            mailer.sendMail(mailOptions);
+        }
+        
         return apiResponse.successResponseWithData(
             res,
             "Data saved successfully.",

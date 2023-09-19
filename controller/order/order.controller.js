@@ -5,6 +5,8 @@ const logger = require("../../helpers/logger");
 const Notification = require('../../models/notification/notification.schema');
 const { server } = require('../../server');
 const io = require('socket.io')(server);
+const mailer = require("../../helpers/nodemailer");
+const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -190,6 +192,20 @@ exports.cancelOrder = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+        
+        const emailModel = await AdminEmail.findOne({ slug: "order-canceled" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+    
+            mailer.sendMail(mailOptions);
+        }        
 
         return apiResponse.successResponseWithData(res, "Order cancelled successfully", order);
     } catch (error) {
