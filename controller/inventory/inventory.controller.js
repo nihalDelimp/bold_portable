@@ -543,12 +543,12 @@ exports.findByQrId = async (req, res) => {
 
         let query = {};
 
-        if (qrId) query.qrId = qrId;
-        if (productName) query.productName = productName;
-        if (gender) query.gender = gender;
-        if (type) query.type = type;
-        if (status) query.status = status;
-        if (category) query.category = category;
+        if (qrId) query.qrId = { $regex: new RegExp(qrId, 'i') };
+        if (productName) query.productName = { $regex: new RegExp(productName, 'i') };
+        if (gender) query.gender = { $regex: new RegExp(gender, 'i') };
+        if (type) query.type = { $regex: new RegExp(type, 'i') };
+        if (status) query.status = { $regex: new RegExp(status, 'i') };
+        if (category) query.category = { $regex: new RegExp(category, 'i') };
 
         const skip = (page - 1) * limit;
 
