@@ -168,16 +168,14 @@ exports.createConstructionQuotation = async (req, res) => {
 
         const emailModel = await AdminEmail.findOne({ slug: "construction-quotation-created" });
 
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Construction Quotation Created',
+            text: `Hi Admin,\nA new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
         
         return apiResponse.successResponseWithData(
             res,
@@ -326,19 +324,14 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "recreational-site-quotation-created" });
-
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Recreational-site Quotation Created',
+            text: `Hi Admin,\nA new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
@@ -788,19 +781,14 @@ exports.createDisasterReliefQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "disaster-relief-quotation-created" });
-
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Disaster-relief Quotation Created',
+            text: `Hi Admin,\nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
         
         return apiResponse.successResponseWithData(
             res,
@@ -1035,19 +1023,14 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "personal-or-business-quotation-created" });
-
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Personal-or-business Quotation Created',
+            text: `Hi Admin,\nA new personal-or-business(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new personal-or-business quotation(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1282,19 +1265,14 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "farm-orchard-winery-quotation-created" });
-
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Farm-orchard-winery Quotation Created',
+            text: `Hi Admin,\nA new farm-orchard-winery(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new farm-orchard-winery quotation(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1553,19 +1531,14 @@ exports.createEventQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "event-quotation-created" });
-
-        if(emailModel) {
-            const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: process.env.GO_BOLD_ADMIN_MAIL,
-                subject: emailModel.header,
-                text: emailModel.body,
-                html: emailModel.body
-            };
-            
-            mailer.sendMail(mailOptions);
-        }
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.GO_BOLD_ADMIN_MAIL,
+            subject: 'Event Quotation Created',
+            text: `Hi Admin,\nA new event(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nGo Boldly`,
+            html: `<p>Hi Admin,</p><p>A new event quotation(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+        };
+        mailer.sendMail(mailOptions);
 
         return apiResponse.successResponseWithData(
             res,
