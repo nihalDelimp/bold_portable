@@ -178,12 +178,6 @@ exports.createConstructionQuotation = async (req, res) => {
             };
             mailer.sendMail(mailOptions);
         }
-
-        return apiResponse.successResponseWithData(
-            res,
-            "Quotation has been created successfully",
-            emailModel
-        );
         
         return apiResponse.successResponseWithData(
             res,
@@ -1980,6 +1974,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+
+                    // const inventories = await Inventory.find({ quotationId: quotationId });
                 }
                 return quotations;
             });
