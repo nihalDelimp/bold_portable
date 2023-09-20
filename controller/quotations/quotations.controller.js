@@ -166,9 +166,9 @@ exports.createConstructionQuotation = async (req, res) => {
         });
         await notification.save();
 
-        const emailModel = await AdminEmail.findOne({ slug: "construction-quotation-created" });
+        try {
+            const emailModel = await AdminEmail.findOne({ slug: "construction-quotation-created" });
 
-        if(emailModel) {
             const mailOptions = {
                 from: process.env.MAIL_FROM,
                 to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -178,8 +178,10 @@ exports.createConstructionQuotation = async (req, res) => {
             };
             
             mailer.sendMail(mailOptions);
+        } catch (error) {
+            console.error('errrrrrrrrrrr', error);
+            throw new Error('err msggggggggg', innerError.message);
         }
-
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
