@@ -1876,6 +1876,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: event._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
@@ -1896,6 +1898,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: farmOrchardWinery._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
@@ -1916,6 +1920,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: personalOrBusiness._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (disasterRelief) {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
@@ -1936,6 +1942,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: disasterRelief._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
@@ -1955,6 +1963,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: construction._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (recreationalSite) {
                     quotations.push({ ...recreationalSite.toObject(), type: 'recreational-site' });
@@ -1975,7 +1985,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
 
-                    // const inventories = await Inventory.find({ quotationId: quotationId });
+                    const inventories = await Inventory.find({ quote_id: recreationalSite._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 return quotations;
             });
@@ -1999,7 +2010,7 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                 DisasterRelief.findOne({ _id: quoteId }),
                 Construction.findOne({ _id: quoteId }),
                 RecreationalSite.findOne({ _id: quoteId }),
-            ]).then(([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
+            ]).then(async ([event, farmOrchardWinery, personalOrBusiness, disasterRelief, construction, recreationalSite]) => {
                 const quotations = [];
                 if (event) {
                     quotations.push({ ...event.toObject(), type: 'event' });
@@ -2008,6 +2019,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: event._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (farmOrchardWinery) {
                     quotations.push({ ...farmOrchardWinery.toObject(), type: 'farm-orchard-winery' });
@@ -2016,6 +2029,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: farmOrchardWinery._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (personalOrBusiness) {
                     quotations.push({ ...personalOrBusiness.toObject(), type: 'personal-or-business' });
@@ -2024,6 +2039,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: personalOrBusiness._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (disasterRelief) {
                     quotations.push({ ...disasterRelief.toObject(), type: 'disaster-relief' });
@@ -2032,6 +2049,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: disasterRelief._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (construction) {
                     quotations.push({ ...construction.toObject(), type: 'construction' });
@@ -2040,6 +2059,8 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+                    const inventories = await Inventory.find({ quote_id: construction._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 if (recreationalSite) {
                     quotations.push({ ...recreationalSite.toObject(), type: 'recreational-site' });
@@ -2048,6 +2069,9 @@ exports.getSpefcificQuotationQuoteId = async (req, res) => {
                         const costDetailsSum = Object.values(costDetails).reduce((acc, val) => acc + val, 0);
                         quotations[0].costDetailsSum = costDetailsSum;
                     }
+
+                    const inventories = await Inventory.find({ quote_id: recreationalSite._id }).select('qrId');
+                    quotations[0].inventories = inventories;
                 }
                 return quotations;
             });
