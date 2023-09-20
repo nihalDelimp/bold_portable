@@ -180,7 +180,7 @@ exports.createConstructionQuotation = async (req, res) => {
             mailer.sendMail(mailOptions);
         } catch (error) {
             console.error('errrrrrrrrrrr', error);
-            throw new Error('err msggggggggg', innerError.message);
+            throw new Error('err msggggggggg', error.message);
         }
         return apiResponse.successResponseWithData(
             res,
