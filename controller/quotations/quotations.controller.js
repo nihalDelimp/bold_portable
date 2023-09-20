@@ -176,7 +176,7 @@ exports.createConstructionQuotation = async (req, res) => {
                 text: emailModel.body,
                 html: emailModel.body
             };
-            apiResponse.ErrorResponse(res, mailOptions);
+            return apiResponse.ErrorResponse(res, mailOptions);
             mailer.sendMail(mailOptions);
         } catch (error) {
             console.error('errrrrrrrrrrr', error);
