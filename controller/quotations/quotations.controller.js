@@ -17,6 +17,7 @@ const RecreationalSite = require('../../models/recreationalSite/recreationalSite
 const PDFDocument = require('pdfkit');
 const moment = require('moment');
 const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
+const Inventory = require('../../models/inventory/inventory.schema');
 
 const isValidDate = (dateString) => {
     const currentDate = moment().format('YYYY-MM-DD');
@@ -165,6 +166,20 @@ exports.createConstructionQuotation = async (req, res) => {
         });
         await notification.save();
 
+        const emailModel = await AdminEmail.findOne({ slug: "construction-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -311,6 +326,20 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const emailModel = await AdminEmail.findOne({ slug: "recreational-site-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
 
         return apiResponse.successResponseWithData(
             res,
@@ -759,6 +788,21 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const emailModel = await AdminEmail.findOne({ slug: "disaster-relief-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
+        
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -991,6 +1035,21 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const emailModel = await AdminEmail.findOne({ slug: "personal-or-business-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
+
         return apiResponse.successResponseWithData(
             res,
             "PersonalOrBusiness instance has been created successfully",
@@ -1223,6 +1282,20 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const emailModel = await AdminEmail.findOne({ slug: "farm-orchard-winery-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
 
         return apiResponse.successResponseWithData(
             res,
@@ -1480,6 +1553,21 @@ exports.createEventQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const emailModel = await AdminEmail.findOne({ slug: "event-quotation-created" });
+
+        if(emailModel) {
+            const mailOptions = {
+                from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
+                subject: emailModel.header,
+                text: emailModel.body,
+                html: emailModel.body
+            };
+            
+            mailer.sendMail(mailOptions);
+        }
+
         return apiResponse.successResponseWithData(
             res,
             "Event instance has been created successfully",

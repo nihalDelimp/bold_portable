@@ -85,3 +85,42 @@ exports.updateBySlug = async (req, res) => {
 		return apiResponse.ErrorResponse(res, error.message);
 	}
 };
+
+exports.listAdminEmails = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, slug, header } = req.query;
+        let filter = {};
+
+        if (slug) {
+            filter.slug = { $regex: slug, $options: 'i' };
+        }
+
+        if (header) {
+            filter.header = { $regex: header, $options: 'i' };
+        }
+
+        const skip = (page - 1) * limit;
+        const adminEmails = await AdminEmail.find(filter)
+            .skip(skip)
+            .limit(limit);
+
+        const totalItems = await AdminEmail.countDocuments(filter);
+        const totalPages = Math.ceil(totalItems / limit);
+
+        const pagination = {
+            currentPage: page,
+            totalPages: totalPages,
+            totalItems: totalItems
+        };
+
+        return apiResponse.successResponseWithData(
+            res,
+            "Admin emails fetched successfully.",
+            { adminEmails, pagination }
+        );
+    } catch (error) {
+        return apiResponse.ErrorResponse(res, error.message);
+    }
+};
+
+
