@@ -74,7 +74,7 @@ exports.createCheckoutSession = async (req, res) => {
             line_items: [
                 {
                     price_data: {
-                        currency: "usd",
+                        currency: "cad",
                         unit_amount: price * 100,
                         product_data: {
                             name: product_name,
@@ -84,7 +84,7 @@ exports.createCheckoutSession = async (req, res) => {
                             interval,
                         },
                         product_data: {
-                            name: 'test',
+                            name: 'Bold Portable Rental',
                             metadata: {
                                 quotationId: encodedQuotationId,
                                 quotationType: encodedQuotationType,
@@ -95,7 +95,7 @@ exports.createCheckoutSession = async (req, res) => {
                 },
                 {
                     price_data: {
-                        currency: "usd",
+                        currency: "cad",
                         unit_amount: shipping_amount * 100,
                         product_data: {
                             name: "Shipping charges",
@@ -274,7 +274,7 @@ exports.endSubscription = async (req, res) => {
             line_items: [
                 {
                     price_data: {
-                        currency: "usd",
+                        currency: "cad",
                         unit_amount: pickup_charge * 100,
                         product_data: {
                             name: `Pickup charges for ${product_name}`,
