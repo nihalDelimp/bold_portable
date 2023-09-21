@@ -172,11 +172,11 @@ exports.createConstructionQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Construction Quotation Created',
-            text: `Hi Admin,\nA new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
-        
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -328,8 +328,8 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Recreational-site Quotation Created',
-            text: `Hi Admin,\nA new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin, \nA new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p> Hi Admin,</p><p>A new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
 
@@ -374,7 +374,7 @@ exports.updateConstructionQuotation = async (req, res) => {
 
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -382,7 +382,7 @@ exports.updateConstructionQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -400,7 +400,7 @@ exports.updateConstructionQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -587,7 +587,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
 
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -595,7 +595,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -613,7 +613,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -785,11 +785,11 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Disaster-relief Quotation Created',
-            text: `Hi Admin,\nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin, \nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p> Hi Admin,</p> <p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
-        
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -830,7 +830,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -838,7 +838,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -856,7 +856,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1027,8 +1027,8 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Personal-or-business Quotation Created',
-            text: `Hi Admin,\nA new personal-or-business(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new personal-or-business quotation(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin, \nA new personal-or-business(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p> Hi Admin,</p> <p>A new personal-or-business quotation(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
 
@@ -1074,7 +1074,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -1082,7 +1082,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -1100,7 +1100,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1269,8 +1269,8 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Farm-orchard-winery Quotation Created',
-            text: `Hi Admin,\nA new farm-orchard-winery(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new farm-orchard-winery quotation(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin, \nA new farm-orchard-winery(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p> Hi Admin,</p><p>A new farm-orchard-winery quotation(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
 
@@ -1315,7 +1315,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -1323,7 +1323,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -1341,7 +1341,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1535,8 +1535,8 @@ exports.createEventQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Event Quotation Created',
-            text: `Hi Admin,\nA new event(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new event quotation(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nGo Boldly</p>`
+            text: `Hi Admin, \nA new event(Id: ${event._id}) has been created by ${event.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
+            html: `<p> Hi Admin,</p> <p>A new event quotation(Id: ${event._id}) has been created by ${event.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
 
@@ -1586,10 +1586,10 @@ exports.updateEventQuotation = async (req, res) => {
             });
             await notification.save();
             io.emit('update_quote', { event });
-        
+
             const emailModel = await AdminEmail.findOne({ slug: "quotation-updated" });
 
-            if(emailModel) {
+            if (emailModel) {
                 const mailOptions = {
                     from: process.env.MAIL_FROM,
                     to: process.env.GO_BOLD_ADMIN_MAIL,
@@ -1597,7 +1597,7 @@ exports.updateEventQuotation = async (req, res) => {
                     text: emailModel.body,
                     html: emailModel.body
                 };
-                
+
                 mailer.sendMail(mailOptions);
             }
 
@@ -1615,7 +1615,7 @@ exports.updateEventQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
