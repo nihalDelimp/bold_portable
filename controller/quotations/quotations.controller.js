@@ -172,8 +172,8 @@ exports.createConstructionQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Construction Quotation Created',
-            text: `Hi Admin,\nA new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.</p><p>Thanks,\n</p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
@@ -328,8 +328,8 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Recreational-site Quotation Created',
-            text: `Hi Admin,\nA new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new recreational-site quotation(Id: ${recreationalSite._id}) has been created by ${recreationalSite.coordinator.name}.</p><p>Thanks,\n</p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
@@ -757,8 +757,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Disaster-relief Quotation Created',
-            text: `Hi Admin,\nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,\n</p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
@@ -985,8 +985,8 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Personal-or-business Quotation Created',
-            text: `Hi Admin,\nA new personal-or-business(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new personal-or-business quotation(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new personal-or-business(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new personal-or-business quotation(Id: ${personalOrBusiness._id}) has been created by ${personalOrBusiness.coordinator.name}.</p><p>Thanks,\n</p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
@@ -1213,8 +1213,8 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Farm-orchard-winery Quotation Created',
-            text: `Hi Admin,\nA new farm-orchard-winery(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new farm-orchard-winery quotation(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new farm-orchard-winery(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new farm-orchard-winery quotation(Id: ${farmOrchardWinery._id}) has been created by ${farmOrchardWinery.coordinator.name}.</p><p>Thanks,</p><p></p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
@@ -1465,8 +1465,8 @@ exports.createEventQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Event Quotation Created',
-            text: `Hi Admin,\nA new event(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nGo Boldly`,
-            html: `<p>Hi Admin,</p><p>A new event quotation(Id: ${event._id}) has been created by ${event.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
+            text: `Hi Admin,\nA new event(Id: ${event._id}) has been created by ${event.coordinator.name}.\n\nThanks,\nBold Portable`,
+            html: `<p>Hi Admin,</p><p>A new event quotation(Id: ${event._id}) has been created by ${event.coordinator.name}.</p><p>Thanks,\n</p><p>Bold Portable`
         };
         mailer.sendMail(mailOptions);
 
