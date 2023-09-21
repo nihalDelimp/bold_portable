@@ -785,8 +785,8 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             from: process.env.MAIL_FROM,
             to: process.env.GO_BOLD_ADMIN_MAIL,
             subject: 'Disaster-relief Quotation Created',
-            text: `Hi Admin, \nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.<p>Thanks,</p><p>Go Bold</p>`,
-            html: `<p> Hi Admin,</p> <p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,</p><p>Go Bold</p>`
+            text: `Hi Admin, \nA new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.<p>Thanks,<br/>Go Bold</p>`,
+            html: `<p> Hi Admin,</p> <p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,<br/>Go Bold</p>`
         };
         mailer.sendMail(mailOptions);
 
