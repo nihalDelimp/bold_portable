@@ -176,7 +176,7 @@ exports.createConstructionQuotation = async (req, res) => {
             html: `<p>Hi Admin,</p><p>A new construction quotation(Id: ${construction._id}) has been created by ${construction.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
         };
         mailer.sendMail(mailOptions);
-        
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -386,7 +386,7 @@ exports.updateConstructionQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -585,7 +585,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -761,7 +761,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             html: `<p>Hi Admin,</p><p>A new disaster-relief quotation(Id: ${disasterRelief._id}) has been created by ${disasterRelief.coordinator.name}.</p><p>Thanks,\nGo Boldly</p>`
         };
         mailer.sendMail(mailOptions);
-        
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -814,7 +814,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1044,7 +1044,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1271,7 +1271,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
@@ -1531,7 +1531,7 @@ exports.updateEventQuotation = async (req, res) => {
                 // Send the email with the PDF attachment
                 const emailModel = await AdminEmail.findOne({ slug: "quotation-update-action-required" });
 
-                if(emailModel) {
+                if (emailModel) {
                     const mailOptions = {
                         from: process.env.MAIL_FROM,
                         to: user.email,
