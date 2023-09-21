@@ -99,6 +99,15 @@ exports.save = async (req, res) => {
 
 		io.emit("user_service_saved", { savedUserServices });
 
+		const adminMailOptions = {
+			from: process.env.MAIL_FROM,
+			to: process.env.GO_BOLD_ADMIN_MAIL,
+			subject: 'New service requested',
+			text: `Hi Admin,\nA new service ${service} of quotationId: ${quotationId} has been requested`,
+            html: `<p>Hi Admin,</p><p>A new service ${service} of quotationId: ${quotationId} has been requested</p>`
+		};
+		mailer.sendMail(adminMailOptions);
+
 		return apiResponse.successResponseWithData(
 			res,
 			"Data saved successfully.",
