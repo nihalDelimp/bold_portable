@@ -17,7 +17,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         const savedInventories = [];
 
         for (let i = 0; i < quantity; i++) {
-            const uniqueId = UUIDV4(); // Generate a unique identifier
+            const uniqueId = await generateStrings(); // Generate a unique identifier
 
             const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
             const formattedValue = `${process.env.APP_URL}/services/${scanningValue.replace(/\s/g, '')}`;
@@ -61,7 +61,7 @@ exports.editGeneratedQrCOde = async (req, res) => {
         }
 
         // Generate a new unique identifier
-        const uniqueId = UUIDV4();
+        const uniqueId = await generateStrings();
 
         const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
         const formattedValue = scanningValue.replace(/\s/g, '');
@@ -145,7 +145,14 @@ async function generateQRCode(scanningValue) {
     }
 }
 
-
+async function generateStrings() {
+    let strings = [];
+    for(let i = 1; i <= 9999; i++) {
+        let paddedString = i.toString().padStart(4, '0');
+        strings.push(paddedString);
+    }
+    return strings;
+}
 
 
 exports.getQrCodeDetails = async (req, res) => {
