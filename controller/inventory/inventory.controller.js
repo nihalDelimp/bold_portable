@@ -146,12 +146,9 @@ async function generateQRCode(scanningValue) {
 }
 
 async function generateStrings() {
-    let strings = [];
-    for(let i = 1; i <= 9999; i++) {
-        let paddedString = i.toString().padStart(4, '0');
-        strings.push(paddedString);
-    }
-    return strings;
+    const randomNumber = Math.floor(Math.random() * 10000); // Generate a random number between 0 and 9999
+    const paddedString = randomNumber.toString().padStart(4, '0'); // Pad with leading zeros if needed
+    return paddedString;
 }
 
 
