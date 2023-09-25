@@ -9,6 +9,8 @@ const PersonalOrBusiness = require('../../models/personalOrBusiness/personal_or_
 const DisasterRelief = require('../../models/disasterRelief/disasterRelief.schema');
 const Construction = require('../../models/construction/construction.schema');
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const DOMParser = require('xmldom').DOMParser;
+const XMLSerializer = require('xmldom').XMLSerializer;
 
 exports.saveNewGeneratedQrCOde = async (req, res) => {
     try {
@@ -162,11 +164,19 @@ async function generateQRCode(scanningValue, additionalText=null) {
         // Generate QR code in SVG format
         let qrCodeSVG = await qrcode.toString(formattedValue, { type: 'svg' });
 
-        if(additionalText) {
-            qrCodeSVG = await replaceLastOccurrence(qrCodeSVG, '</svg>', `<text x="0" y="50">${additionalText}</text></svg>`);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(qrCodeSVG, 'image/svg+xml');
+        const svgElement = xmlDoc.documentElement;
+        svgElement.setAttribute('viewBox', '0 0 41 50');
+
+        let modifiedSVG = new XMLSerializer().serializeToString(xmlDoc);
+
+        if (additionalText) {
+            modifiedSVG = await replaceLastOccurrence(modifiedSVG, '</svg>', `<text x="0" y="50">${additionalText}</text></svg>`);
         }
 
-        return `data:image/svg+xml;utf8,${qrCodeSVG}`;
+        return `data:image/svg+xml;utf8,${modifiedSVG}`;
+
 
     } catch (error) {
         console.error('Error generating QR code:', error);
