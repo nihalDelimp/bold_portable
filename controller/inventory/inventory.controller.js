@@ -18,19 +18,16 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
 
         const savedInventories = [];
 
+        const lastInventory = await Inventory.findOne().sort({ createdAt: -1 }).limit(1);
+
+        let lastQrId = lastInventory && lastInventory.qrId && !isNaN(lastInventory.qrId) ? lastInventory.qrId : 0;
+
+        let qrId = parseInt(lastQrId) + 1;
+
         for (let i = 0; i < quantity; i++) {
-            let uniqueId;
-            let isUnique = false;
-
-            while (!isUnique) {
-                uniqueId = await generateStrings();
-
-                const existingInventory = await Inventory.findOne({ qrId: uniqueId });
-
-                if (!existingInventory) {
-                    isUnique = true;
-                }
-            }
+            
+            // const uniqueId = await generateStrings();
+            const uniqueId = qrId;
 
             const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
             const formattedValue = `${process.env.APP_URL}/services/${scanningValue.replace(/\s/g, '')}`;
@@ -42,16 +39,18 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 quantity: 1, // Set quantity as 1 for each inventory
                 gender,
                 type,
-                qrId: uniqueId,
+                qrId: qrId,
                 qrCodeValue: formattedValue,
                 intial_value: formattedValue,
                 created_value: scanningValue,
-                qrCode: await generateQRCode(formattedValue, uniqueId) // Generate and assign unique QR code
+                qrCode: await generateQRCode(formattedValue, qrId) // Generate and assign unique QR code
             });
 
             // Save the inventory record
             const savedInventory = await inventory.save();
             savedInventories.push(savedInventory);
+
+            qrId++;
         }
 
         return apiResponse.successResponseWithData(res, 'Inventories saved successfully', savedInventories);
@@ -73,7 +72,7 @@ exports.editGeneratedQrCOde = async (req, res) => {
         }
 
         // Generate a new unique identifier
-        const uniqueId = await generateStrings();
+        const uniqueId = updatedInventory.qrId;
 
         const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
         const formattedValue = scanningValue.replace(/\s/g, '');
@@ -172,7 +171,7 @@ async function generateQRCode(scanningValue, additionalText=null) {
         let modifiedSVG = new XMLSerializer().serializeToString(xmlDoc);
 
         if (additionalText) {
-            modifiedSVG = await replaceLastOccurrence(modifiedSVG, '</svg>', `<text x="0" y="50">${additionalText}</text></svg>`);
+            modifiedSVG = await replaceLastOccurrence(modifiedSVG, '</svg>', `<text x="21" y="43" font-family="Arial" fill="#000000" font-size="5" text-anchor="middle" alignment-baseline="middle">${additionalText}</text></svg>`);
         }
 
         return `data:image/svg+xml;utf8,${modifiedSVG}`;
