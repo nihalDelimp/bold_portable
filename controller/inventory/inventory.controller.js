@@ -17,7 +17,18 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         const savedInventories = [];
 
         for (let i = 0; i < quantity; i++) {
-            const uniqueId = await generateStrings(); // Generate a unique identifier
+            let uniqueId;
+            let isUnique = false;
+
+            while (!isUnique) {
+                uniqueId = await generateStrings();
+
+                const existingInventory = await Inventory.findOne({ qrId: uniqueId });
+
+                if (!existingInventory) {
+                    isUnique = true;
+                }
+            }
 
             const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
             const formattedValue = `${process.env.APP_URL}/services/${scanningValue.replace(/\s/g, '')}`;
@@ -33,7 +44,7 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 qrCodeValue: formattedValue,
                 intial_value: formattedValue,
                 created_value: scanningValue,
-                qrCode: await generateQRCode(formattedValue) // Generate and assign unique QR code
+                qrCode: await generateQRCode(formattedValue, uniqueId) // Generate and assign unique QR code
             });
 
             // Save the inventory record
@@ -46,7 +57,6 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         return apiResponse.ErrorResponse(res, error.message);
     }
 };
-
 
 
 exports.editGeneratedQrCOde = async (req, res) => {
@@ -75,7 +85,7 @@ exports.editGeneratedQrCOde = async (req, res) => {
         updatedInventory.qrCodeValue = formattedValue;
 
         // Generate the QR code image
-        const qrCodeImage = await generateQRCode(scanningValue);
+        const qrCodeImage = await generateQRCode(scanningValue, uniqueId);
         updatedInventory.qrCode = qrCodeImage;
 
         // Save the updated inventory
@@ -131,19 +141,52 @@ exports.getInventoryByQRCodeValue = async (req, res) => {
 };
 
 
-async function generateQRCode(scanningValue) {
+// async function generateQRCode(scanningValue) {
+//     try {
+//         const formattedValue = scanningValue.replace(/\s/g, '');
+
+//         // Generate QR code in SVG format
+//         const qrCodeSVG = await qrcode.toString(formattedValue, { type: 'svg' });
+
+//         return `data:image/svg+xml;utf8,${qrCodeSVG}`;
+//     } catch (error) {
+//         console.error('Error generating QR code:', error);
+//         throw error;
+//     }
+// }
+
+async function generateQRCode(scanningValue, additionalText=null) {
     try {
         const formattedValue = scanningValue.replace(/\s/g, '');
 
         // Generate QR code in SVG format
-        const qrCodeSVG = await qrcode.toString(formattedValue, { type: 'svg' });
+        let qrCodeSVG = await qrcode.toString(formattedValue, { type: 'svg' });
+
+        if(additionalText) {
+            qrCodeSVG = await replaceLastOccurrence(qrCodeSVG, '</svg>', `<text x="0" y="50">${additionalText}</text></svg>`);
+        }
 
         return `data:image/svg+xml;utf8,${qrCodeSVG}`;
+
     } catch (error) {
         console.error('Error generating QR code:', error);
         throw error;
     }
 }
+
+async function replaceLastOccurrence(inputString, searchTerm, replacement) {
+    const lastIndexOfTerm = inputString.lastIndexOf(searchTerm);
+
+    if (lastIndexOfTerm === -1) {
+        return inputString;
+    }
+
+    const modifiedString = inputString.substring(0, lastIndexOfTerm) + replacement +
+        inputString.substring(lastIndexOfTerm + searchTerm.length);
+
+    return modifiedString;
+}
+
 
 async function generateStrings() {
     const randomNumber = Math.floor(Math.random() * 10000); // Generate a random number between 0 and 9999
