@@ -25,11 +25,11 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
         let qrId = parseInt(lastQrId) + 1;
 
         for (let i = 0; i < quantity; i++) {
-            
+            qrId = parseInt(qrId);
             // const uniqueId = await generateStrings();
-            const uniqueId = qrId;
+            const paddedQrId = qrId.toString().padStart(4, '0');
 
-            const scanningValue = `${productName}-${uniqueId}-${type}-${category}-${gender}`;
+            const scanningValue = `${productName}-${paddedQrId}-${type}-${category}-${gender}`;
             const formattedValue = `${process.env.APP_URL}/services/${scanningValue.replace(/\s/g, '')}`;
             // Create a new inventory instance
             const inventory = new Inventory({
@@ -39,11 +39,11 @@ exports.saveNewGeneratedQrCOde = async (req, res) => {
                 quantity: 1, // Set quantity as 1 for each inventory
                 gender,
                 type,
-                qrId: qrId,
+                qrId: paddedQrId,
                 qrCodeValue: formattedValue,
                 intial_value: formattedValue,
                 created_value: scanningValue,
-                qrCode: await generateQRCode(formattedValue, qrId) // Generate and assign unique QR code
+                qrCode: await generateQRCode(formattedValue, paddedQrId) // Generate and assign unique QR code
             });
 
             // Save the inventory record
