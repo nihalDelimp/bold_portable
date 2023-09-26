@@ -9,10 +9,6 @@ const client = twilio(accountSid, authToken);
 
 exports.sendSMS = async (number, text) => {
     try {
-        let formattedNumber = number;
-        if (!number.startsWith('+91')) {
-            formattedNumber = '+91' + number;
-        }
 
         const message = await client.messages.create({
             body: text,
