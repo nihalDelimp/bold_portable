@@ -13,7 +13,7 @@ exports.sendSMS = async (number, text) => {
         const message = await client.messages.create({
             body: text,
             from: fromPhone,
-            to: formattedNumber, // Updated recipient phone number
+            to: number, // Updated recipient phone number
         });
 
         console.log(message.sid);
@@ -22,4 +22,3 @@ exports.sendSMS = async (number, text) => {
     }
 };
 
-    
