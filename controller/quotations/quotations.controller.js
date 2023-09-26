@@ -36,7 +36,7 @@ exports.createConstructionQuotation = async (req, res) => {
             // Rest of the properties
         } = req.body;
 
-        const updatedCellNumber = '+1' + cellNumber;
+        const updatedCellNumber = '+91' + cellNumber;
 
         // // Check if a user with the provided email and cellNumber already exists
         // const existingUser = await Construction.findOne({
@@ -180,9 +180,9 @@ exports.createConstructionQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
-        const text = `Quotation created Id:${construction._id}`;
+        const text = `Quotation created Id: ${construction._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -342,9 +342,9 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
-        const text = `Quotation created. Id:${recreationalSite._id}`;
+        const text = `Quotation created. Id: ${recreationalSite._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -385,7 +385,7 @@ exports.updateConstructionQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { construction });
 
-            
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -425,7 +425,7 @@ exports.updateConstructionQuotation = async (req, res) => {
 
         const text = `Quotation cost details updated:${construction._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -589,7 +589,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { recreationalSite });
 
-            
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -629,7 +629,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
 
         const text = `Quotation cost detail updated. Id: ${recreationalSite._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(res, 'Quotation has been updated successfully', recreationalSite);
     } catch (error) {
@@ -645,7 +645,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             // Rest of the properties
         } = req.body;
 
-        const updatedCellNumber = '+1' + cellNumber;
+        const updatedCellNumber = '+91' + cellNumber;
 
         // Check if a user with the provided email and cellNumber already exists
         // const existingUser = await DisasterRelief.findOne({
@@ -723,7 +723,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
             coordinator: {
                 name,
                 email,
-                cellNumber:updatedCellNumber,
+                cellNumber: updatedCellNumber,
             },
             placementDate,
             placementLocation,
@@ -788,7 +788,7 @@ exports.createDisasterReliefQuotation = async (req, res) => {
 
         const text = `Quotation created. Id: ${disasterRelief._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -828,7 +828,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { disasterRelief });
 
-            
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -869,7 +869,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
 
         const text = `Quotation cost details updated. Id: ${disasterRelief._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -889,7 +889,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
             // Rest of the properties
         } = req.body;
 
-        const updatedCellNumber = '+1' + cellNumber;
+        const updatedCellNumber = '+91' + cellNumber;
 
         // Check if a user with the provided email and cellNumber already exists
         // const existingUser = await PersonalOrBusiness.findOne({
@@ -1027,7 +1027,7 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
 
         const text = `Quotation created. Id: ${personalOrBusiness._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1069,7 +1069,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { personalOrBusiness });
 
-            
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1109,7 +1109,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
         const text = `Quotation cost details updated. Id: ${personalOrBusiness._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1128,7 +1128,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             // Rest of the properties
         } = req.body;
 
-        const updatedCellNumber = '+1' + cellNumber;
+        const updatedCellNumber = '+91' + cellNumber;
 
         // Check if a user with the provided email and cellNumber already exists
         // const existingUser = await FarmOrchardWinery.findOne({
@@ -1214,7 +1214,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
             coordinator: {
                 name,
                 email,
-                cellNumber:updatedCellNumber,
+                cellNumber: updatedCellNumber,
             },
             maxWorkers,
             weeklyHours,
@@ -1266,7 +1266,7 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
 
         const text = `Quotation created. Id: ${farmOrchardWinery._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1309,7 +1309,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { farmOrchardWinery });
 
-            
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1349,7 +1349,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
 
         const text = `Quotation cost details updated. Id: ${farmOrchardWinery._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1368,7 +1368,7 @@ exports.createEventQuotation = async (req, res) => {
             coordinator: { email, cellNumber },
             // Rest of the properties
         } = req.body;
-        const updatedCellNumber = '+1' + cellNumber;
+        const updatedCellNumber = '+91' + cellNumber;
 
         // Check if a user with the provided email and cellNumber already exists
         // const existingUser = await Event.findOne({
@@ -1466,7 +1466,7 @@ exports.createEventQuotation = async (req, res) => {
             coordinator: {
                 name,
                 email,
-                cellNumber:updatedCellNumber,
+                cellNumber: updatedCellNumber,
             },
             maxWorkers,
             weeklyHours,
@@ -1530,7 +1530,7 @@ exports.createEventQuotation = async (req, res) => {
 
         const text = `Quotation created. Id: ${event._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(updatedCellNumber, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -1581,8 +1581,8 @@ exports.updateEventQuotation = async (req, res) => {
             });
             await notification.save();
             io.emit('update_quote', { event });
-        
-            
+
+
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1622,7 +1622,7 @@ exports.updateEventQuotation = async (req, res) => {
 
         const text = `Quotation cost detail updated. Id: ${event._id}`;
 
-		sendSms.sendSMS(user.mobile, text);
+        sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
