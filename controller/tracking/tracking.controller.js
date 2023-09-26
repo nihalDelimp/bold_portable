@@ -12,6 +12,7 @@ const Notification = require('../../models/notification/notification.schema');
 const { server } = require('../../server');
 const io = require('socket.io')(server);
 const RecreationalSite = require('../../models/recreationalSite/recreationalSite.schema');
+const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
 
 exports.saveTracking = async (req, res) => {
 	try {
@@ -98,7 +99,7 @@ exports.saveTracking = async (req, res) => {
         if(emailModel) {
             const mailOptions = {
                 from: process.env.MAIL_FROM,
-                to: user_email,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
                 subject: emailModel.header,
                 text: emailModel.body
             };
@@ -154,10 +155,11 @@ exports.updateTracking = async (req, res) => {
 
         if(emailModel) {
             const mailOptions = {
-                from: process.env.MAIL_FROM,
-                to: user_email,
+				from: process.env.MAIL_FROM,
+                to: process.env.GO_BOLD_ADMIN_MAIL,
                 subject: emailModel.header,
-                text: emailModel.body
+                text: emailModel.body,
+                html: emailModel.body
             };
             mailer.sendMail(mailOptions);
         }

@@ -18,6 +18,7 @@ const PDFDocument = require('pdfkit');
 const moment = require('moment');
 const AdminEmail = require('../../models/adminEmail/adminEmail.schema');
 const Inventory = require('../../models/inventory/inventory.schema');
+const sendSms = require("../../helpers/twillioSms.js");
 
 const isValidDate = (dateString) => {
     const currentDate = moment().format('YYYY-MM-DD');
@@ -179,6 +180,10 @@ exports.createConstructionQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created Id:${construction._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -337,6 +342,10 @@ exports.createRecreationalSiteQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created. Id:${recreationalSite._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -362,7 +371,7 @@ exports.updateConstructionQuotation = async (req, res) => {
         // Update the costDetails field
         construction.costDetails = costDetails;
 
-
+        const user = await User.findById(construction.user);
         // Save the updated construction document
         await construction.save();
         if (type !== 'save') {
@@ -376,7 +385,7 @@ exports.updateConstructionQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { construction });
 
-            const user = await User.findById(construction.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -413,6 +422,10 @@ exports.updateConstructionQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost details updated:${construction._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(
             res,
@@ -562,6 +575,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
         // Update the recreationalSite field
         recreationalSite.costDetails = costDetails;
 
+        const user = await User.findById(recreationalSite.user);
         // Save the updated recreationalSite document
         await recreationalSite.save();
         if (type !== 'save') {
@@ -575,7 +589,7 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { recreationalSite });
 
-            const user = await User.findById(recreationalSite.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -612,6 +626,10 @@ exports.updateRecreationalSiteQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost detail updated. Id: ${recreationalSite._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
 
         return apiResponse.successResponseWithData(res, 'Quotation has been updated successfully', recreationalSite);
     } catch (error) {
@@ -768,6 +786,10 @@ exports.createDisasterReliefQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created. Id: ${disasterRelief._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been created successfully",
@@ -789,7 +811,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
         if (!disasterRelief) {
             return apiResponse.ErrorResponse(res, "Disaster Relief Quotation not found.");
         }
-
+        const user = await User.findById(disasterRelief.user);
         // Update the costDetails field
         disasterRelief.costDetails = costDetails;
 
@@ -806,7 +828,7 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { disasterRelief });
 
-            const user = await User.findById(disasterRelief.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -844,6 +866,11 @@ exports.updateDisasterReliefQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost details updated. Id: ${disasterRelief._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -998,6 +1025,10 @@ exports.createPersonalOrBusinessQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created. Id: ${personalOrBusiness._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "PersonalOrBusiness instance has been created successfully",
@@ -1024,7 +1055,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
 
         // Update the costDetails field
         personalOrBusiness.costDetails = costDetails;
-
+        const user = await User.findById(personalOrBusiness.user);
         // Save the updated disasterRelief document
         await personalOrBusiness.save();
         if (type !== 'save') {
@@ -1038,7 +1069,7 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { personalOrBusiness });
 
-            const user = await User.findById(personalOrBusiness.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1075,6 +1106,11 @@ exports.updatePersonalOrBusinessQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost details updated. Id: ${personalOrBusiness._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -1228,6 +1264,10 @@ exports.createFarmOrchardWineryQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created. Id: ${farmOrchardWinery._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "FarmOrchardWinery instance has been created successfully",
@@ -1254,6 +1294,8 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
         // Update the costDetails field
         farmOrchardWinery.costDetails = costDetails;
 
+        const user = await User.findById(farmOrchardWinery.user);
+
         // Save the updated disasterRelief document
         await farmOrchardWinery.save();
         if (type !== 'save') {
@@ -1267,7 +1309,7 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { farmOrchardWinery });
 
-            const user = await User.findById(farmOrchardWinery.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1304,6 +1346,11 @@ exports.updateFarmOrchardWineryQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost details updated. Id: ${farmOrchardWinery._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
@@ -1481,6 +1528,10 @@ exports.createEventQuotation = async (req, res) => {
         };
         mailer.sendMail(mailOptions);
 
+        const text = `Quotation created. Id: ${event._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Event instance has been created successfully",
@@ -1517,6 +1568,9 @@ exports.updateEventQuotation = async (req, res) => {
             status_seen: false
         });
         await notification.save();
+
+        const user = await User.findById(event.user);
+
         if (type !== 'save') {
             const notification = new Notification({
                 user: event.user,
@@ -1528,7 +1582,7 @@ exports.updateEventQuotation = async (req, res) => {
             await notification.save();
             io.emit('update_quote', { event });
         
-            const user = await User.findById(event.user);
+            
 
             // Generate the PDF content
             const pdfDoc = new PDFDocument();
@@ -1565,6 +1619,11 @@ exports.updateEventQuotation = async (req, res) => {
             // End the document
             pdfDoc.end();
         }
+
+        const text = `Quotation cost detail updated. Id: ${event._id}`;
+
+		sendSms.sendSMS(user.mobile, text);
+
         return apiResponse.successResponseWithData(
             res,
             "Quotation has been updated successfully",
